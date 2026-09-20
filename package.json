@@ -12,7 +12,9 @@
     "test:rules": "firebase emulators:exec --only firestore --project demo-ronda \"node --test test/rules/*.test.js\"",
     "emuladores": "firebase emulators:start --only auth,firestore --project demo-ronda",
     "dev:emulador": "vite --mode emulador --port 5174",
-    "semear": "node scripts/semear-emulador.mjs"
+    "semear": "node scripts/semear-emulador.mjs",
+    "verificar:fluxo": "node scripts/verificar-fluxo-emulador.mjs",
+    "test:fluxo": "firebase emulators:exec --only auth,firestore --project demo-ronda \"npm run semear && npm run verificar:fluxo\""
   },
   "dependencies": {
     "firebase": "^12.19.0",
