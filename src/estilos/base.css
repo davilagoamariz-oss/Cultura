@@ -1,0 +1,356 @@
+/* Cultura: fundo branco, contraste em verde escuro.
+   Pensado para celular e tablet, uso com uma mão, sol forte e luvas:
+   alvos de toque grandes (mín. 56 px), texto grande, alto contraste. */
+
+:root {
+  --verde-900: #14532d; /* principal: cabeçalho, botões (contraste 10:1 sobre branco) */
+  --verde-800: #166534;
+  --verde-700: #15803d;
+  --verde-100: #dcfce7;
+  --verde-50: #f0fdf4;
+  --branco: #ffffff;
+  --texto: #0b1f12;
+  --texto-suave: #3f5546;
+  --borda: #9db3a3;
+  --erro: #991b1b;
+  --erro-fundo: #fef2f2;
+  --aviso: #78350f;
+  --aviso-fundo: #fffbeb;
+
+  --alvo: 56px; /* altura mínima de tudo que se toca */
+  --raio: 12px;
+  --gutter: 16px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--branco);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 18px;
+  line-height: 1.45;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: var(--verde-900);
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  color: var(--verde-900);
+}
+
+p {
+  margin: 0 0 12px;
+}
+
+.lead {
+  color: var(--texto-suave);
+}
+
+:focus-visible {
+  outline: 3px solid var(--verde-700);
+  outline-offset: 2px;
+}
+
+/* ---------- Estrutura ---------- */
+
+.app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topo {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'marca sair'
+    'estado usuario';
+  align-items: center;
+  gap: 8px 12px;
+  padding: max(10px, env(safe-area-inset-top)) max(var(--gutter), env(safe-area-inset-right)) 10px
+    max(var(--gutter), env(safe-area-inset-left));
+  background: var(--verde-900);
+  color: var(--branco);
+}
+
+.topo__marca {
+  grid-area: marca;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.topo .botao {
+  grid-area: sair;
+}
+
+.topo__usuario {
+  grid-area: usuario;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+.topo__nome {
+  font-weight: 600;
+}
+
+.topo__papel {
+  opacity: 0.9;
+}
+
+.conteudo {
+  flex: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px max(var(--gutter), env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom))
+    max(var(--gutter), env(safe-area-inset-left));
+}
+
+/* ---------- Estado online/offline ---------- */
+
+.estado {
+  grid-area: estado;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: var(--branco);
+  color: var(--verde-900);
+}
+
+.estado__ponto {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--verde-700);
+}
+
+/* Offline precisa saltar aos olhos: o pragueiro tem que saber que está gravando só no aparelho. */
+.estado--offline {
+  background: #fde68a;
+  color: var(--aviso);
+}
+
+.estado--offline .estado__ponto {
+  background: var(--aviso);
+}
+
+/* ---------- Botões ---------- */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--alvo);
+  min-width: var(--alvo);
+  padding: 0 24px;
+  border: 2px solid transparent;
+  border-radius: var(--raio);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.botao:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.botao--principal {
+  background: var(--verde-900);
+  color: var(--branco);
+}
+
+.botao--principal:active:not(:disabled) {
+  background: var(--verde-800);
+}
+
+.botao--contorno {
+  background: var(--branco);
+  color: var(--verde-900);
+  border-color: var(--verde-900);
+}
+
+.botao--contorno-claro {
+  min-height: 44px;
+  padding: 0 18px;
+  background: transparent;
+  color: var(--branco);
+  border-color: var(--branco);
+}
+
+.botao--cheio {
+  width: 100%;
+}
+
+/* ---------- Formulário ---------- */
+
+.campo {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.campo > span {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+  color: var(--verde-900);
+}
+
+.campo input {
+  width: 100%;
+  min-height: var(--alvo);
+  padding: 0 14px;
+  border: 2px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--branco);
+  color: var(--texto);
+  font: inherit;
+}
+
+.campo input:focus {
+  border-color: var(--verde-900);
+  outline: 3px solid var(--verde-100);
+}
+
+.aviso {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 2px solid var(--aviso);
+  border-radius: var(--raio);
+  background: var(--aviso-fundo);
+  color: var(--aviso);
+  font-weight: 600;
+}
+
+.aviso--erro {
+  border-color: var(--erro);
+  background: var(--erro-fundo);
+  color: var(--erro);
+}
+
+/* ---------- Login / telas centradas ---------- */
+
+.login {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px max(var(--gutter), env(safe-area-inset-right)) 24px max(var(--gutter), env(safe-area-inset-left));
+  background: var(--branco);
+}
+
+.login__cartao {
+  width: 100%;
+  max-width: 440px;
+  padding: 28px 24px;
+  border: 2px solid var(--verde-900);
+  border-radius: 20px;
+}
+
+.login__marca {
+  margin: 0;
+  font-size: 2.2rem;
+  color: var(--verde-900);
+}
+
+.login__sub {
+  margin-bottom: 24px;
+  color: var(--texto-suave);
+}
+
+.centro {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--verde-900);
+  font-weight: 600;
+}
+
+.giro {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--verde-100);
+  border-top-color: var(--verde-900);
+  border-radius: 50%;
+  animation: gira 0.9s linear infinite;
+}
+
+@keyframes gira {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .giro {
+    animation-duration: 3s;
+  }
+}
+
+/* ---------- Tablet (a partir de 768 px) ---------- */
+
+@media (min-width: 768px) {
+  body {
+    font-size: 20px;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .topo {
+    grid-template-columns: auto auto 1fr auto;
+    grid-template-areas: 'marca estado usuario sair';
+    gap: 16px;
+    padding-block: 12px;
+  }
+
+  .topo__usuario {
+    align-items: flex-end;
+    justify-self: end;
+    font-size: 0.95rem;
+  }
+
+  .conteudo {
+    padding-top: 32px;
+  }
+
+  .login__cartao {
+    padding: 40px 36px;
+  }
+}
