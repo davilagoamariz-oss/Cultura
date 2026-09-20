@@ -1,10 +1,15 @@
-import { useAuth } from './auth/AuthProvider.jsx';
-import { NOMES_PAPEL } from './auth/papeis.js';
+import { Link } from 'react-router-dom';
+import { useSessao } from './nucleo/Sessao.jsx';
+import { NOMES_PAPEL } from './nucleo/papeis.js';
 import { useOnline } from './offline/useOnline.js';
 
 export default function Layout({ children }) {
-  const { perfil, papel, sair } = useAuth();
+  const { nome, user, papel, empresaNome, ativos, ehPlataforma, sair, trocarEmpresa } = useSessao();
   const online = useOnline();
+
+  const legenda = [empresaNome, papel ? NOMES_PAPEL[papel] : ehPlataforma ? 'Plataforma' : null]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <div className="app">
@@ -15,12 +20,24 @@ export default function Layout({ children }) {
           {online ? 'Online' : 'Offline'}
         </div>
         <div className="topo__usuario">
-          <span className="topo__nome">{perfil?.nome ?? 'Usuário'}</span>
-          <span className="topo__papel">{NOMES_PAPEL[papel] ?? papel}</span>
+          <span className="topo__nome">{nome ?? user?.email ?? 'Usuário'}</span>
+          <span className="topo__papel">{legenda}</span>
         </div>
-        <button className="botao botao--contorno-claro" type="button" onClick={sair}>
-          Sair
-        </button>
+        <div className="topo__acoes">
+          {ativos.length > 1 && (
+            <button className="botao botao--contorno-claro" type="button" onClick={trocarEmpresa}>
+              Trocar empresa
+            </button>
+          )}
+          {ehPlataforma && (
+            <Link className="botao botao--contorno-claro" to="/plataforma">
+              Plataforma
+            </Link>
+          )}
+          <button className="botao botao--contorno-claro" type="button" onClick={sair}>
+            Sair
+          </button>
+        </div>
       </header>
       <main className="conteudo">{children}</main>
     </div>

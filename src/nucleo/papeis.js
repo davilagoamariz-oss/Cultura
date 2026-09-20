@@ -1,19 +1,20 @@
-// Papéis e áreas do app. Espelha o que firestore.rules permite:
-// só o pragueiro grava avaliações; gestor, agrônomo e admin leem e decidem; só o admin cadastra.
+// Papéis por empresa e áreas do app. Espelha o que firestore.rules permite:
+// só o pragueiro grava avaliações; agrônomo e gerente acompanham e decidem/executam;
+// o admin da empresa cadastra. O admin da plataforma é outra coisa (plataforma_admins).
 
-export const PAPEIS = ['pragueiro', 'gestor', 'agronomo', 'admin'];
+export const PAPEIS = ['pragueiro', 'agronomo', 'gerente', 'admin_empresa'];
 
 const AREAS = {
   campo: ['pragueiro'],
-  gestor: ['gestor', 'agronomo', 'admin'],
-  admin: ['admin'],
+  gestao: ['agronomo', 'gerente', 'admin_empresa'],
+  admin: ['admin_empresa'],
 };
 
 export const NOMES_PAPEL = {
   pragueiro: 'Pragueiro',
-  gestor: 'Gestor',
   agronomo: 'Agrônomo',
-  admin: 'Administrador',
+  gerente: 'Gerente',
+  admin_empresa: 'Administrador',
 };
 
 export function papelValido(papel) {
@@ -27,7 +28,7 @@ export function podeAcessar(papel, area) {
 /** Rota em que cada papel começa depois do login. */
 export function rotaInicial(papel) {
   if (papel === 'pragueiro') return '/campo';
-  if (papel === 'admin') return '/admin';
-  if (papel === 'gestor' || papel === 'agronomo') return '/gestor';
+  if (papel === 'admin_empresa') return '/admin';
+  if (papel === 'agronomo' || papel === 'gerente') return '/gestao';
   return '/sem-acesso';
 }

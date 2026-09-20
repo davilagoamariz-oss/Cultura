@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from './auth/AuthProvider.jsx';
-import { rotaInicial } from './auth/papeis.js';
-import { firebaseConfigurado } from './firebase.js';
+import { useSessao } from './nucleo/Sessao.jsx';
+import { firebaseConfigurado } from './nucleo/firebase.js';
 import { useOnline } from './offline/useOnline.js';
 
 const MENSAGENS = {
@@ -14,15 +13,15 @@ const MENSAGENS = {
 };
 
 export default function Login() {
-  const { user, papel, status, entrar } = useAuth();
+  const { user, status, entrar } = useSessao();
   const online = useOnline();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
 
-  if (user && status === 'ok') return <Navigate to={rotaInicial(papel)} replace />;
-  if (user && status !== 'carregando') return <Navigate to="/sem-acesso" replace />;
+  // Já logado: a rota "/" decide para onde ir (área do papel, escolha de empresa ou sem acesso).
+  if (user && status !== 'carregando') return <Navigate to="/" replace />;
 
   async function enviar(evento) {
     evento.preventDefault();

@@ -101,8 +101,21 @@ p {
   letter-spacing: 0.02em;
 }
 
-.topo .botao {
+.topo__acoes {
   grid-area: sair;
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.topo__acoes .botao {
+  text-decoration: none;
+}
+
+.pilha {
+  display: grid;
+  gap: 12px;
 }
 
 .topo__usuario {
@@ -335,6 +348,7 @@ p {
 
   .topo {
     grid-template-columns: auto auto 1fr auto;
+    align-items: center;
     grid-template-areas: 'marca estado usuario sair';
     gap: 16px;
     padding-block: 12px;
