@@ -20,6 +20,23 @@ docs/modelo-de-dados.md      coleções do Firestore e como a ficha vira dados
 
 Rodar os testes (Node 20 ou superior; o script usa o glob do próprio shell): `npm test`
 
+> A arquitetura vigente (várias empresas, papéis por empresa, protocolo de ficha em dados) está em
+> `docs/arquitetura.md`. Onde este README e ele divergirem, vale o `docs/arquitetura.md`.
+
+## Desenvolvimento local (sem tocar no Firebase real)
+
+Precisa de Java 21 e do `firebase-tools`.
+
+```
+npm run emuladores     # terminal 1: Auth + Firestore locais
+npm run semear         # terminal 2: cria usuários e uma empresa de demonstração
+npm run dev:emulador   # terminal 3: app em http://localhost:5174
+npm run test:rules     # testes das firestore.rules (sobe o próprio emulador)
+```
+
+Usuários de demonstração (senha `senha123`): `admin@demo.test`, `agro@demo.test`,
+`gerente@demo.test`, `paulo@demo.test` e `semvinculo@demo.test`.
+
 ## 1. GitHub
 
 1. Crie uma **organização da empresa** (não use conta pessoal) e um repositório **privado**.
