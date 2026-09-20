@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "node --test test/*.test.js",
     "test:rules": "firebase emulators:exec --only firestore --project demo-cultura \"node --test test/rules/*.test.js\"",
-    "emuladores": "firebase emulators:start --only auth,firestore --project demo-cultura"
+    "emuladores": "firebase emulators:start --only auth,firestore --project demo-cultura",
+    "test:rules:proposta": "firebase emulators:exec --only firestore --project demo-ronda \"node --test test/rules-multiempresa/*.test.js\""
   },
   "dependencies": {
     "firebase": "^12.19.0",
