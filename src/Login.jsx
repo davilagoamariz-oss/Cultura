@@ -40,7 +40,7 @@ export default function Login() {
   return (
     <main className="login">
       <div className="login__cartao">
-        <h1 className="login__marca">Cultura</h1>
+        <h1 className="login__marca">Ronda do Pomar</h1>
         <p className="login__sub">Monitoramento de pragas e doenças do limão Tahiti</p>
 
         {!firebaseConfigurado && (

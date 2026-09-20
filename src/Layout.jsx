@@ -9,7 +9,7 @@ export default function Layout({ children }) {
   return (
     <div className="app">
       <header className="topo">
-        <div className="topo__marca">Cultura</div>
+        <div className="topo__marca">Ronda do Pomar</div>
         <div className={`estado ${online ? 'estado--online' : 'estado--offline'}`} role="status">
           <span className="estado__ponto" aria-hidden="true" />
           {online ? 'Online' : 'Offline'}

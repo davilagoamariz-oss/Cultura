@@ -10,3 +10,4 @@ firebase-debug.log
 serviceAccount*.json
 dist/
 .DS_Store
+*-debug.log

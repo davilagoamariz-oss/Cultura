@@ -35,7 +35,7 @@ export default function SemAcesso() {
   return (
     <main className="login">
       <div className="login__cartao">
-        <h1 className="login__marca">Cultura</h1>
+        <h1 className="login__marca">Ronda do Pomar</h1>
         <h2>{texto.titulo}</h2>
         <p>{texto.corpo}</p>
         {!online && <p className="aviso">Você está offline.</p>}

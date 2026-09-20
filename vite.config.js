@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['apple-touch-icon.png'],
       manifest: {
-        name: 'Cultura',
-        short_name: 'Cultura',
+        name: 'Ronda do Pomar',
+        short_name: 'Ronda',
         description: 'Monitoramento semanal de pragas e doenças do limão Tahiti',
         lang: 'pt-BR',
         display: 'standalone',

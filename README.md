@@ -1,4 +1,4 @@
-# Monitoramento de pragas e doenças do limão Tahiti
+# Ronda do Pomar: monitoramento de pragas e doenças do limão Tahiti
 
 App de campo (PWA, funciona offline) + painel do gestor, com cálculo automático de nível de
 infestação (NI) e sugestão de tomada de decisão (TD), seguindo a ficha FFPRO02.
