@@ -1,7 +1,13 @@
 # Plano v2 (Fase 0): empresas, unidades, setores e cultura como dado
 
-Proposta para aprovação. Nada aqui foi implementado. Substitui o desenho de `docs/arquitetura.md`
-(que já tinha empresa por caminho, mas papéis fixos por empresa) e reaproveita o que já existe.
+**Estado:** aprovado em 2026-09-20; a **Fase 1 (fundação) está implementada** na branch `dev`
+(motor v2, catálogo e ficha do limão, regras v2 com 106 testes, seed com duas empresas, decisões em
+`docs/decisoes/`). As Fases 2 a 5 seguem pendentes. Onde este plano diverge do código, vale o código
+e as decisões em `docs/decisoes/`; divergências conhecidas: o índice `vinculos.pessoaUid`, convites
+fora da v2 e o setor sem `_` no id.
+
+Substitui o desenho de `docs/arquitetura.md` (que já tinha empresa por caminho, mas papéis fixos por
+empresa) e reaproveita o que já existe.
 
 ## 1. O que muda em relação ao que já está pronto
 

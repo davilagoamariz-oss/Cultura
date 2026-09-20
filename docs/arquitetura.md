@@ -1,5 +1,10 @@
 # Arquitetura do Ronda do Pomar
 
+> **Substituído.** Este é o desenho anterior (empresa por caminho, mas papéis fixos por empresa).
+> A arquitetura vigente está em `docs/plano-v2.md`, `docs/modelo-de-dados.md` e `docs/decisoes/`.
+> Continuam válidas aqui as seções 4 (segurança em camadas), 5 (limites do plano Spark), 6 (plano
+> pago) e 7 (nome e domínio).
+
 Decisões de arquitetura aprovadas em 2026-09-20. O produto nasce para atender **várias empresas**,
 **várias culturas por empresa** e **tipos de cultura diferentes**, entregando primeiro as demandas
 iniciais (limão Tahiti, ficha FFPRO02). Este documento substitui o desenho de uma empresa só que

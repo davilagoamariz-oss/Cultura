@@ -1,0 +1,18 @@
+# Decisões de arquitetura
+
+Uma página curta por decisão (contexto, decisão, consequências). Quando uma decisão mudar, cria-se
+uma nova página que a substitui; não se reescreve a história.
+
+| # | Decisão | Estado |
+|---|---|---|
+| 001 | [Cada empresa fica na própria árvore do banco](001-empresa-por-caminho.md) | vigente |
+| 002 | [O que a pessoa faz vem dos vínculos por setor](002-vinculos-por-setor.md) | vigente |
+| 003 | [Cultura é dado, não código](003-cultura-e-dado.md) | vigente |
+| 004 | [Ajustes de limite só acrescentam](004-ajustes-que-so-acrescentam.md) | vigente |
+| 005 | [Motor de regras v2](005-motor-v2.md) | vigente |
+| 006 | [Cálculo no aparelho enquanto for plano Spark](006-calculo-no-cliente.md) | vigente até o plano pago |
+| 007 | [Desenho previsto para a IA (futuro)](007-ia-futura.md) | previsto |
+| 008 | [LGPD: dados pessoais mínimos](008-lgpd-minimo.md) | vigente |
+| 009 | [Admin da empresa não lê dados operacionais sem vínculo](009-admin-sem-leitura-operacional.md) | vigente |
+| 010 | [Convites por e-mail adiados](010-convites-adiados.md) | vigente |
+| 011 | [Cadastros base legíveis por todo membro ativo](011-cadastros-base-legiveis.md) | vigente |
