@@ -44,6 +44,12 @@ const FICHA = { fichaId: 'limao-tahiti', versao: 1 };
 const ATRIBUTOS = { tipoPomar: 'adulto' };
 const agora = () => Timestamp.now();
 
+const AV1 = 't-a1_2026-W38_pragA1'; // rascunho da pragA1 (setor fit-a1)
+const AV1_FIN = 't-a1_2026-W37_pragA1'; // finalizada da pragA1, com decisão aprovada
+const AV1B = 't-a1_2026-W38_pragA1b'; // rascunho do colega pragA1b (mesmo setor)
+const AV2 = 't-a2_2026-W38_pragA2'; // rascunho da pragA2 (setor fit-a2)
+const AV2_FIN = 't-a2_2026-W37_pragA2'; // finalizada da pragA2 (setor fit-a2)
+
 const membro = (uid, papelEmpresa = 'membro', ativo = true) => ({ uid, papelEmpresa, ativo });
 const vinculo = (pessoaUid, setorId, unidadeId, papel, funcoes, ativo = true) => ({
   pessoaUid, setorId, unidadeId, papel, funcoes, ativo, versao: 1, alteradoPor: 'seed', alteradoEm: agora(),
@@ -75,7 +81,7 @@ beforeEach(async () => {
     const membrosA = {
       admA: membro('admA', 'admin'), gerA1: membro('gerA1'), gerA2: membro('gerA2'), pragA1: membro('pragA1'),
       pragA2: membro('pragA2'), agroA: membro('agroA'), motA: membro('motA'), inativoA: membro('inativoA', 'membro', false),
-      semVincA: membro('semVincA'), gerA1b: membro('gerA1b'),
+      semVincA: membro('semVincA'), gerA1b: membro('gerA1b'), pragA1b: membro('pragA1b'),
     };
     for (const [uid, m] of Object.entries(membrosA)) await setDoc(doc(db, 'empresas', A, 'membros', uid), m);
     await setDoc(doc(db, 'empresas', B, 'membros', 'admB'), membro('admB', 'admin'));
@@ -96,6 +102,7 @@ beforeEach(async () => {
       vinculo('gerA1b', 'fit-a1', 'un-a1', 'gerente', []),
       vinculo('pragA1', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro']),
       vinculo('pragA2', 'fit-a2', 'un-a2', 'funcionario', ['pragueiro']),
+      vinculo('pragA1b', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro']),
       vinculo('agroA', 'fit-a1', 'un-a1', 'funcionario', ['agronomo']),
       vinculo('motA', 'frota-a1', 'un-a1', 'funcionario', []),
       vinculo('inativoA', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro']),
@@ -103,6 +110,22 @@ beforeEach(async () => {
     for (const v of vinculos) await setDoc(doc(db, 'empresas', A, 'vinculos', `${v.pessoaUid}_${v.setorId}`), v);
     await setDoc(doc(db, 'empresas', A, 'vinculos', 'pragA1_fit-a1', 'historico', '1'), {
       versao: 1, pessoaUid: 'pragA1', setorId: 'fit-a1', papel: 'funcionario', funcoes: ['pragueiro'], ativo: true, alteradoPor: 'seed', alteradoEm: agora(),
+    });
+    const av = (talhaoId, unidadeId, setorId, semanaISO, uid, status) => ({
+      talhaoId, unidadeId, setorId, fichaId: 'limao-tahiti', fichaVersao: 1, atributosTalhao: ATRIBUTOS,
+      responsavelUid: uid, data: '2026-09-15', semanaISO, status, ...(status === 'finalizada' ? { finalizadaEm: agora() } : {}),
+    });
+    await setDoc(doc(db, 'empresas', A, 'avaliacoes', AV1), av('t-a1', 'un-a1', 'fit-a1', '2026-W38', 'pragA1', 'rascunho'));
+    await setDoc(doc(db, 'empresas', A, 'avaliacoes', AV1_FIN), av('t-a1', 'un-a1', 'fit-a1', '2026-W37', 'pragA1', 'finalizada'));
+    await setDoc(doc(db, 'empresas', A, 'avaliacoes', AV1B), av('t-a1', 'un-a1', 'fit-a1', '2026-W38', 'pragA1b', 'rascunho'));
+    await setDoc(doc(db, 'empresas', A, 'avaliacoes', AV2), av('t-a2', 'un-a2', 'fit-a2', '2026-W38', 'pragA2', 'rascunho'));
+    await setDoc(doc(db, 'empresas', A, 'avaliacoes', AV2_FIN), av('t-a2', 'un-a2', 'fit-a2', '2026-W37', 'pragA2', 'finalizada'));
+    await setDoc(doc(db, 'empresas', B, 'avaliacoes', 't-b1_2026-W38_pragB'), av('t-b1', 'un-b1', 'fit-b1', '2026-W38', 'pragB', 'rascunho'));
+    await setDoc(doc(db, 'empresas', A, 'avaliacoes', AV1, 'plantas', '1'), { n: 1, obs: {} });
+    await setDoc(doc(db, 'empresas', A, 'avaliacoes', AV1_FIN, 'plantas', '1'), { n: 1, obs: {} });
+    await setDoc(doc(db, 'empresas', A, 'decisoes', AV1_FIN), {
+      avaliacaoId: AV1_FIN, talhaoId: 't-a1', unidadeId: 'un-a1', setorId: 'fit-a1', tds: ['TD2'], status: 'aprovada',
+      decididoPor: 'agroA', decididoEm: agora(),
     });
     await setDoc(doc(db, 'empresas', B, 'vinculos', 'pragB_fit-b1'), vinculo('pragB', 'fit-b1', 'un-b1', 'funcionario', ['pragueiro']));
 
@@ -634,6 +657,396 @@ describe('vínculos por setor', () => {
         versao: 7, pessoaUid: 'pragA1', setorId: 'fit-a1', papel: 'funcionario', funcoes: ['pragueiro'], ativo: true, alteradoPor: 'admA', alteradoEm: serverTimestamp(),
       }));
     });
+  });
+});
+
+// ---------------------------------------------------------------- operação: avaliações, plantas, decisões, eventos
+
+describe('avaliações (cabeçalho)', () => {
+  const nova = (extra = {}) => Object.fromEntries(Object.entries({
+    talhaoId: 't-a1', unidadeId: 'un-a1', setorId: 'fit-a1', fichaId: 'limao-tahiti', fichaVersao: 1,
+    atributosTalhao: ATRIBUTOS, responsavelUid: 'pragA1', data: '2026-09-22', semanaISO: '2026-W39', status: 'rascunho', ...extra,
+  }).filter(([, v]) => v !== undefined));
+  const ID = 't-a1_2026-W39_pragA1';
+  const ref = (db, id = ID) => p(db, 'empresas', A, 'avaliacoes', id);
+  const semModulo = async () => env.withSecurityRulesDisabled(async (ctx) => {
+    await updateDoc(doc(ctx.firestore(), 'empresas', A, 'setores', 'fit-a1'), { modulos: [] });
+  });
+
+  describe('criar', () => {
+    test('pragueiro do setor cria a própria, com o id talhão_semana_uid', async () => {
+      await assertSucceeds(setDoc(ref(como('pragA1')), nova()));
+    });
+
+    test('id fora do padrão, dono trocado ou já finalizada: negado', async () => {
+      const db = como('pragA1');
+      await assertFails(setDoc(ref(db, 'qualquer-id'), nova()));
+      await assertFails(setDoc(ref(db, 't-a1_2026-W39_pragA1b'), nova({ responsavelUid: 'pragA1b' })));
+      await assertFails(setDoc(ref(db), nova({ responsavelUid: 'pragA1b' })));
+      await assertFails(setDoc(ref(db), nova({ status: 'finalizada' })));
+      await assertFails(setDoc(ref(db), nova({ finalizadaEm: serverTimestamp() })));
+    });
+
+    test('só quem tem a função "pragueiro" no setor: agrônomo, gerente, admin e motorista não', async () => {
+      for (const uid of ['agroA', 'gerA1', 'admA', 'motA', 'semVincA']) {
+        await assertFails(setDoc(p(como(uid), 'empresas', A, 'avaliacoes', `t-a1_2026-W39_${uid}`), nova({ responsavelUid: uid })));
+      }
+    });
+
+    test('pragueiro de outro setor não avalia neste (vínculo é por setor)', async () => {
+      await assertFails(setDoc(p(como('pragA2'), 'empresas', A, 'avaliacoes', 't-a1_2026-W39_pragA2'), nova({ responsavelUid: 'pragA2' })));
+      await assertFails(setDoc(p(como('pragA1'), 'empresas', A, 'avaliacoes', 't-a2_2026-W39_pragA1'), nova({ talhaoId: 't-a2', unidadeId: 'un-a2', setorId: 'fit-a2' })));
+    });
+
+    test('talhão de outra unidade, ou de outra empresa, ou inativo: negado', async () => {
+      const db = como('pragA1');
+      await assertFails(setDoc(ref(db, 't-a2_2026-W39_pragA1'), nova({ talhaoId: 't-a2' }))); // talhão da un-a2 no setor da un-a1
+      await assertFails(setDoc(ref(db, 't-b1_2026-W39_pragA1'), nova({ talhaoId: 't-b1' }))); // talhão que só existe na empresa B
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await updateDoc(doc(ctx.firestore(), 'empresas', A, 'talhoes', 't-a1'), { ativo: false });
+      });
+      await assertFails(setDoc(ref(db), nova()));
+    });
+
+    test('atributos do talhão não podem ser adulterados (esconderia infestação com limite maior)', async () => {
+      await assertFails(setDoc(ref(como('pragA1')), nova({ atributosTalhao: { tipoPomar: 'novo' } })));
+      await assertFails(setDoc(ref(como('pragA1')), nova({ atributosTalhao: {} })));
+    });
+
+    test('a ficha tem que ser a vigente da cultura; o pragueiro não escolhe a versão', async () => {
+      const db = como('pragA1');
+      await assertFails(setDoc(ref(db), nova({ fichaVersao: 0 })));
+      await assertFails(setDoc(ref(db), nova({ fichaVersao: 2 })));
+      await assertFails(setDoc(ref(db), nova({ fichaId: 'outra-ficha' })));
+      // quando a plataforma publica a v2 e a cultura passa a apontar para ela, a v1 deixa de valer
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await updateDoc(doc(ctx.firestore(), 'catalogo_culturas', 'limao-tahiti'), { fichaAtual: { fichaId: 'limao-tahiti', versao: 2 } });
+      });
+      await assertFails(setDoc(ref(db), nova()));
+      await assertSucceeds(setDoc(ref(db), nova({ fichaVersao: 2 })));
+    });
+
+    test('unidade do cabeçalho tem que ser a do setor', async () => {
+      await assertFails(setDoc(ref(como('pragA1')), nova({ unidadeId: 'un-a2' })));
+    });
+
+    test('setor sem o módulo (ou desativado): ninguém cria', async () => {
+      await semModulo();
+      await assertFails(setDoc(ref(como('pragA1')), nova()));
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await updateDoc(doc(ctx.firestore(), 'empresas', A, 'setores', 'fit-a1'), { modulos: ['fitossanidade'], ativo: false });
+      });
+      await assertFails(setDoc(ref(como('pragA1')), nova()));
+    });
+
+    test('vínculo ou membro inativo: sem acesso', async () => {
+      await assertFails(setDoc(p(como('inativoA'), 'empresas', A, 'avaliacoes', 't-a1_2026-W39_inativoA'), nova({ responsavelUid: 'inativoA' })));
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await updateDoc(doc(ctx.firestore(), 'empresas', A, 'vinculos', 'pragA1_fit-a1'), { ativo: false });
+      });
+      await assertFails(setDoc(ref(como('pragA1')), nova()));
+    });
+
+    test('formato inválido ou campo extra: negado', async () => {
+      const db = como('pragA1');
+      await assertFails(setDoc(ref(db), nova({ data: '22/09/2026' })));
+      await assertFails(setDoc(ref(db, 't-a1_39_pragA1'), nova({ semanaISO: '39' })));
+      await assertFails(setDoc(ref(db), nova({ admin: true })));
+      await assertFails(setDoc(ref(db), nova({ faseCultura: 'chumbinho' })));
+    });
+
+    test('empresa B não cria avaliação na A', async () => {
+      await assertFails(setDoc(p(como('pragB'), 'empresas', A, 'avaliacoes', 't-a1_2026-W39_pragB'), nova({ responsavelUid: 'pragB' })));
+    });
+  });
+
+  describe('ler', () => {
+    test('o pragueiro lê só as próprias; o colega do mesmo setor não lê as dele', async () => {
+      await assertSucceeds(getDoc(ref(como('pragA1'), AV1)));
+      await assertFails(getDoc(ref(como('pragA1'), AV1B))); // colega
+      await assertFails(getDoc(ref(como('pragA1'), AV2))); // outro setor
+    });
+
+    test('agrônomo e gerente leem as do próprio setor; de outro setor não', async () => {
+      for (const uid of ['agroA', 'gerA1', 'gerA1b']) {
+        await assertSucceeds(getDoc(ref(como(uid), AV1)));
+        await assertSucceeds(getDoc(ref(como(uid), AV1B)));
+        await assertFails(getDoc(ref(como(uid), AV2)));
+      }
+      await assertFails(getDoc(ref(como('gerA2'), AV1)));
+    });
+
+    test('o admin da empresa SEM vínculo não lê dados operacionais; nem a plataforma; nem motorista', async () => {
+      for (const uid of ['admA', 'plat', 'motA', 'semVincA']) {
+        await assertFails(getDoc(ref(como(uid), AV1)));
+      }
+      await assertFails(getDoc(ref(como('admB'), AV1)));
+    });
+
+    test('quando o admin se vincula ao setor com função de agrônomo, passa a ler', async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await setDoc(doc(ctx.firestore(), 'empresas', A, 'vinculos', 'admA_fit-a1'), vinculo('admA', 'fit-a1', 'un-a1', 'funcionario', ['agronomo']));
+      });
+      await assertSucceeds(getDoc(ref(como('admA'), AV1)));
+      await assertFails(getDoc(ref(como('admA'), AV2))); // continua sem acesso ao outro setor
+    });
+
+    test('consultas: o pragueiro filtra por setorId E responsavelUid; o gestor por setorId', async () => {
+      const col = (db) => collection(db, 'empresas', A, 'avaliacoes');
+      const pr = como('pragA1');
+      await assertSucceeds(getDocs(query(col(pr), where('setorId', '==', 'fit-a1'), where('responsavelUid', '==', 'pragA1'))));
+      await assertFails(getDocs(query(col(pr), where('setorId', '==', 'fit-a1')))); // veria as dos colegas
+      await assertFails(getDocs(query(col(pr), where('responsavelUid', '==', 'pragA1'))));
+      await assertFails(getDocs(col(pr)));
+      await assertSucceeds(getDocs(query(col(como('agroA')), where('setorId', '==', 'fit-a1'))));
+      await assertSucceeds(getDocs(query(col(como('gerA1')), where('setorId', '==', 'fit-a1'))));
+      await assertFails(getDocs(query(col(como('gerA1')), where('setorId', '==', 'fit-a2'))));
+      await assertFails(getDocs(col(como('agroA'))));
+    });
+
+    test('setor sem o módulo: nem o dono lê', async () => {
+      await semModulo();
+      await assertFails(getDoc(ref(como('pragA1'), AV1)));
+      await assertFails(getDoc(ref(como('agroA'), AV1)));
+    });
+  });
+
+  describe('alterar', () => {
+    test('o dono edita o rascunho e finaliza com o carimbo de hora do servidor', async () => {
+      const r = ref(como('pragA1'), AV1);
+      await assertSucceeds(updateDoc(r, { faseCultura: ['chumbinho'], notas: 'ok', armadilha: { adultos: 4 } }));
+      await assertFails(updateDoc(r, { status: 'finalizada' })); // sem finalizadaEm
+      await assertFails(updateDoc(r, { status: 'finalizada', finalizadaEm: Timestamp.fromDate(new Date('2020-01-01')) }));
+      await assertFails(updateDoc(r, { finalizadaEm: serverTimestamp() })); // carimbo sem finalizar
+      await assertSucceeds(updateDoc(r, { status: 'finalizada', finalizadaEm: serverTimestamp() }));
+    });
+
+    test('identidade, setor, talhão, semana, ficha e atributos não mudam', async () => {
+      const r = ref(como('pragA1'), AV1);
+      await assertFails(updateDoc(r, { talhaoId: 't-a2' }));
+      await assertFails(updateDoc(r, { setorId: 'fit-a2' }));
+      await assertFails(updateDoc(r, { unidadeId: 'un-a2' }));
+      await assertFails(updateDoc(r, { responsavelUid: 'pragA1b' }));
+      await assertFails(updateDoc(r, { semanaISO: '2026-W40' }));
+      await assertFails(updateDoc(r, { fichaVersao: 2 }));
+      await assertFails(updateDoc(r, { atributosTalhao: { tipoPomar: 'novo' } }));
+      await assertFails(updateDoc(r, { data: '2026-01-01' }));
+    });
+
+    test('avaliação finalizada é imutável', async () => {
+      const r = ref(como('pragA1'), AV1_FIN);
+      await assertFails(updateDoc(r, { status: 'rascunho' }));
+      await assertFails(updateDoc(r, { notas: 'depois' }));
+      await assertFails(updateDoc(r, { finalizadaEm: serverTimestamp() }));
+    });
+
+    test('só o dono altera: colega, agrônomo, gerente e admin não', async () => {
+      for (const uid of ['pragA1b', 'agroA', 'gerA1', 'admA', 'pragB']) {
+        await assertFails(updateDoc(ref(como(uid), AV1), { notas: 'invasão' }));
+      }
+    });
+
+    test('dono com vínculo desativado ou setor sem módulo não altera', async () => {
+      await semModulo();
+      await assertFails(updateDoc(ref(como('pragA1'), AV1), { notas: 'x' }));
+    });
+
+    test('ninguém apaga', async () => {
+      for (const uid of ['pragA1', 'agroA', 'gerA1', 'admA']) {
+        await assertFails(deleteDoc(ref(como(uid), AV1)));
+      }
+    });
+  });
+});
+
+describe('plantas', () => {
+  const planta = (n, uid = 'pragA1', aid = AV1) => p(como(uid), 'empresas', A, 'avaliacoes', aid, 'plantas', String(n));
+
+  test('o pragueiro grava as plantas 1 a 30 da própria avaliação em rascunho', async () => {
+    await assertSucceeds(setDoc(planta(2), { n: 2, obs: { tripes_flor: { A: 1, B: null } } }));
+    await assertSucceeds(setDoc(planta(30), { n: 30, obs: {} }));
+    await assertSucceeds(updateDoc(planta(1), { 'obs.tripes_flor': { A: 3, B: 0 } }));
+    await assertSucceeds(setDoc(planta(3), { n: 3, obs: {}, notas: 'foco perto da cerca', fotos: [{ itemId: 'tripes_flor', quadrante: 'A', caminho: 'local:1' }] }));
+  });
+
+  test('plantas fora de 1 a 30, campos extras e dados inválidos: negado', async () => {
+    await assertFails(setDoc(planta(0), { n: 0, obs: {} }));
+    await assertFails(setDoc(planta(31), { n: 31, obs: {} }));
+    await assertFails(setDoc(planta('01'), { n: 1, obs: {} }));
+    await assertFails(setDoc(planta(3), { n: 3, obs: {}, admin: true }));
+    await assertFails(setDoc(planta(3), { n: 3, obs: 'texto' }));
+    await assertFails(setDoc(planta(3), { n: '3', obs: {} }));
+    await assertFails(setDoc(planta(3), { n: 3, obs: {}, fotos: 'foto.jpg' }));
+    await assertFails(setDoc(planta(3), { n: 3, obs: Object.fromEntries(Array.from({ length: 61 }, (_, i) => [`item${i}`, { A: 1, B: 1 }])) }));
+  });
+
+  test('avaliação finalizada não aceita mais plantas', async () => {
+    await assertFails(setDoc(planta(2, 'pragA1', AV1_FIN), { n: 2, obs: {} }));
+    await assertFails(updateDoc(planta(1, 'pragA1', AV1_FIN), { notas: 'x' }));
+  });
+
+  test('o colega do mesmo setor não lê nem grava planta alheia', async () => {
+    await assertFails(getDoc(planta(1, 'pragA1b')));
+    await assertFails(setDoc(planta(2, 'pragA1b'), { n: 2, obs: {} }));
+  });
+
+  test('pragueiro de outro setor e outra empresa: nada', async () => {
+    await assertFails(getDoc(planta(1, 'pragA2')));
+    await assertFails(setDoc(planta(2, 'pragA2'), { n: 2, obs: {} }));
+    await assertFails(getDoc(planta(1, 'pragB')));
+  });
+
+  test('agrônomo e gerente do setor leem, mas não gravam; admin sem vínculo nem lê', async () => {
+    for (const uid of ['agroA', 'gerA1']) {
+      await assertSucceeds(getDoc(planta(1, uid)));
+      await assertFails(setDoc(planta(2, uid), { n: 2, obs: {} }));
+      await assertFails(updateDoc(planta(1, uid), { notas: 'x' }));
+    }
+    await assertFails(getDoc(planta(1, 'gerA2')));
+    await assertFails(getDoc(planta(1, 'admA')));
+  });
+
+  test('setor sem o módulo: nem o dono grava', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await updateDoc(doc(ctx.firestore(), 'empresas', A, 'setores', 'fit-a1'), { modulos: [] });
+    });
+    await assertFails(setDoc(planta(2), { n: 2, obs: {} }));
+    await assertFails(getDoc(planta(1)));
+  });
+
+  test('ninguém apaga planta', async () => {
+    await assertFails(deleteDoc(planta(1)));
+  });
+});
+
+describe('decisões (agrônomo decide, gerente executa)', () => {
+  const nova = (extra = {}) => ({
+    avaliacaoId: AV1_FIN, talhaoId: 't-a1', unidadeId: 'un-a1', setorId: 'fit-a1', tds: ['TD2'], status: 'aprovada',
+    decididoPor: 'agroA', decididoEm: serverTimestamp(), ...extra,
+  });
+  const semDecisao = async () => env.withSecurityRulesDisabled(async (ctx) => {
+    await deleteDoc(doc(ctx.firestore(), 'empresas', A, 'decisoes', AV1_FIN));
+  });
+  const dec = (uid, id = AV1_FIN) => p(como(uid), 'empresas', A, 'decisoes', id);
+
+  test('o agrônomo do setor decide uma avaliação finalizada; o id é o da avaliação', async () => {
+    await semDecisao();
+    await assertSucceeds(setDoc(dec('agroA'), nova()));
+    await semDecisao();
+    await assertSucceeds(setDoc(dec('agroA'), nova({ status: 'rejeitada', observacao: 'aguardar a próxima semana', tds: ['TD1'] })));
+  });
+
+  test('não decide rascunho, id trocado, dados de outra avaliação ou em nome de outro', async () => {
+    await semDecisao();
+    await assertFails(setDoc(dec('agroA', AV1), nova({ avaliacaoId: AV1 }))); // rascunho
+    await assertFails(setDoc(dec('agroA', 'outro-id'), nova()));
+    await assertFails(setDoc(dec('agroA'), nova({ decididoPor: 'gerA1' })));
+    await assertFails(setDoc(dec('agroA'), nova({ decididoEm: Timestamp.fromDate(new Date('2020-01-01')) })));
+    await assertFails(setDoc(dec('agroA'), nova({ status: 'executada' })));
+    await assertFails(setDoc(dec('agroA'), nova({ setorId: 'fit-a2' })));
+    await assertFails(setDoc(dec('agroA'), nova({ talhaoId: 't-a2' })));
+    await assertFails(setDoc(dec('agroA'), nova({ tds: [] })));
+    await assertFails(setDoc(dec('agroA'), nova({ extra: 1 })));
+  });
+
+  test('agrônomo de OUTRO setor não decide (a função é por setor)', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await deleteDoc(doc(ctx.firestore(), 'empresas', A, 'decisoes', AV2_FIN)).catch(() => {});
+    });
+    await assertFails(setDoc(dec('agroA', AV2_FIN), nova({
+      avaliacaoId: AV2_FIN, talhaoId: 't-a2', unidadeId: 'un-a2', setorId: 'fit-a2',
+    })));
+  });
+
+  test('gerente, pragueiro, admin e motorista não criam decisão', async () => {
+    await semDecisao();
+    for (const uid of ['gerA1', 'pragA1', 'admA', 'motA', 'pragB']) {
+      await assertFails(setDoc(dec(uid), nova({ decididoPor: uid })));
+    }
+  });
+
+  test('decisão já tomada não é reescrita pelo agrônomo', async () => {
+    await assertFails(setDoc(dec('agroA'), nova()));
+    await assertFails(updateDoc(dec('agroA'), { status: 'rejeitada' }));
+  });
+
+  test('o gerente do setor marca como executada, só com os campos permitidos', async () => {
+    const r = dec('gerA1');
+    await assertFails(updateDoc(r, { status: 'executada', executadoPor: 'gerA1', executadoEm: serverTimestamp(), tds: ['TD1'] }));
+    await assertFails(updateDoc(r, { status: 'executada', executadoPor: 'outro', executadoEm: serverTimestamp() }));
+    await assertFails(updateDoc(r, { status: 'executada', executadoPor: 'gerA1', executadoEm: Timestamp.fromDate(new Date('2020-01-01')) }));
+    await assertSucceeds(updateDoc(r, { status: 'executada', executadoPor: 'gerA1', executadoEm: serverTimestamp(), observacaoExecucao: 'aplicado em 21/09' }));
+    await assertFails(updateDoc(r, { status: 'aprovada' })); // já executada
+  });
+
+  test('gerente de outro setor, agrônomo, pragueiro e admin não executam', async () => {
+    for (const uid of ['gerA2', 'agroA', 'pragA1', 'admA']) {
+      await assertFails(updateDoc(dec(uid), { status: 'executada', executadoPor: uid, executadoEm: serverTimestamp() }));
+    }
+  });
+
+  test('decisão rejeitada não pode ser executada', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await updateDoc(doc(ctx.firestore(), 'empresas', A, 'decisoes', AV1_FIN), { status: 'rejeitada' });
+    });
+    await assertFails(updateDoc(dec('gerA1'), { status: 'executada', executadoPor: 'gerA1', executadoEm: serverTimestamp() }));
+  });
+
+  test('leitura: agrônomo e gerente do setor; pragueiro, outro setor e admin sem vínculo não', async () => {
+    await assertSucceeds(getDoc(dec('agroA')));
+    await assertSucceeds(getDoc(dec('gerA1')));
+    await assertFails(getDoc(dec('pragA1')));
+    await assertFails(getDoc(dec('gerA2')));
+    await assertFails(getDoc(dec('admA')));
+    await assertFails(getDoc(dec('pragB')));
+  });
+
+  test('ninguém apaga decisão', async () => {
+    await assertFails(deleteDoc(dec('agroA')));
+    await assertFails(deleteDoc(dec('gerA1')));
+  });
+});
+
+describe('eventos (trilha de auditoria)', () => {
+  const ev = (uid, id) => p(como(uid), 'empresas', A, 'eventos', id);
+  const semear = async (dados) => env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), 'empresas', A, 'eventos', 'e9'), { uid: 'pragA1', acao: 'finalizou', em: agora(), ...dados });
+  });
+
+  test('cada membro ativo registra o próprio evento; não falsifica autor nem hora', async () => {
+    await assertSucceeds(setDoc(ev('pragA1', 'e1'), { uid: 'pragA1', acao: 'finalizou', setorId: 'fit-a1', em: serverTimestamp() }));
+    await assertFails(setDoc(ev('pragA1', 'e2'), { uid: 'agroA', acao: 'finalizou', em: serverTimestamp() }));
+    await assertFails(setDoc(ev('pragA1', 'e3'), { uid: 'pragA1', acao: 'finalizou', em: Timestamp.fromDate(new Date('2020-01-01')) }));
+    await assertFails(setDoc(ev('pragA1', 'e4'), { uid: 'pragA1', acao: '', em: serverTimestamp() }));
+    await assertFails(setDoc(ev('pragA1', 'e5'), { uid: 'pragA1', acao: 'x', em: serverTimestamp(), poder: 1 }));
+  });
+
+  test('membro inativo, de fora ou de outra empresa não registra', async () => {
+    await assertFails(setDoc(ev('inativoA', 'e1'), { uid: 'inativoA', acao: 'x', em: serverTimestamp() }));
+    await assertFails(setDoc(ev('pragB', 'e1'), { uid: 'pragB', acao: 'x', em: serverTimestamp() }));
+  });
+
+  test('não se altera nem se apaga', async () => {
+    await semear({});
+    await assertFails(updateDoc(ev('pragA1', 'e9'), { acao: 'outra' }));
+    await assertFails(deleteDoc(ev('admA', 'e9')));
+  });
+
+  test('leitura: admin da empresa; agrônomo e gerente do setor do evento; pragueiro e outros setores não', async () => {
+    await semear({ setorId: 'fit-a1' });
+    await assertSucceeds(getDoc(ev('admA', 'e9')));
+    await assertSucceeds(getDoc(ev('agroA', 'e9')));
+    await assertSucceeds(getDoc(ev('gerA1', 'e9')));
+    await assertFails(getDoc(ev('pragA1', 'e9')));
+    await assertFails(getDoc(ev('gerA2', 'e9')));
+    await assertFails(getDoc(ev('admB', 'e9')));
+  });
+
+  test('evento sem setor só o admin lê', async () => {
+    await semear({});
+    await assertSucceeds(getDoc(ev('admA', 'e9')));
+    await assertFails(getDoc(ev('agroA', 'e9')));
+    await assertFails(getDoc(ev('gerA1', 'e9')));
   });
 });
 
