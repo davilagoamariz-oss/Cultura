@@ -1,5 +1,9 @@
 # Modelo de dados (Firestore)
 
+> **Atenção:** a estrutura de coleções abaixo é a versão de uma empresa só. Hoje tudo vive dentro de
+> `empresas/{empresaId}/...`; veja `docs/arquitetura.md`. Continuam valendo aqui a tabela "Como a ficha
+> vira dados" e a "Regra de ouro do motor".
+
 Uma avaliação semanal de um talhão vira **1 documento de cabeçalho + 30 documentos de planta**.
 Assim cada documento fica pequeno e o app grava planta a planta, mesmo offline.
 

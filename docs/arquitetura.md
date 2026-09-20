@@ -75,7 +75,7 @@ antecipação por nível 3, regra do bicho-furão e TDs. O app monta a tela a pa
 | Camada | Medida |
 |---|---|
 | Regras do banco | Nega tudo por padrão; valida campos, tipos e faixas; identidade, talhão, semana e protocolo de uma avaliação não mudam; finalizada é imutável; nada é apagado. |
-| Testes das regras | `npm run test:rules:proposta`: ataques entre empresas, escalada de papel, convites, escopo por fazenda, um caso por papel. Rodam a cada mudança das regras. |
+| Testes das regras | `npm run test:rules`: ataques entre empresas, escalada de papel, convites, escopo por fazenda, um caso por papel. Rodam a cada mudança das regras. |
 | Acesso a dados no app | Um único módulo monta os caminhos, sempre dentro da empresa ativa. |
 | Entrada | Só por convite com e-mail verificado; política de senha do Firebase Auth. |
 | Navegador | CSP, HSTS, `frame-ancestors none`, `Referrer-Policy` e `Permissions-Policy` (ao escolher a hospedagem); sem HTML injetado; validação de entradas. |
