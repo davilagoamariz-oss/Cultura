@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from './nucleo/firebase.js';
 import { caminhos } from './nucleo/caminhos.js';
+import { NOME_APP } from './nucleo/config.js';
 import { useSessao } from './nucleo/Sessao.jsx';
 import { NOMES_PAPEL } from './nucleo/papeis.js';
 import Carregando from './Carregando.jsx';
@@ -34,7 +35,7 @@ export default function EscolherEmpresa() {
   return (
     <main className="login">
       <div className="login__cartao">
-        <h1 className="login__marca">Ronda do Pomar</h1>
+        <h1 className="login__marca">{NOME_APP}</h1>
         <h2>Escolha a empresa</h2>
         <div className="pilha">
           {ativos.map((v) => (

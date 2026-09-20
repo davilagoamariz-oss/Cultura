@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import { NOME_APP } from './nucleo/config.js';
 import { useSessao } from './nucleo/Sessao.jsx';
 import { firebaseConfigurado } from './nucleo/firebase.js';
 import { useOnline } from './offline/useOnline.js';
@@ -39,7 +40,7 @@ export default function Login() {
   return (
     <main className="login">
       <div className="login__cartao">
-        <h1 className="login__marca">Ronda do Pomar</h1>
+        <h1 className="login__marca">{NOME_APP}</h1>
         <p className="login__sub">Monitoramento de pragas e doenças do limão Tahiti</p>
 
         {!firebaseConfigurado && (

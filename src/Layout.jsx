@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { NOME_APP } from './nucleo/config.js';
 import { useSessao } from './nucleo/Sessao.jsx';
 import { NOMES_PAPEL } from './nucleo/papeis.js';
 import { useOnline } from './offline/useOnline.js';
@@ -14,7 +15,7 @@ export default function Layout({ children }) {
   return (
     <div className="app">
       <header className="topo">
-        <div className="topo__marca">Ronda do Pomar</div>
+        <div className="topo__marca">{NOME_APP}</div>
         <div className={`estado ${online ? 'estado--online' : 'estado--offline'}`} role="status">
           <span className="estado__ponto" aria-hidden="true" />
           {online ? 'Online' : 'Offline'}

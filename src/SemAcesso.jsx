@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router-dom';
+import { NOME_APP } from './nucleo/config.js';
 import { useSessao } from './nucleo/Sessao.jsx';
 import { useOnline } from './offline/useOnline.js';
 import Carregando from './Carregando.jsx';
@@ -37,7 +38,7 @@ export default function SemAcesso() {
   return (
     <main className="login">
       <div className="login__cartao">
-        <h1 className="login__marca">Ronda do Pomar</h1>
+        <h1 className="login__marca">{NOME_APP}</h1>
         <h2>{texto.titulo}</h2>
         <p>{texto.corpo}</p>
         {!online && <p className="aviso">Você está offline.</p>}
