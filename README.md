@@ -10,10 +10,11 @@ Hospedagem ainda não configurada.
 
 ## Estado
 
-Fase 1 (fundação) concluída na branch `dev`: motor v2, catálogo e ficha do limão em dados,
-`firestore.rules` v2 com testes e seed com duas empresas. A casca do app (login, escolha de empresa,
-menu por módulo), a ficha de campo e o painel são as próximas fases (ver `docs/plano-v2.md`).
-**As regras v2 e os índices ainda não foram publicados no Firebase.**
+Na branch `dev`: **Fase 1** (motor v2, catálogo e ficha do limão em dados, `firestore.rules` v2 com
+testes, seed com duas empresas) e **Fase 2** (casca do app: login, escolha de empresa, menu só com os
+módulos dos setores com vínculo, escolha de setor, cache offline e indicador online/offline). A ficha
+de campo, o painel de acompanhamento e a administração são as próximas fases (ver `docs/plano-v2.md`).
+**As regras v2, os índices e a migração dos dados ainda não foram aplicados no Firebase real.**
 
 ## Onde está o quê
 
@@ -22,11 +23,13 @@ catalogo/                    dados versionados: alvos, cultura e ficha limao-tah
 regras/regras-iniciais.json  fonte da ficha do limão (convertida por scripts/converter-regras-iniciais.mjs)
 src/dominio/motor/           motor de regras v2 (função pura): métricas, níveis, ajustes
 src/dominio/fichas/          validador e conversor de fichas
-src/nucleo/                  firebase, caminhos do banco, vínculos, sessão
+src/nucleo/                  firebase, caminhos do banco, sessão, menu por módulo, permissões, guardas de rota
+src/modulos/                 registro fixo de módulos e as telas de cada módulo (hoje: fitossanidade)
+src/paginas/                 telas gerais (início)
 firestore.rules              segurança do banco (empresa > setor > vínculo > módulo)
 firestore.indexes.json       índices (grupos de coleções membros e vinculos)
-scripts/                     semear-emulador, verificar-fluxo-emulador, converter-regras-iniciais
-test/                        testes do motor, das fichas, dos caminhos e das regras (emulador)
+scripts/                     semear e verificar nos emuladores, converter a ficha, migrar produção (v2)
+test/                        testes do motor, fichas, caminhos, menu, guardas, telas renderizadas e regras (emulador)
 docs/                        plano-v2, modelo-de-dados, decisoes/ (uma página por decisão)
 ```
 
@@ -36,9 +39,10 @@ Leia primeiro: `docs/decisoes/README.md` (as decisões), `docs/modelo-de-dados.m
 ## Testes
 
 ```
-npm test                 # motor, fichas, caminhos, vínculos (rápido; Node 20+)
+npm test                 # motor, fichas, caminhos, menu, guardas e telas renderizadas (rápido; Node 20+)
 npm run test:rules       # firestore.rules no emulador (106 verificações, duas empresas; precisa de Java 21)
-npm run test:fluxo       # fluxo completo nos emuladores: avaliar, calcular, decidir, executar, ataques barrados
+npm run test:fluxo       # nos emuladores: menu de cada usuário, e o fluxo avaliar, calcular, decidir, executar
+npm run test:migracao    # nos emuladores: prova a migração de produção (simula, aplica, repete, entra como davi e paulo)
 npm run build            # gera dist/
 ```
 
@@ -57,8 +61,9 @@ plataforma), `gerente@demo.test`, `agro@demo.test` (agrônomo nas duas empresas)
 (pragueiro), `motorista@demo.test` (só Frota), `semvinculo@demo.test`, `admin2@demo.test` e
 `pragueiro2@demo.test` (segunda empresa).
 
-> `npm run dev:emulador` abre o app na porta 5174, mas a casca do app ainda é a do modelo anterior e
-> não entende os vínculos por setor; ela é refeita na Fase 2.
+Para ver o app funcionando localmente: deixe `npm run emuladores` e `npm run semear` rodando e, em outro
+terminal, `npm run dev:emulador` (http://localhost:5174). Entre com cada usuário para ver menus
+diferentes: o `motorista@demo.test` não vê Fitossanidade, o `agro@demo.test` escolhe entre duas empresas.
 
 ## Configuração
 
@@ -72,8 +77,9 @@ regras. O nome do sistema vem de `VITE_APP_NAME` (padrão: Ronda do Pomar).
    (não muda depois). Plano **Spark**: não ative Storage nem Cloud Functions.
 2. Regras e índices: `firebase deploy --only firestore` (só depois de revisar o diff e testar).
 3. **Dono da plataforma e primeira empresa**: criados à mão, uma única vez (`plataforma_admins/{uid}`,
-   `empresas/{id}` e o primeiro `membros/{uid}` com `papelEmpresa: admin`). Os demais usuários são
-   criados no console do Firebase; o admin da empresa os liga à empresa e aos setores pelo app.
+   `empresas/{id}` e o primeiro `membros/{uid}` com `papelEmpresa: admin`). Os dados atuais de produção
+   migram para a v2 com `node scripts/migrar-producao-v2.cjs` (simula; `--aplicar` grava). Os demais
+   usuários são criados no console do Firebase; o admin da empresa os liga à empresa e aos setores pelo app.
 4. Ao publicar o app, adicione o domínio em Authentication > Configurações > Domínios autorizados.
 
 ## Pendências de definição
