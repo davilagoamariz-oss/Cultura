@@ -1,0 +1,112 @@
+[
+  {
+    "id": "acaro-da-ferrugem",
+    "nome": "Ácaro da ferrugem",
+    "tipo": "praga"
+  },
+  {
+    "id": "acaro-branco",
+    "nome": "Ácaro branco",
+    "tipo": "praga"
+  },
+  {
+    "id": "acaro-da-leprose",
+    "nome": "Ácaro da leprose",
+    "tipo": "praga"
+  },
+  {
+    "id": "acaros-predadores",
+    "nome": "Ácaros predadores",
+    "tipo": "inimigo_natural"
+  },
+  {
+    "id": "larva-minadora",
+    "nome": "Larva minadora",
+    "tipo": "praga"
+  },
+  {
+    "id": "ageniaspis",
+    "nome": "Ageniaspis",
+    "tipo": "inimigo_natural"
+  },
+  {
+    "id": "podridao-floral",
+    "nome": "Podridão floral (estrelinha)",
+    "tipo": "doenca"
+  },
+  {
+    "id": "ortezia",
+    "nome": "Cochonilha ortézia",
+    "tipo": "praga"
+  },
+  {
+    "id": "escama-farinha",
+    "nome": "Cochonilha escama-farinha",
+    "tipo": "praga"
+  },
+  {
+    "id": "parlatoria",
+    "nome": "Cochonilha parlatória",
+    "tipo": "praga"
+  },
+  {
+    "id": "cochonilha-rosada",
+    "nome": "Cochonilha rosada",
+    "tipo": "praga"
+  },
+  {
+    "id": "cochonilha-branca",
+    "nome": "Cochonilha branca",
+    "tipo": "praga"
+  },
+  {
+    "id": "cochonilha-parda",
+    "nome": "Cochonilha parda",
+    "tipo": "praga"
+  },
+  {
+    "id": "tripes",
+    "nome": "Tripes",
+    "tipo": "praga"
+  },
+  {
+    "id": "gomose",
+    "nome": "Gomose",
+    "tipo": "doenca"
+  },
+  {
+    "id": "pulgao",
+    "nome": "Pulgão",
+    "tipo": "praga"
+  },
+  {
+    "id": "mosca-negra",
+    "nome": "Mosca-negra",
+    "tipo": "praga"
+  },
+  {
+    "id": "bicho-furao",
+    "nome": "Bicho-furão",
+    "tipo": "praga"
+  },
+  {
+    "id": "declinio",
+    "nome": "Declínio",
+    "tipo": "doenca"
+  },
+  {
+    "id": "bicho-lixeiro",
+    "nome": "Bicho-lixeiro",
+    "tipo": "inimigo_natural"
+  },
+  {
+    "id": "joaninha",
+    "nome": "Joaninha",
+    "tipo": "inimigo_natural"
+  },
+  {
+    "id": "floracao",
+    "nome": "Flores abertas",
+    "tipo": "indicador"
+  }
+]

@@ -1,0 +1,923 @@
+{
+  "fichaId": "limao-tahiti",
+  "versao": 1,
+  "culturaId": "limao-tahiti",
+  "origem": "Ficha FFPRO02 v1.0 + Manual Prático Embrapa (Documentos 183)",
+  "amostragem": {
+    "tipo": "plantas_quadrantes",
+    "plantas": 30,
+    "lados": [
+      "A",
+      "B"
+    ],
+    "intensidade": {
+      "escala": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "legenda": {
+        "1": "até 5 pragas",
+        "2": "de 6 a 15 pragas",
+        "3": "mais de 15 pragas"
+      }
+    }
+  },
+  "orgaos": [
+    "fruto",
+    "folha",
+    "broto",
+    "flor",
+    "tronco",
+    "planta"
+  ],
+  "fases": [
+    {
+      "grupo": "Crescimento",
+      "itens": [
+        {
+          "id": "crescimento_vegetativo",
+          "nome": "Crescimento vegetativo"
+        },
+        {
+          "id": "amadurecimento_ramos",
+          "nome": "Amadurecimento de ramos"
+        }
+      ]
+    },
+    {
+      "grupo": "Floração",
+      "itens": [
+        {
+          "id": "cabeca_de_fosforo",
+          "nome": "Cabeça de fósforo"
+        },
+        {
+          "id": "cotonete",
+          "nome": "Cotonete"
+        }
+      ]
+    },
+    {
+      "grupo": "Frutificação",
+      "itens": [
+        {
+          "id": "chumbinho",
+          "nome": "Chumbinho"
+        },
+        {
+          "id": "azeitona",
+          "nome": "Azeitona"
+        },
+        {
+          "id": "bola_de_gude",
+          "nome": "Bola de gude"
+        },
+        {
+          "id": "pingue_pongue",
+          "nome": "Pingue-pongue"
+        },
+        {
+          "id": "bilhar",
+          "nome": "Bilhar"
+        },
+        {
+          "id": "fruto_para_colheita",
+          "nome": "Fruto para colheita"
+        },
+        {
+          "id": "pos_colheita",
+          "nome": "Pós-colheita"
+        }
+      ]
+    }
+  ],
+  "tds": {
+    "TD1": "Não pulverizar",
+    "TD2": "Pulverizar com acaricida",
+    "TD3": "Pulverizar com inseticida",
+    "TD4": "Pulverizar com fungicida",
+    "TD5": "Proceder poda",
+    "TD6": "Inspecionar todas as plantas"
+  },
+  "tdsQuePulverizam": [
+    "TD2",
+    "TD3",
+    "TD4"
+  ],
+  "itens": [
+    {
+      "id": "ferrugem_bgude",
+      "alvoId": "acaro-da-ferrugem",
+      "nome": "Ácaro da ferrugem (bola de gude)",
+      "orgao": "fruto",
+      "tipo": "presenca_quadrante",
+      "criterio": {
+        "texto": "30 ou mais ácaros por visada (lupa 10x, base de 1 cm²), em 3 frutos por planta.",
+        "fonte": "Manual Embrapa Doc. 183, p.16"
+      }
+    },
+    {
+      "id": "ferrugem_pingue_pongue",
+      "alvoId": "acaro-da-ferrugem",
+      "nome": "Ácaro da ferrugem (pingue-pongue)",
+      "orgao": "fruto",
+      "tipo": "presenca_quadrante",
+      "criterio": {
+        "texto": "30 ou mais ácaros por visada (lupa 10x, base de 1 cm²), em 3 frutos por planta.",
+        "fonte": "Manual Embrapa Doc. 183, p.16"
+      }
+    },
+    {
+      "id": "acaro_branco_chumbinho",
+      "alvoId": "acaro-branco",
+      "nome": "Ácaro branco (chumbinho)",
+      "orgao": "fruto",
+      "tipo": "presenca_quadrante",
+      "criterio": {
+        "texto": "5 ou mais ácaros por visada (lupa 10x, base de 1 cm²), em 3 frutos de cada tamanho por planta.",
+        "fonte": "Manual Embrapa Doc. 183, p.17"
+      }
+    },
+    {
+      "id": "acaro_branco_azeitona",
+      "alvoId": "acaro-branco",
+      "nome": "Ácaro branco (azeitona)",
+      "orgao": "fruto",
+      "tipo": "presenca_quadrante",
+      "criterio": {
+        "texto": "5 ou mais ácaros por visada (lupa 10x, base de 1 cm²), em 3 frutos de cada tamanho por planta.",
+        "fonte": "Manual Embrapa Doc. 183, p.17"
+      }
+    },
+    {
+      "id": "acaro_branco_bgude",
+      "alvoId": "acaro-branco",
+      "nome": "Ácaro branco (bola de gude)",
+      "orgao": "fruto",
+      "tipo": "presenca_quadrante",
+      "criterio": {
+        "texto": "5 ou mais ácaros por visada (lupa 10x, base de 1 cm²), em 3 frutos de cada tamanho por planta.",
+        "fonte": "Manual Embrapa Doc. 183, p.17"
+      }
+    },
+    {
+      "id": "leprose_fruto",
+      "alvoId": "acaro-da-leprose",
+      "nome": "Ácaro da leprose",
+      "orgao": "fruto",
+      "tipo": "presenca_quadrante",
+      "criterio": {
+        "texto": "5 ou mais ácaros por visada (lupa 10x, base de 1 cm²), em 3 frutos por planta.",
+        "fonte": "Manual Embrapa Doc. 183, p.18"
+      }
+    },
+    {
+      "id": "acaros_predadores",
+      "alvoId": "acaros-predadores",
+      "nome": "Ácaros predadores",
+      "orgao": "fruto",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "larva_minadora_broto",
+      "alvoId": "larva-minadora",
+      "nome": "Larva minadora",
+      "orgao": "broto",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "ageniaspis_pupa",
+      "alvoId": "ageniaspis",
+      "nome": "Ageniaspis (pupa)",
+      "orgao": "folha",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "podridao_floral_flor",
+      "alvoId": "podridao-floral",
+      "nome": "Podridão floral (estrelinha)",
+      "orgao": "flor",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "ortezia_folha",
+      "alvoId": "ortezia",
+      "nome": "Cochonilha ortézia",
+      "orgao": "folha",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "escama_farinha_tronco",
+      "alvoId": "escama-farinha",
+      "nome": "Cochonilha escama-farinha",
+      "orgao": "tronco",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "escama_farinha_fruto",
+      "alvoId": "escama-farinha",
+      "nome": "Cochonilha escama-farinha",
+      "orgao": "fruto",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "parlatoria_tronco",
+      "alvoId": "parlatoria",
+      "nome": "Cochonilha parlatória",
+      "orgao": "tronco",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "rosada_folha",
+      "alvoId": "cochonilha-rosada",
+      "nome": "Cochonilha rosada",
+      "orgao": "folha",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "branca_folha",
+      "alvoId": "cochonilha-branca",
+      "nome": "Cochonilha branca",
+      "orgao": "folha",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "branca_fruto",
+      "alvoId": "cochonilha-branca",
+      "nome": "Cochonilha branca",
+      "orgao": "fruto",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "branca_tronco",
+      "alvoId": "cochonilha-branca",
+      "nome": "Cochonilha branca",
+      "orgao": "tronco",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "parda_folha",
+      "alvoId": "cochonilha-parda",
+      "nome": "Cochonilha parda",
+      "orgao": "folha",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "parda_fruto",
+      "alvoId": "cochonilha-parda",
+      "nome": "Cochonilha parda",
+      "orgao": "fruto",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "parda_tronco",
+      "alvoId": "cochonilha-parda",
+      "nome": "Cochonilha parda",
+      "orgao": "tronco",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "tripes_flor",
+      "alvoId": "tripes",
+      "nome": "Tripes",
+      "orgao": "flor",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "gomose",
+      "alvoId": "gomose",
+      "nome": "Gomose",
+      "orgao": "planta",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "pulgao",
+      "alvoId": "pulgao",
+      "nome": "Pulgão",
+      "orgao": "planta",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "mosca_negra",
+      "alvoId": "mosca-negra",
+      "nome": "Mosca-negra",
+      "orgao": "planta",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "bicho_furao",
+      "alvoId": "bicho-furao",
+      "nome": "Bicho-furão",
+      "orgao": "fruto",
+      "tipo": "lado_unico"
+    },
+    {
+      "id": "declinio",
+      "alvoId": "declinio",
+      "nome": "Declínio",
+      "orgao": "planta",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "bicho_lixeiro",
+      "alvoId": "bicho-lixeiro",
+      "nome": "Bicho-lixeiro",
+      "orgao": "folha",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "joaninha",
+      "alvoId": "joaninha",
+      "nome": "Joaninha",
+      "orgao": "planta",
+      "tipo": "presenca_quadrante"
+    },
+    {
+      "id": "flores_abertas",
+      "alvoId": "floracao",
+      "nome": "Nº de flores abertas",
+      "orgao": "flor",
+      "tipo": "presenca_quadrante"
+    }
+  ],
+  "regras": [
+    {
+      "itemId": "ferrugem_bgude",
+      "alvoId": "acaro-da-ferrugem",
+      "opcoesLimite": [
+        0.05,
+        0.1,
+        0.15
+      ],
+      "nota": "Ficha: 5%, 10% ou 15% conforme a exigência do mercado. Escolher por fazenda (overrides).",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD2",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "ferrugem_pingue_pongue",
+      "alvoId": "acaro-da-ferrugem",
+      "opcoesLimite": [
+        0.05,
+        0.1,
+        0.15
+      ],
+      "nota": "Ficha: 5%, 10% ou 15% conforme a exigência do mercado. Escolher por fazenda (overrides).",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD2",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "acaro_branco_chumbinho",
+      "alvoId": "acaro-branco",
+      "nota": "Ficha: 10%. Avaliado por estágio do fruto.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": 0.1,
+          "td": "TD2",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "acaro_branco_azeitona",
+      "alvoId": "acaro-branco",
+      "nota": "Ficha: 10%. Avaliado por estágio do fruto.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": 0.1,
+          "td": "TD2",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "acaro_branco_bgude",
+      "alvoId": "acaro-branco",
+      "nota": "Ficha: 10%. Avaliado por estágio do fruto.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": 0.1,
+          "td": "TD2",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "leprose_fruto",
+      "alvoId": "acaro-da-leprose",
+      "aplicaSe": {
+        "atributos": {
+          "citrosVizinhos": true
+        }
+      },
+      "nota": "Ficha: 10%. Manual Embrapa: só monitorar se houver outros citros (laranja, lima, tangerina) próximos ao talhão.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": 0.1,
+          "td": "TD2",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "acaros_predadores",
+      "alvoId": "acaros-predadores",
+      "nota": "Ficha: SNA (sem nível de ação). Inimigo natural.",
+      "informativo": true,
+      "niveis": []
+    },
+    {
+      "itemId": "larva_minadora_broto",
+      "alvoId": "larva-minadora",
+      "nota": "Ficha: pomar adulto 40%, pomar novo 10%.",
+      "niveis": [
+        {
+          "id": "pomar-adulto",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": 0.4,
+          "td": "TD3",
+          "gravidade": 3,
+          "quando": {
+            "atributos": {
+              "tipoPomar": "adulto"
+            }
+          }
+        },
+        {
+          "id": "pomar-novo",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": 0.1,
+          "td": "TD3",
+          "gravidade": 3,
+          "quando": {
+            "atributos": {
+              "tipoPomar": "novo"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "itemId": "ageniaspis_pupa",
+      "alvoId": "ageniaspis",
+      "nota": "Ficha: SNA. Inimigo natural da larva minadora.",
+      "informativo": true,
+      "niveis": []
+    },
+    {
+      "itemId": "podridao_floral_flor",
+      "alvoId": "podridao-floral",
+      "nota": "Ficha: 5%.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": 0.05,
+          "td": "TD4",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "ortezia_folha",
+      "alvoId": "ortezia",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar.",
+      "niveis": [
+        {
+          "id": "foco",
+          "metrica": "plantas_positivas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD6",
+          "gravidade": 1,
+          "proposta": {
+            "metrica": "plantas_positivas",
+            "operador": ">=",
+            "limite": 1,
+            "texto": "Ao achar a praga em uma planta, inspecionar todas as plantas do talhão para localizar o foco.",
+            "fonte": "Manual Embrapa Doc. 183, p.22"
+          }
+        },
+        {
+          "id": "talhao-todo",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD3",
+          "gravidade": 3,
+          "proposta": {
+            "metrica": "percent_plantas",
+            "operador": ">=",
+            "limite": 1,
+            "texto": "Com todas as plantas amostradas infestadas, controle em todo o pomar (ou só nos focos, se o ataque for em plantas isoladas ou reboleiras).",
+            "fonte": "Manual Embrapa Doc. 183, p.22"
+          }
+        }
+      ]
+    },
+    {
+      "itemId": "escama_farinha_tronco",
+      "alvoId": "escama-farinha",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar.",
+      "niveis": [
+        {
+          "id": "foco",
+          "metrica": "plantas_positivas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD6",
+          "gravidade": 1,
+          "proposta": {
+            "metrica": "plantas_positivas",
+            "operador": ">=",
+            "limite": 1,
+            "texto": "Ao achar a praga em uma planta, inspecionar todas as plantas do talhão para localizar o foco.",
+            "fonte": "Manual Embrapa Doc. 183, p.23"
+          }
+        },
+        {
+          "id": "talhao-todo",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD3",
+          "gravidade": 3,
+          "proposta": {
+            "metrica": "percent_plantas",
+            "operador": ">=",
+            "limite": 1,
+            "texto": "Com todas as plantas amostradas infestadas, controle em todo o pomar (ou só nos focos, se o ataque for em plantas isoladas ou reboleiras).",
+            "fonte": "Manual Embrapa Doc. 183, p.23"
+          }
+        }
+      ]
+    },
+    {
+      "itemId": "escama_farinha_fruto",
+      "alvoId": "escama-farinha",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar.",
+      "niveis": [
+        {
+          "id": "foco",
+          "metrica": "plantas_positivas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD6",
+          "gravidade": 1,
+          "proposta": {
+            "metrica": "plantas_positivas",
+            "operador": ">=",
+            "limite": 1,
+            "texto": "Ao achar a praga em uma planta, inspecionar todas as plantas do talhão para localizar o foco.",
+            "fonte": "Manual Embrapa Doc. 183, p.23"
+          }
+        },
+        {
+          "id": "talhao-todo",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD3",
+          "gravidade": 3,
+          "proposta": {
+            "metrica": "percent_plantas",
+            "operador": ">=",
+            "limite": 1,
+            "texto": "Com todas as plantas amostradas infestadas, controle em todo o pomar (ou só nos focos, se o ataque for em plantas isoladas ou reboleiras).",
+            "fonte": "Manual Embrapa Doc. 183, p.23"
+          }
+        }
+      ]
+    },
+    {
+      "itemId": "parlatoria_tronco",
+      "alvoId": "parlatoria",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar.",
+      "niveis": [
+        {
+          "id": "foco",
+          "metrica": "plantas_positivas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD6",
+          "gravidade": 1,
+          "proposta": {
+            "metrica": "plantas_positivas",
+            "operador": ">=",
+            "limite": 1,
+            "texto": "Ao achar a praga em uma planta, inspecionar todas as plantas do talhão para localizar o foco.",
+            "fonte": "Manual Embrapa Doc. 183, p.24"
+          }
+        },
+        {
+          "id": "talhao-todo",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD3",
+          "gravidade": 3,
+          "proposta": {
+            "metrica": "percent_plantas",
+            "operador": ">=",
+            "limite": 1,
+            "texto": "Com todas as plantas amostradas infestadas, controle em todo o pomar (ou só nos focos, se o ataque for em plantas isoladas ou reboleiras).",
+            "fonte": "Manual Embrapa Doc. 183, p.24"
+          }
+        }
+      ]
+    },
+    {
+      "itemId": "rosada_folha",
+      "alvoId": "cochonilha-rosada",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD3",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "branca_folha",
+      "alvoId": "cochonilha-branca",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD3",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "branca_fruto",
+      "alvoId": "cochonilha-branca",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD3",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "branca_tronco",
+      "alvoId": "cochonilha-branca",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD3",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "parda_folha",
+      "alvoId": "cochonilha-parda",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD3",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "parda_fruto",
+      "alvoId": "cochonilha-parda",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD3",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "parda_tronco",
+      "alvoId": "cochonilha-parda",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD3",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "tripes_flor",
+      "alvoId": "tripes",
+      "nota": "Ficha: acima de 20%.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">",
+          "limite": 0.2,
+          "td": "TD3",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "gomose",
+      "alvoId": "gomose",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar. Manual Embrapa: inspecionar todas as plantas e tratar a planta afetada ou a reboleira.",
+      "niveis": [
+        {
+          "id": "planta-afetada",
+          "metrica": "plantas_positivas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD6",
+          "gravidade": 1,
+          "proposta": {
+            "metrica": "plantas_positivas",
+            "operador": ">=",
+            "limite": 1,
+            "texto": "Inspecionar todas as plantas do talhão e tratar a planta afetada ou a reboleira.",
+            "fonte": "Manual Embrapa Doc. 183, p.26"
+          }
+        }
+      ]
+    },
+    {
+      "itemId": "pulgao",
+      "alvoId": "pulgao",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD3",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "mosca_negra",
+      "alvoId": "mosca-negra",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar.",
+      "niveis": [
+        {
+          "id": "padrao",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD3",
+          "gravidade": 3
+        }
+      ]
+    },
+    {
+      "itemId": "bicho_furao",
+      "alvoId": "bicho-furao",
+      "pendente": true,
+      "nota": "Ficha sem nível de ação. Avaliado só no lado da armadilha. Definir métrica (mariposas ou frutos) e limite.",
+      "niveis": [
+        {
+          "id": "armadilha",
+          "metrica": "percent_plantas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD3",
+          "gravidade": 3,
+          "proposta": {
+            "metrica": "contagem_armadilha",
+            "operador": ">=",
+            "limite": 10,
+            "texto": "Controle com 10 adultos na armadilha, ou 6 adultos em duas semanas seguidas. Precisa de uma métrica nova (contagem na armadilha, com a semana anterior).",
+            "fonte": "Cliente (2026-09-20), a confirmar"
+          }
+        }
+      ]
+    },
+    {
+      "itemId": "declinio",
+      "alvoId": "declinio",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar. Manual Embrapa: levantamento total das plantas do talhão.",
+      "niveis": [
+        {
+          "id": "levantamento-total",
+          "metrica": "plantas_positivas",
+          "operador": ">=",
+          "limite": null,
+          "td": "TD6",
+          "gravidade": 1,
+          "proposta": {
+            "metrica": "plantas_positivas",
+            "operador": ">=",
+            "limite": 1,
+            "texto": "Levantamento total das plantas do talhão.",
+            "fonte": "Manual Embrapa Doc. 183, p.27"
+          }
+        }
+      ]
+    },
+    {
+      "itemId": "bicho_lixeiro",
+      "alvoId": "bicho-lixeiro",
+      "nota": "Ficha: SNA. Inimigo natural.",
+      "informativo": true,
+      "niveis": []
+    },
+    {
+      "itemId": "joaninha",
+      "alvoId": "joaninha",
+      "nota": "Ficha: SNA. Inimigo natural.",
+      "informativo": true,
+      "niveis": []
+    },
+    {
+      "itemId": "flores_abertas",
+      "alvoId": "floracao",
+      "nota": "Ficha: contexto da floração (NF).",
+      "informativo": true,
+      "niveis": []
+    }
+  ],
+  "propostas": [
+    {
+      "id": "intensidade-1-2-3",
+      "texto": "Cada quadrante recebe 0 (ausente) ou 1, 2, 3 = até 5, de 6 a 15, mais de 15 pragas. Com intensidade 3 o controle pode antecipar para 5% das plantas (em vez de 10%).",
+      "fonte": "Cliente (2026-09-20), a confirmar",
+      "status": "proposta"
+    }
+  ]
+}
