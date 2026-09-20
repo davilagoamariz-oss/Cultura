@@ -1,0 +1,95 @@
+rules_version = '2';
+
+// Regras de segurança do Firestore - monitoramento de pragas do limão Tahiti.
+// Papéis (documento users/{uid}.papel): pragueiro | gestor | agronomo | admin
+//
+// ATENÇÃO: estas regras ainda NÃO foram testadas no emulador do Firebase.
+// Antes de ir para produção, teste no "Rules Playground" do console ou com o
+// Firebase Emulator Suite, com um usuário de cada papel.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function logado() {
+      return request.auth != null;
+    }
+    function perfilExiste() {
+      return logado() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    function papel() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.papel;
+    }
+    function temPapel(lista) {
+      return perfilExiste() && papel() in lista;
+    }
+    function ehMembro()   { return temPapel(['pragueiro', 'gestor', 'agronomo', 'admin']); }
+    function ehGestor()   { return temPapel(['gestor', 'agronomo', 'admin']); }
+    function ehAdmin()    { return temPapel(['admin']); }
+    function ehPragueiro(){ return temPapel(['pragueiro']); }
+
+    function avaliacaoPai(aid) {
+      return get(/databases/$(database)/documents/avaliacoes/$(aid)).data;
+    }
+
+    // Perfis de usuário. O primeiro admin é criado à mão no console (ver README).
+    match /users/{uid} {
+      allow read: if logado() && (request.auth.uid == uid || ehGestor());
+      allow write: if ehAdmin();
+    }
+
+    // Cadastros e configuração: todos leem, só admin altera.
+    match /fazendas/{id} { allow read: if ehMembro(); allow write: if ehAdmin(); }
+    match /talhoes/{id}  { allow read: if ehMembro(); allow write: if ehAdmin(); }
+    match /config/{id}   { allow read: if ehMembro(); allow write: if ehAdmin(); }
+
+    // Avaliação semanal (cabeçalho da ficha).
+    // Pragueiro só cria e edita as próprias, enquanto 'rascunho'.
+    // Ao virar 'finalizada' ela fica imutável (trilha de auditoria).
+    match /avaliacoes/{aid} {
+      allow read: if ehGestor()
+        || (ehPragueiro() && resource.data.responsavelUid == request.auth.uid);
+
+      allow create: if ehPragueiro()
+        && request.resource.data.responsavelUid == request.auth.uid
+        && request.resource.data.status == 'rascunho';
+
+      allow update: if ehPragueiro()
+        && resource.data.responsavelUid == request.auth.uid
+        && resource.data.status == 'rascunho'
+        && request.resource.data.responsavelUid == request.auth.uid
+        && request.resource.data.status in ['rascunho', 'finalizada'];
+
+      allow delete: if false;
+
+      // Uma planta por documento (plantas 1 a 30), com as observações dos quadrantes A e B.
+      // Não crie o documento pai e as plantas no MESMO batch: get() enxerga o estado anterior ao batch.
+      match /plantas/{pid} {
+        allow read: if ehGestor()
+          || (ehPragueiro() && avaliacaoPai(aid).responsavelUid == request.auth.uid);
+
+        allow create, update: if ehPragueiro()
+          && avaliacaoPai(aid).responsavelUid == request.auth.uid
+          && avaliacaoPai(aid).status == 'rascunho';
+
+        allow delete: if false;
+      }
+    }
+
+    // Resultados (NI por praga) e decisões sugeridas são escritos só pelo servidor
+    // (Cloud Function com Admin SDK, que ignora estas regras).
+    match /resultados/{aid} {
+      allow read: if ehGestor();
+      allow write: if false;
+    }
+
+    // O gestor só pode aprovar/rejeitar e comentar; não altera NI, limite nem TD.
+    match /decisoes/{did} {
+      allow read: if ehGestor();
+      allow create: if false;
+      allow update: if ehGestor()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['status', 'aprovadoPor', 'aprovadoEm', 'observacao'])
+        && request.resource.data.status in ['pendente', 'aprovada', 'rejeitada'];
+      allow delete: if false;
+    }
+  }
+}

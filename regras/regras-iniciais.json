@@ -1,0 +1,351 @@
+{
+  "versao": 1,
+  "origem": "Ficha FFPRO02 v1.0 + Manual Prático Embrapa (Documentos 183)",
+  "tds": {
+    "TD1": "Não pulverizar",
+    "TD2": "Pulverizar com acaricida",
+    "TD3": "Pulverizar com inseticida",
+    "TD4": "Pulverizar com fungicida",
+    "TD5": "Proceder poda",
+    "TD6": "Inspecionar todas as plantas"
+  },
+  "regras": [
+    {
+      "id": "ferrugem_bgude",
+      "nome": "Ácaro da ferrugem (bola de gude)",
+      "orgao": "fruto",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD2",
+      "opcoesLimite": [
+        0.05,
+        0.1,
+        0.15
+      ],
+      "nota": "Ficha: 5%, 10% ou 15% conforme a exigência do mercado. Escolher por fazenda (overrides)."
+    },
+    {
+      "id": "ferrugem_pingue_pongue",
+      "nome": "Ácaro da ferrugem (pingue-pongue)",
+      "orgao": "fruto",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD2",
+      "opcoesLimite": [
+        0.05,
+        0.1,
+        0.15
+      ],
+      "nota": "Ficha: 5%, 10% ou 15% conforme a exigência do mercado. Escolher por fazenda (overrides)."
+    },
+    {
+      "id": "acaro_branco_chumbinho",
+      "nome": "Ácaro branco (chumbinho)",
+      "orgao": "fruto",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": 0.1,
+      "td": "TD2",
+      "nota": "Ficha: 10%. Avaliado por estágio do fruto."
+    },
+    {
+      "id": "acaro_branco_azeitona",
+      "nome": "Ácaro branco (azeitona)",
+      "orgao": "fruto",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": 0.1,
+      "td": "TD2",
+      "nota": "Ficha: 10%. Avaliado por estágio do fruto."
+    },
+    {
+      "id": "acaro_branco_bgude",
+      "nome": "Ácaro branco (bola de gude)",
+      "orgao": "fruto",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": 0.1,
+      "td": "TD2",
+      "nota": "Ficha: 10%. Avaliado por estágio do fruto."
+    },
+    {
+      "id": "leprose_fruto",
+      "nome": "Ácaro da leprose",
+      "orgao": "fruto",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": 0.1,
+      "td": "TD2",
+      "condicao": "citros_vizinhos",
+      "nota": "Ficha: 10%. Manual Embrapa: só monitorar se houver outros citros (laranja, lima, tangerina) próximos ao talhão."
+    },
+    {
+      "id": "acaros_predadores",
+      "nome": "Ácaros predadores",
+      "orgao": "fruto",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": null,
+      "informativo": true,
+      "nota": "Ficha: SNA (sem nível de ação). Inimigo natural."
+    },
+    {
+      "id": "larva_minadora_broto",
+      "nome": "Larva minadora",
+      "orgao": "broto",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "limitePorTipoPomar": {
+        "adulto": 0.4,
+        "novo": 0.1
+      },
+      "nota": "Ficha: pomar adulto 40%, pomar novo 10%."
+    },
+    {
+      "id": "ageniaspis_pupa",
+      "nome": "Ageniaspis (pupa)",
+      "orgao": "folha",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": null,
+      "informativo": true,
+      "nota": "Ficha: SNA. Inimigo natural da larva minadora."
+    },
+    {
+      "id": "podridao_floral_flor",
+      "nome": "Podridão floral (estrelinha)",
+      "orgao": "flor",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": 0.05,
+      "td": "TD4",
+      "nota": "Ficha: 5%."
+    },
+    {
+      "id": "ortezia_folha",
+      "nome": "Cochonilha ortézia",
+      "orgao": "folha",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar."
+    },
+    {
+      "id": "escama_farinha_tronco",
+      "nome": "Cochonilha escama-farinha",
+      "orgao": "tronco",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar."
+    },
+    {
+      "id": "escama_farinha_fruto",
+      "nome": "Cochonilha escama-farinha",
+      "orgao": "fruto",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar."
+    },
+    {
+      "id": "parlatoria_tronco",
+      "nome": "Cochonilha parlatória",
+      "orgao": "tronco",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar."
+    },
+    {
+      "id": "rosada_folha",
+      "nome": "Cochonilha rosada",
+      "orgao": "folha",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar."
+    },
+    {
+      "id": "branca_folha",
+      "nome": "Cochonilha branca",
+      "orgao": "folha",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar."
+    },
+    {
+      "id": "branca_fruto",
+      "nome": "Cochonilha branca",
+      "orgao": "fruto",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar."
+    },
+    {
+      "id": "branca_tronco",
+      "nome": "Cochonilha branca",
+      "orgao": "tronco",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar."
+    },
+    {
+      "id": "parda_folha",
+      "nome": "Cochonilha parda",
+      "orgao": "folha",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar."
+    },
+    {
+      "id": "parda_fruto",
+      "nome": "Cochonilha parda",
+      "orgao": "fruto",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar."
+    },
+    {
+      "id": "parda_tronco",
+      "nome": "Cochonilha parda",
+      "orgao": "tronco",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar."
+    },
+    {
+      "id": "tripes_flor",
+      "nome": "Tripes",
+      "orgao": "flor",
+      "metrica": "percent_plantas",
+      "operador": ">",
+      "limite": 0.2,
+      "td": "TD3",
+      "nota": "Ficha: acima de 20%."
+    },
+    {
+      "id": "gomose",
+      "nome": "Gomose",
+      "orgao": "planta",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD6",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar. Manual Embrapa: inspecionar todas as plantas e tratar a planta afetada ou a reboleira."
+    },
+    {
+      "id": "pulgao",
+      "nome": "Pulgão",
+      "orgao": "planta",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar."
+    },
+    {
+      "id": "mosca_negra",
+      "nome": "Mosca-negra",
+      "orgao": "planta",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar."
+    },
+    {
+      "id": "bicho_furao",
+      "nome": "Bicho-furão",
+      "orgao": "fruto",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD3",
+      "pendente": true,
+      "ladoUnico": true,
+      "nota": "Ficha sem nível de ação. Avaliado só no lado da armadilha. Definir métrica (mariposas ou frutos) e limite."
+    },
+    {
+      "id": "declinio",
+      "nome": "Declínio",
+      "orgao": "planta",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": "TD6",
+      "pendente": true,
+      "nota": "Ficha traz 'Nº PLANTAS' sem valor definido: preencher o limite antes de usar. Manual Embrapa: levantamento total das plantas do talhão."
+    },
+    {
+      "id": "bicho_lixeiro",
+      "nome": "Bicho-lixeiro",
+      "orgao": "folha",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": null,
+      "informativo": true,
+      "nota": "Ficha: SNA. Inimigo natural."
+    },
+    {
+      "id": "joaninha",
+      "nome": "Joaninha",
+      "orgao": "planta",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": null,
+      "informativo": true,
+      "nota": "Ficha: SNA. Inimigo natural."
+    },
+    {
+      "id": "flores_abertas",
+      "nome": "Nº de flores abertas",
+      "orgao": "flor",
+      "metrica": "percent_plantas",
+      "operador": ">=",
+      "limite": null,
+      "td": null,
+      "informativo": true,
+      "nota": "Ficha: contexto da floração (NF)."
+    }
+  ]
+}

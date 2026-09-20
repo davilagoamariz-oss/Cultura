@@ -1,0 +1,16 @@
+rules_version = '2';
+
+// Fotos das avaliações. Limite de 2 MB por foto e só imagens.
+// O app deve comprimir a foto no celular antes do envio (alvo: ~300 KB).
+// Melhoria futura: restringir por papel usando firestore.get() nestas regras.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /avaliacoes/{aid}/{arquivo} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.size < 2 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow update, delete: if false;
+    }
+  }
+}

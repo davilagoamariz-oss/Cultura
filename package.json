@@ -1,0 +1,10 @@
+{
+  "name": "monitoramento-limao-tahiti",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Monitoramento semanal de pragas e doenças do limão Tahiti (PWA offline + Firebase)",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}
