@@ -75,7 +75,7 @@ beforeEach(async () => {
     const membrosA = {
       admA: membro('admA', 'admin'), gerA1: membro('gerA1'), gerA2: membro('gerA2'), pragA1: membro('pragA1'),
       pragA2: membro('pragA2'), agroA: membro('agroA'), motA: membro('motA'), inativoA: membro('inativoA', 'membro', false),
-      semVincA: membro('semVincA'),
+      semVincA: membro('semVincA'), gerA1b: membro('gerA1b'),
     };
     for (const [uid, m] of Object.entries(membrosA)) await setDoc(doc(db, 'empresas', A, 'membros', uid), m);
     await setDoc(doc(db, 'empresas', B, 'membros', 'admB'), membro('admB', 'admin'));
@@ -93,6 +93,7 @@ beforeEach(async () => {
     const vinculos = [
       vinculo('gerA1', 'fit-a1', 'un-a1', 'gerente', []),
       vinculo('gerA2', 'fit-a2', 'un-a2', 'gerente', []),
+      vinculo('gerA1b', 'fit-a1', 'un-a1', 'gerente', []),
       vinculo('pragA1', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro']),
       vinculo('pragA2', 'fit-a2', 'un-a2', 'funcionario', ['pragueiro']),
       vinculo('agroA', 'fit-a1', 'un-a1', 'funcionario', ['agronomo']),
@@ -100,6 +101,9 @@ beforeEach(async () => {
       vinculo('inativoA', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro']),
     ];
     for (const v of vinculos) await setDoc(doc(db, 'empresas', A, 'vinculos', `${v.pessoaUid}_${v.setorId}`), v);
+    await setDoc(doc(db, 'empresas', A, 'vinculos', 'pragA1_fit-a1', 'historico', '1'), {
+      versao: 1, pessoaUid: 'pragA1', setorId: 'fit-a1', papel: 'funcionario', funcoes: ['pragueiro'], ativo: true, alteradoPor: 'seed', alteradoEm: agora(),
+    });
     await setDoc(doc(db, 'empresas', B, 'vinculos', 'pragB_fit-b1'), vinculo('pragB', 'fit-b1', 'un-b1', 'funcionario', ['pragueiro']));
 
     const talhao = (unidadeId) => ({ unidadeId, nome: 'T', culturaId: 'limao-tahiti', atributos: ATRIBUTOS, ativo: true });
@@ -384,6 +388,252 @@ describe('catálogo (culturas, alvos e fichas)', () => {
     await assertFails(deleteDoc(p(plat, 'catalogo_fichas', 'limao-tahiti', 'versoes', '1')));
     await assertFails(setDoc(p(plat, 'catalogo_fichas', 'limao-tahiti', 'versoes', 'abc'), { versao: 'abc' }));
     await assertFails(setDoc(p(como('admA'), 'catalogo_fichas', 'limao-tahiti', 'versoes', '3'), { versao: 3 }));
+  });
+});
+
+// ---------------------------------------------------------------- vínculos por setor
+
+describe('vínculos por setor', () => {
+  const dv = (pessoaUid, setorId, unidadeId, papel, funcoes, extra = {}) => ({
+    pessoaUid, setorId, unidadeId, papel, funcoes, ativo: true, versao: 1, ...extra,
+  });
+
+  // Cria vínculo + histórico no MESMO lote (é o que as regras exigem).
+  async function criar(quem, dados, { historico = true, historicoExtra = {}, id } = {}) {
+    const db = como(quem);
+    const ref = p(db, 'empresas', A, 'vinculos', id ?? `${dados.pessoaUid}_${dados.setorId}`);
+    const lote = writeBatch(db);
+    lote.set(ref, { ...dados, alteradoPor: dados.alteradoPor ?? quem, alteradoEm: dados.alteradoEm ?? serverTimestamp() });
+    if (historico) {
+      lote.set(doc(ref, 'historico', String(dados.versao)), {
+        versao: dados.versao, pessoaUid: dados.pessoaUid, setorId: dados.setorId, papel: dados.papel,
+        funcoes: dados.funcoes, ativo: dados.ativo, alteradoPor: quem, alteradoEm: serverTimestamp(), ...historicoExtra,
+      });
+    }
+    return lote.commit();
+  }
+
+  async function estadoAtual(pessoa, sid) {
+    let dados;
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      dados = (await getDoc(doc(ctx.firestore(), 'empresas', A, 'vinculos', `${pessoa}_${sid}`))).data();
+    });
+    return dados;
+  }
+
+  // Altera vínculo + grava o histórico da nova versão no mesmo lote.
+  async function atualizar(quem, pessoa, sid, mudancas, { saltoDeVersao = 1, historico = true, historicoExtra = {}, extraNoVinculo = {} } = {}) {
+    const db = como(quem);
+    const atual = await estadoAtual(pessoa, sid);
+    const novo = { ...atual, ...mudancas, versao: atual.versao + saltoDeVersao };
+    const ref = p(db, 'empresas', A, 'vinculos', `${pessoa}_${sid}`);
+    const lote = writeBatch(db);
+    lote.update(ref, { ...mudancas, versao: novo.versao, alteradoPor: quem, alteradoEm: serverTimestamp(), ...extraNoVinculo });
+    if (historico) {
+      lote.set(doc(ref, 'historico', String(novo.versao)), {
+        versao: novo.versao, pessoaUid: pessoa, setorId: sid, papel: novo.papel, funcoes: novo.funcoes, ativo: novo.ativo,
+        alteradoPor: quem, alteradoEm: serverTimestamp(), ...historicoExtra,
+      });
+    }
+    return lote.commit();
+  }
+
+  describe('criar', () => {
+    test('gerente cria FUNCIONÁRIO no próprio setor, para um membro ativo', async () => {
+      await assertSucceeds(criar('gerA1', dv('semVincA', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro'])));
+    });
+
+    test('gerente NÃO cria vínculo em outro setor', async () => {
+      await assertFails(criar('gerA1', dv('semVincA', 'fit-a2', 'un-a2', 'funcionario', ['pragueiro'])));
+      await assertFails(criar('gerA2', dv('semVincA', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro'])));
+      await assertFails(criar('gerA1', dv('semVincA', 'frota-a1', 'un-a1', 'funcionario', [])));
+    });
+
+    test('gerente NÃO cria gerente (nem para si, nem para outro): promoção é só do admin', async () => {
+      await assertFails(criar('gerA1', dv('semVincA', 'fit-a1', 'un-a1', 'gerente', [])));
+      await assertFails(criar('gerA1', dv('gerA1', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro']))); // para si
+    });
+
+    test('só para membro ativo da própria empresa', async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await deleteDoc(doc(ctx.firestore(), 'empresas', A, 'vinculos', 'inativoA_fit-a1'));
+      });
+      await assertFails(criar('gerA1', dv('inativoA', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro']))); // membro inativo
+      await assertFails(criar('gerA1', dv('pessoaDeFora', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro']))); // não é membro
+      await assertFails(criar('gerA1', dv('pragB', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro']))); // membro de outra empresa
+    });
+
+    test('o vínculo precisa do histórico no mesmo lote, e o histórico tem que ser fiel', async () => {
+      await assertFails(criar('gerA1', dv('semVincA', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro']), { historico: false }));
+      await assertFails(criar('gerA1', dv('semVincA', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro']), { historicoExtra: { papel: 'gerente' } }));
+      await assertFails(criar('gerA1', dv('semVincA', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro']), { historicoExtra: { alteradoPor: 'admA' } }));
+      await assertFails(criar('gerA1', dv('semVincA', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro']), { historicoExtra: { alteradoEm: Timestamp.fromDate(new Date('2020-01-01')) } }));
+    });
+
+    test('id, unidade, versão e auditoria precisam bater', async () => {
+      const base = dv('semVincA', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro']);
+      await assertFails(criar('gerA1', base, { id: 'outro-id' }));
+      await assertFails(criar('gerA1', dv('semVincA', 'fit-a1', 'un-a2', 'funcionario', ['pragueiro']))); // unidade não é a do setor
+      await assertFails(criar('gerA1', { ...base, versao: 2 }));
+      await assertFails(criar('gerA1', { ...base, alteradoPor: 'admA' }));
+      await assertFails(criar('gerA1', { ...base, alteradoEm: Timestamp.fromDate(new Date('2020-01-01')) }));
+    });
+
+    test('campos inválidos: função desconhecida, papel desconhecido, campo extra, setor inexistente', async () => {
+      await assertFails(criar('admA', dv('semVincA', 'fit-a1', 'un-a1', 'funcionario', ['diretor'])));
+      await assertFails(criar('admA', dv('semVincA', 'fit-a1', 'un-a1', 'dono', [])));
+      await assertFails(criar('admA', dv('semVincA', 'fit-a1', 'un-a1', 'funcionario', [], { poder: 'total' })));
+      await assertFails(criar('admA', dv('semVincA', 'setor-fantasma', 'un-a1', 'funcionario', [])));
+      await assertFails(criar('admA', dv('semVincA', 'fit_a1', 'un-a1', 'funcionario', []))); // "_" no setor
+    });
+
+    test('admin da empresa cria qualquer vínculo: gerente, funcionário e o próprio (para poder operar)', async () => {
+      await assertSucceeds(criar('admA', dv('semVincA', 'fit-a1', 'un-a1', 'gerente', [])));
+      await assertSucceeds(criar('admA', dv('motA', 'fit-a2', 'un-a2', 'funcionario', ['agronomo'])));
+      await assertSucceeds(criar('admA', dv('admA', 'fit-a1', 'un-a1', 'funcionario', ['agronomo'])));
+    });
+
+    test('funcionário, agrônomo, motorista e membro sem vínculo não criam vínculo', async () => {
+      for (const uid of ['pragA1', 'agroA', 'motA', 'semVincA']) {
+        await assertFails(criar(uid, dv('gerA2', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro'])));
+      }
+    });
+
+    test('ninguém se auto-promove criando o próprio vínculo de gerente', async () => {
+      await assertFails(criar('semVincA', dv('semVincA', 'fit-a1', 'un-a1', 'gerente', [])));
+      await assertFails(criar('semVincA', dv('semVincA', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro'])));
+    });
+
+    test('admin de outra empresa não cria vínculo aqui; gerente inativo ou de membro inativo não cria', async () => {
+      await assertFails(criar('admB', dv('semVincA', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro'])));
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await updateDoc(doc(ctx.firestore(), 'empresas', A, 'vinculos', 'gerA1_fit-a1'), { ativo: false });
+      });
+      await assertFails(criar('gerA1', dv('semVincA', 'fit-a1', 'un-a1', 'funcionario', ['pragueiro'])));
+    });
+  });
+
+  describe('alterar', () => {
+    test('gerente desativa e ajusta funções de FUNCIONÁRIO do próprio setor, com histórico', async () => {
+      await assertSucceeds(atualizar('gerA1', 'pragA1', 'fit-a1', { ativo: false }));
+      await assertSucceeds(atualizar('gerA1', 'agroA', 'fit-a1', { funcoes: ['agronomo', 'pragueiro'] }));
+    });
+
+    test('gerente NÃO promove funcionário a gerente', async () => {
+      await assertFails(atualizar('gerA1', 'pragA1', 'fit-a1', { papel: 'gerente' }));
+    });
+
+    test('gerente NÃO se promove nem altera o próprio vínculo', async () => {
+      await assertFails(atualizar('gerA1', 'gerA1', 'fit-a1', { papel: 'gerente', funcoes: ['agronomo'] }));
+      await assertFails(atualizar('gerA1', 'gerA1', 'fit-a1', { ativo: false }));
+      await assertFails(atualizar('gerA1', 'gerA1', 'fit-a1', { funcoes: ['agronomo'] }));
+    });
+
+    test('gerente NÃO altera outro gerente, nem vínculo de outro setor', async () => {
+      await assertFails(atualizar('gerA1', 'gerA1b', 'fit-a1', { ativo: false }));
+      await assertFails(atualizar('gerA2', 'pragA1', 'fit-a1', { ativo: false })); // gerente de fit-a2 no setor fit-a1
+      await assertFails(atualizar('gerA1', 'pragA2', 'fit-a2', { ativo: false })); // gerente de fit-a1 no setor fit-a2
+      await assertFails(atualizar('gerA1', 'motA', 'frota-a1', { ativo: false }));
+    });
+
+    test('funcionário NÃO altera o próprio vínculo (ativo, funções ou papel)', async () => {
+      await assertFails(atualizar('pragA1', 'pragA1', 'fit-a1', { funcoes: ['pragueiro', 'agronomo'] }));
+      await assertFails(atualizar('pragA1', 'pragA1', 'fit-a1', { papel: 'gerente' }));
+      await assertFails(atualizar('pragA1', 'pragA1', 'fit-a1', { ativo: false }));
+      await assertFails(atualizar('agroA', 'pragA1', 'fit-a1', { ativo: false })); // colega
+    });
+
+    test('só o admin promove a gerente e mexe em gerente', async () => {
+      await assertSucceeds(atualizar('admA', 'pragA1', 'fit-a1', { papel: 'gerente' }));
+      await assertSucceeds(atualizar('admA', 'gerA1b', 'fit-a1', { ativo: false }));
+    });
+
+    test('toda alteração exige a versão seguinte e o histórico correspondente', async () => {
+      await assertFails(atualizar('gerA1', 'pragA1', 'fit-a1', { ativo: false }, { historico: false }));
+      await assertFails(atualizar('gerA1', 'pragA1', 'fit-a1', { ativo: false }, { saltoDeVersao: 2 }));
+      await assertFails(atualizar('gerA1', 'pragA1', 'fit-a1', { ativo: false }, { saltoDeVersao: 0 }));
+      await assertFails(atualizar('gerA1', 'pragA1', 'fit-a1', { ativo: false }, { historicoExtra: { ativo: true } }));
+      await assertFails(atualizar('gerA1', 'pragA1', 'fit-a1', { ativo: false }, { historicoExtra: { alteradoPor: 'admA' } }));
+    });
+
+    test('pessoa, setor e unidade do vínculo nunca mudam; campos fora da lista também não', async () => {
+      await assertFails(atualizar('admA', 'pragA1', 'fit-a1', { pessoaUid: 'pragA2' }));
+      await assertFails(atualizar('admA', 'pragA1', 'fit-a1', { setorId: 'fit-a2' }));
+      await assertFails(atualizar('admA', 'pragA1', 'fit-a1', { unidadeId: 'un-a2' }));
+      await assertFails(atualizar('admA', 'pragA1', 'fit-a1', { ativo: false }, { extraNoVinculo: { poder: 'total' } }));
+    });
+
+    test('gerente com vínculo desativado, ou membro inativo, perde o poder', async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await updateDoc(doc(ctx.firestore(), 'empresas', A, 'vinculos', 'gerA1_fit-a1'), { ativo: false });
+      });
+      await assertFails(atualizar('gerA1', 'pragA1', 'fit-a1', { ativo: false }));
+    });
+
+    test('membro inativo (mesmo com vínculo de gerente ativo) não altera nada', async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await updateDoc(doc(ctx.firestore(), 'empresas', A, 'membros', 'gerA1'), { ativo: false });
+      });
+      await assertFails(atualizar('gerA1', 'pragA1', 'fit-a1', { ativo: false }));
+    });
+
+    test('admin de outra empresa não altera', async () => {
+      await assertFails(atualizar('admB', 'pragA1', 'fit-a1', { ativo: false }));
+    });
+
+    test('ninguém apaga vínculo', async () => {
+      for (const uid of ['admA', 'gerA1', 'pragA1']) {
+        await assertFails(deleteDoc(p(como(uid), 'empresas', A, 'vinculos', 'pragA1_fit-a1')));
+      }
+    });
+  });
+
+  describe('ler', () => {
+    test('a pessoa lê os próprios vínculos; o gerente lê os do setor; o admin lê todos', async () => {
+      await assertSucceeds(getDoc(p(como('pragA1'), 'empresas', A, 'vinculos', 'pragA1_fit-a1')));
+      await assertFails(getDoc(p(como('pragA1'), 'empresas', A, 'vinculos', 'agroA_fit-a1'))); // colega
+      await assertSucceeds(getDoc(p(como('gerA1'), 'empresas', A, 'vinculos', 'pragA1_fit-a1')));
+      await assertFails(getDoc(p(como('gerA1'), 'empresas', A, 'vinculos', 'pragA2_fit-a2'))); // outro setor
+      await assertSucceeds(getDoc(p(como('admA'), 'empresas', A, 'vinculos', 'pragA2_fit-a2')));
+      await assertFails(getDoc(p(como('pragB'), 'empresas', A, 'vinculos', 'pragA1_fit-a1')));
+    });
+
+    test('listas: o gerente lista o próprio setor (filtrando); a pessoa lista os próprios; sem filtro é negado', async () => {
+      const vinculos = (db) => collection(db, 'empresas', A, 'vinculos');
+      await assertSucceeds(getDocs(query(vinculos(como('gerA1')), where('setorId', '==', 'fit-a1'))));
+      await assertFails(getDocs(query(vinculos(como('gerA1')), where('setorId', '==', 'fit-a2'))));
+      await assertFails(getDocs(vinculos(como('gerA1'))));
+      await assertSucceeds(getDocs(query(vinculos(como('pragA1')), where('pessoaUid', '==', 'pragA1'))));
+      await assertFails(getDocs(vinculos(como('pragA1'))));
+      await assertSucceeds(getDocs(vinculos(como('admA'))));
+    });
+
+    test('o app descobre os setores do usuário pelo grupo de coleções, só os próprios', async () => {
+      const db = como('pragA1');
+      await assertSucceeds(getDocs(query(collectionGroup(db, 'vinculos'), where('pessoaUid', '==', 'pragA1'))));
+      await assertFails(getDocs(query(collectionGroup(db, 'vinculos'), where('pessoaUid', '==', 'agroA'))));
+      await assertFails(getDocs(collectionGroup(db, 'vinculos')));
+    });
+  });
+
+  describe('histórico', () => {
+    test('lê quem é admin ou gerente do setor; funcionário e outras empresas não', async () => {
+      await assertSucceeds(getDoc(p(como('gerA1'), 'empresas', A, 'vinculos', 'pragA1_fit-a1', 'historico', '1')));
+      await assertSucceeds(getDoc(p(como('admA'), 'empresas', A, 'vinculos', 'pragA1_fit-a1', 'historico', '1')));
+      await assertFails(getDoc(p(como('pragA1'), 'empresas', A, 'vinculos', 'pragA1_fit-a1', 'historico', '1')));
+      await assertFails(getDoc(p(como('gerA2'), 'empresas', A, 'vinculos', 'pragA1_fit-a1', 'historico', '1')));
+      await assertFails(getDoc(p(como('admB'), 'empresas', A, 'vinculos', 'pragA1_fit-a1', 'historico', '1')));
+    });
+
+    test('é imutável e não se forja registro solto', async () => {
+      const ref = p(como('admA'), 'empresas', A, 'vinculos', 'pragA1_fit-a1', 'historico', '1');
+      await assertFails(updateDoc(ref, { ativo: false }));
+      await assertFails(deleteDoc(ref));
+      // registro de versão que o vínculo não tem
+      await assertFails(setDoc(p(como('admA'), 'empresas', A, 'vinculos', 'pragA1_fit-a1', 'historico', '7'), {
+        versao: 7, pessoaUid: 'pragA1', setorId: 'fit-a1', papel: 'funcionario', funcoes: ['pragueiro'], ativo: true, alteradoPor: 'admA', alteradoEm: serverTimestamp(),
+      }));
+    });
   });
 });
 

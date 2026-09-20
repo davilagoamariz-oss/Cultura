@@ -43,6 +43,23 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/empresas/$(e)/membros/$(request.auth.uid)).data.papelEmpresa == 'admin';
     }
 
+    // Vínculo da pessoa que faz a requisição num setor: documento {uid}_{setorId}.
+    function vinculoAtivo(e, sid) {
+      return membroAtivo(e)
+        && exists(/databases/$(database)/documents/empresas/$(e)/vinculos/$(request.auth.uid + '_' + sid))
+        && get(/databases/$(database)/documents/empresas/$(e)/vinculos/$(request.auth.uid + '_' + sid)).data.ativo == true;
+    }
+
+    function ehGerente(e, sid) {
+      return vinculoAtivo(e, sid)
+        && get(/databases/$(database)/documents/empresas/$(e)/vinculos/$(request.auth.uid + '_' + sid)).data.papel == 'gerente';
+    }
+
+    function outroMembroAtivo(e, uid) {
+      return exists(/databases/$(database)/documents/empresas/$(e)/membros/$(uid))
+        && get(/databases/$(database)/documents/empresas/$(e)/membros/$(uid)).data.ativo == true;
+    }
+
     // ---------- Validações ----------
 
     function textoAte(v, max) {
@@ -124,6 +141,72 @@ service cloud.firestore {
         && (!('motivo' in d) || textoAte(d.motivo, 500));
     }
 
+    function vinculoCamposValidos() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['pessoaUid', 'setorId', 'unidadeId', 'papel', 'funcoes', 'ativo', 'versao', 'alteradoPor', 'alteradoEm'])
+        && d.keys().hasAll(['pessoaUid', 'setorId', 'unidadeId', 'papel', 'funcoes', 'ativo', 'versao', 'alteradoPor', 'alteradoEm'])
+        && textoAte(d.pessoaUid, 128)
+        && idSemSublinhado(d.setorId)
+        && textoAte(d.unidadeId, 128)
+        && d.papel in ['gerente', 'funcionario']
+        && d.funcoes is list && d.funcoes.size() <= 4 && d.funcoes.hasOnly(['pragueiro', 'agronomo'])
+        && d.ativo is bool
+        && d.versao is int;
+    }
+
+    // Criar vínculo: o admin da empresa cria qualquer um (inclusive para si, para poder operar);
+    // o gerente do setor cria só FUNCIONÁRIO, no próprio setor, nunca para si. A pessoa precisa ser
+    // membro ativo. Todo vínculo nasce com a versão 1 e o registro de histórico no MESMO lote.
+    function vinculoCriavel(e, vid) {
+      let d = request.resource.data;
+      return vinculoCamposValidos()
+        && vid == d.pessoaUid + '_' + d.setorId
+        && d.versao == 1
+        && d.alteradoPor == request.auth.uid
+        && d.alteradoEm == request.time
+        && get(/databases/$(database)/documents/empresas/$(e)/setores/$(d.setorId)).data.unidadeId == d.unidadeId
+        && outroMembroAtivo(e, d.pessoaUid)
+        && existsAfter(/databases/$(database)/documents/empresas/$(e)/vinculos/$(vid)/historico/$(d.versao))
+        && (ehAdmin(e)
+            || (ehGerente(e, d.setorId) && d.papel == 'funcionario' && d.pessoaUid != request.auth.uid));
+    }
+
+    // Alterar vínculo: só ativo, funcoes, papel e auditoria; a versão sobe 1 e o histórico é gravado
+    // junto. O admin altera qualquer um (só ele promove a gerente). O gerente altera só FUNCIONÁRIO do
+    // próprio setor: não promove, não mexe em outro gerente e não mexe em si mesmo.
+    function vinculoAtualizavel(e, vid) {
+      let d = request.resource.data;
+      let r = resource.data;
+      return vinculoCamposValidos()
+        && d.diff(r).affectedKeys().hasOnly(['ativo', 'funcoes', 'papel', 'versao', 'alteradoPor', 'alteradoEm'])
+        && d.versao == r.versao + 1
+        && d.alteradoPor == request.auth.uid
+        && d.alteradoEm == request.time
+        && existsAfter(/databases/$(database)/documents/empresas/$(e)/vinculos/$(vid)/historico/$(d.versao))
+        && (ehAdmin(e)
+            || (ehGerente(e, r.setorId)
+                && r.papel == 'funcionario' && d.papel == 'funcionario'
+                && r.pessoaUid != request.auth.uid));
+    }
+
+    // Registro de histórico: cópia fiel do vínculo DEPOIS da alteração (getAfter), no mesmo lote.
+    function historicoCriavel(e, vid, hv) {
+      let d = request.resource.data;
+      let v = getAfter(/databases/$(database)/documents/empresas/$(e)/vinculos/$(vid)).data;
+      return d.keys().hasOnly(['versao', 'pessoaUid', 'setorId', 'papel', 'funcoes', 'ativo', 'alteradoPor', 'alteradoEm'])
+        && d.keys().hasAll(['versao', 'pessoaUid', 'setorId', 'papel', 'funcoes', 'ativo', 'alteradoPor', 'alteradoEm'])
+        && hv.matches('^[0-9]{1,6}$')
+        && d.versao == v.versao
+        && d.pessoaUid == v.pessoaUid
+        && d.setorId == v.setorId
+        && d.papel == v.papel
+        && d.funcoes == v.funcoes
+        && d.ativo == v.ativo
+        && d.alteradoPor == request.auth.uid
+        && d.alteradoEm == request.time
+        && (ehAdmin(e) || ehGerente(e, v.setorId));
+    }
+
     // ---------- Plataforma e catálogo ----------
 
     // Criado à mão no console; o cliente nunca escreve aqui.
@@ -163,6 +246,12 @@ service cloud.firestore {
     // sempre filtrando por uid == request.auth.uid.
     match /{path=**}/membros/{m} {
       allow read: if logado() && resource.data.uid == request.auth.uid;
+    }
+
+    // O app descobre os setores do usuário consultando "vinculos" (grupo de coleções),
+    // sempre filtrando por pessoaUid == request.auth.uid.
+    match /{path=**}/vinculos/{v} {
+      allow read: if logado() && resource.data.pessoaUid == request.auth.uid;
     }
 
     // ---------- Empresa ----------
@@ -228,6 +317,24 @@ service cloud.firestore {
           && request.resource.data.unidadeId == resource.data.unidadeId
           && exists(/databases/$(database)/documents/catalogo_culturas/$(request.resource.data.culturaId));
         allow delete: if false;
+      }
+
+      // Vínculo da pessoa com um setor: papel (gerente|funcionario) e funções do módulo.
+      // Nunca se apaga; desativar = ativo:false (com histórico).
+      match /vinculos/{vid} {
+        allow get, list: if logado()
+          && (resource.data.pessoaUid == request.auth.uid
+              || ehGerente(e, resource.data.setorId)
+              || ehAdmin(e));
+        allow create: if vinculoCriavel(e, vid);
+        allow update: if vinculoAtualizavel(e, vid);
+        allow delete: if false;
+
+        match /historico/{hv} {
+          allow read: if ehAdmin(e) || ehGerente(e, resource.data.setorId);
+          allow create: if historicoCriavel(e, vid, hv);
+          allow update, delete: if false;
+        }
       }
 
       match /ajustes/{ajid} {
