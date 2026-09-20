@@ -5,11 +5,11 @@ import { useOnline } from './offline/useOnline.js';
 import Carregando from './Carregando.jsx';
 
 const TEXTOS = {
-  sem_vinculo: {
+  sem_empresa: {
     titulo: 'Você ainda não faz parte de nenhuma empresa',
-    corpo: 'Você entrou, mas ainda não há acesso liberado para esta conta. Peça ao administrador da sua empresa um convite e tente de novo.',
+    corpo: 'Você entrou, mas esta conta ainda não foi ligada a nenhuma empresa. Peça ao administrador da sua empresa para liberar o seu acesso e tente de novo.',
   },
-  vinculo_inativo: {
+  acesso_desativado: {
     titulo: 'Seu acesso está desativado',
     corpo: 'O seu acesso a esta empresa foi desativado. Fale com o administrador da empresa.',
   },

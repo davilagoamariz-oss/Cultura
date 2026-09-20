@@ -1,16 +1,13 @@
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { NOME_APP } from './nucleo/config.js';
 import { useSessao } from './nucleo/Sessao.jsx';
-import { NOMES_PAPEL } from './nucleo/papeis.js';
 import { useOnline } from './offline/useOnline.js';
 
 export default function Layout({ children }) {
-  const { nome, user, papel, empresaNome, ativos, ehPlataforma, sair, trocarEmpresa } = useSessao();
+  const { nome, user, empresaNome, empresasAtivas, ehAdminEmpresa, ehPlataforma, menu, empresaId, sair, trocarEmpresa } = useSessao();
   const online = useOnline();
-
-  const legenda = [empresaNome, papel ? NOMES_PAPEL[papel] : ehPlataforma ? 'Plataforma' : null]
-    .filter(Boolean)
-    .join(' · ');
+  const legenda = empresaNome ?? (ehPlataforma && !empresaId ? 'Plataforma' : null);
+  const classe = ({ isActive }) => `aba${isActive ? ' aba--ativa' : ''}`;
 
   return (
     <div className="app">
@@ -22,24 +19,43 @@ export default function Layout({ children }) {
         </div>
         <div className="topo__usuario">
           <span className="topo__nome">{nome ?? user?.email ?? 'Usuário'}</span>
-          <span className="topo__papel">{legenda}</span>
+          {legenda && <span className="topo__papel">{legenda}</span>}
         </div>
         <div className="topo__acoes">
-          {ativos.length > 1 && (
-            <button className="botao botao--contorno-claro" type="button" onClick={trocarEmpresa}>
-              Trocar empresa
-            </button>
-          )}
-          {ehPlataforma && (
-            <Link className="botao botao--contorno-claro" to="/plataforma">
-              Plataforma
-            </Link>
-          )}
           <button className="botao botao--contorno-claro" type="button" onClick={sair}>
             Sair
           </button>
         </div>
       </header>
+
+      <nav className="abas" aria-label="Navegação principal">
+        {empresaId && (
+          <NavLink to="/inicio" className={classe}>
+            Início
+          </NavLink>
+        )}
+        {menu.map((e) => (
+          <NavLink key={e.modulo.id} to={e.modulo.rota} className={classe}>
+            {e.modulo.rotulo}
+          </NavLink>
+        ))}
+        {ehAdminEmpresa && (
+          <NavLink to="/admin" className={classe}>
+            Administração
+          </NavLink>
+        )}
+        {ehPlataforma && (
+          <NavLink to="/plataforma" className={classe}>
+            Plataforma
+          </NavLink>
+        )}
+        {empresasAtivas.length > 1 && (
+          <button className="aba aba--botao" type="button" onClick={trocarEmpresa}>
+            Trocar empresa
+          </button>
+        )}
+      </nav>
+
       <main className="conteudo">{children}</main>
     </div>
   );

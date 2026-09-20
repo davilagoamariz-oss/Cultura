@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
 
-/** true quando o aparelho tem conexão. O contador de envios pendentes entra na Fase 2. */
+// Só é offline quando o navegador diz explicitamente que não há conexão (onLine === false).
+// Se a informação não existir, assume online: melhor não alarmar sem motivo.
+const estaOnline = () => (typeof navigator === 'undefined' ? true : navigator.onLine !== false);
+
+/** true quando o aparelho tem conexão. O contador de envios pendentes entra na Fase 3. */
 export function useOnline() {
-  const [online, setOnline] = useState(() => (typeof navigator === 'undefined' ? true : navigator.onLine));
+  const [online, setOnline] = useState(estaOnline);
 
   useEffect(() => {
     const ligou = () => setOnline(true);

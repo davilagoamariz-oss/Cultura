@@ -5,20 +5,19 @@ import { db } from './nucleo/firebase.js';
 import { caminhos } from './nucleo/caminhos.js';
 import { NOME_APP } from './nucleo/config.js';
 import { useSessao } from './nucleo/Sessao.jsx';
-import { NOMES_PAPEL } from './nucleo/papeis.js';
 import Carregando from './Carregando.jsx';
 
 /** Para quem tem vínculo com mais de uma empresa (ex.: agrônomo consultor). */
 export default function EscolherEmpresa() {
-  const { carregando, user, status, ativos, escolherEmpresa, sair } = useSessao();
+  const { carregando, user, status, empresasAtivas, escolherEmpresa, sair } = useSessao();
   const [nomes, setNomes] = useState({});
 
   useEffect(() => {
     let cancelado = false;
-    ativos.forEach(async (v) => {
+    empresasAtivas.forEach(async (m) => {
       try {
-        const s = await getDoc(doc(db, ...caminhos.empresa(v.empresaId)));
-        if (!cancelado && s.exists()) setNomes((n) => ({ ...n, [v.empresaId]: s.data().nome }));
+        const s = await getDoc(doc(db, ...caminhos.empresa(m.empresaId)));
+        if (!cancelado && s.exists()) setNomes((n) => ({ ...n, [m.empresaId]: s.data().nome }));
       } catch {
         /* sem nome: mostra o identificador */
       }
@@ -26,7 +25,7 @@ export default function EscolherEmpresa() {
     return () => {
       cancelado = true;
     };
-  }, [ativos]);
+  }, [empresasAtivas]);
 
   if (carregando) return <Carregando />;
   if (!user) return <Navigate to="/login" replace />;
@@ -38,9 +37,10 @@ export default function EscolherEmpresa() {
         <h1 className="login__marca">{NOME_APP}</h1>
         <h2>Escolha a empresa</h2>
         <div className="pilha">
-          {ativos.map((v) => (
-            <button key={v.empresaId} className="botao botao--principal botao--cheio" type="button" onClick={() => escolherEmpresa(v.empresaId)}>
-              {nomes[v.empresaId] ?? v.empresaId} · {NOMES_PAPEL[v.papel]}
+          {empresasAtivas.map((m) => (
+            <button key={m.empresaId} className="botao botao--principal botao--cheio" type="button" onClick={() => escolherEmpresa(m.empresaId)}>
+              {nomes[m.empresaId] ?? m.empresaId}
+              {m.papelEmpresa === 'admin' ? ' · Administrador' : ''}
             </button>
           ))}
         </div>

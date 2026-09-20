@@ -335,6 +335,114 @@ p {
   }
 }
 
+/* ---------- Navegação por abas ---------- */
+
+.abas {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 0 max(var(--gutter), env(safe-area-inset-right)) 0 max(var(--gutter), env(safe-area-inset-left));
+  border-bottom: 2px solid var(--verde-100);
+  background: var(--branco);
+  -webkit-overflow-scrolling: touch;
+}
+
+.aba {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 0;
+  border-bottom: 4px solid transparent;
+  background: none;
+  color: var(--verde-900);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.aba--ativa {
+  border-bottom-color: var(--verde-900);
+}
+
+.aba--botao {
+  margin-left: auto;
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+
+/* ---------- Cartões e estados vazios ---------- */
+
+.cartoes {
+  display: grid;
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.cartao {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 96px;
+  padding: 18px;
+  border: 2px solid var(--verde-900);
+  border-radius: 16px;
+  background: var(--branco);
+  color: var(--texto);
+  text-decoration: none;
+  touch-action: manipulation;
+}
+
+a.cartao:active {
+  background: var(--verde-50);
+}
+
+.cartao__titulo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--verde-900);
+}
+
+.cartao__texto {
+  color: var(--texto-suave);
+}
+
+.cartao__rodape {
+  margin-top: auto;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--verde-800);
+}
+
+.cartao--espera {
+  border-style: dashed;
+  border-color: var(--borda);
+}
+
+.cartao--espera .cartao__titulo {
+  color: var(--texto-suave);
+}
+
+.selo {
+  align-self: flex-start;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--verde-100);
+  color: var(--verde-900);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.vazio {
+  margin: 16px 0;
+  padding: 20px;
+  border: 2px dashed var(--borda);
+  border-radius: 16px;
+}
+
 /* ---------- Tablet (a partir de 768 px) ---------- */
 
 @media (min-width: 768px) {
@@ -366,5 +474,9 @@ p {
 
   .login__cartao {
     padding: 40px 36px;
+  }
+
+  .cartoes {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

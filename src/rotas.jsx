@@ -1,37 +1,33 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useSessao } from './nucleo/Sessao.jsx';
-import { podeAcessar } from './nucleo/papeis.js';
+import { decidirAcesso } from './nucleo/acesso.js';
 import Layout from './Layout.jsx';
 import Carregando from './Carregando.jsx';
 
-/**
- * Protege uma área do app. Isto é só conforto de navegação: quem barra o acesso de verdade são as
- * firestore.rules. Áreas de empresa: campo, gestao, admin. Área da plataforma: plataforma.
- */
-export function RequerArea({ area }) {
+// Guardas de navegação: a decisão vem de nucleo/acesso.js (pura e testada).
+
+function Guarda({ area, comLayout = false }) {
   const sessao = useSessao();
-
-  if (sessao.carregando) return <Carregando texto="Carregando…" />;
-  if (!sessao.user) return <Navigate to="/login" replace />;
-
-  if (area === 'plataforma') {
-    return sessao.ehPlataforma ? (
-      <Layout>
-        <Outlet />
-      </Layout>
-    ) : (
-      <Navigate to="/" replace />
-    );
-  }
-
-  if (sessao.status === 'escolher_empresa') return <Navigate to="/escolher-empresa" replace />;
-  if (sessao.status === 'plataforma_apenas') return <Navigate to="/plataforma" replace />;
-  if (sessao.status !== 'ok') return <Navigate to="/sem-acesso" replace />;
-  if (!podeAcessar(sessao.papel, area)) return <Navigate to="/" replace />;
-
-  return (
+  const decisao = decidirAcesso(sessao, area);
+  if (decisao.tipo === 'esperar') return <Carregando texto="Carregando…" />;
+  if (decisao.tipo === 'redirecionar') return <Navigate to={decisao.para} replace />;
+  return comLayout ? (
     <Layout>
       <Outlet />
     </Layout>
+  ) : (
+    <Outlet />
   );
 }
+
+/** Exige login e uma empresa escolhida; mostra o cabeçalho e o menu. */
+export const RequerEmpresa = () => <Guarda area="empresa" comLayout />;
+
+/** Dentro de uma empresa: exige que o menu do usuário tenha o módulo (vínculo em setor que o habilita). */
+export const RequerModulo = ({ modulo }) => <Guarda area={`modulo:${modulo}`} />;
+
+/** Dentro de uma empresa: só o administrador da empresa. */
+export const RequerAdminEmpresa = () => <Guarda area="admin" />;
+
+/** Área do dono da plataforma (não depende de empresa). */
+export const RequerPlataforma = () => <Guarda area="plataforma" comLayout />;

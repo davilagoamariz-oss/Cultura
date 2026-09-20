@@ -1,52 +1,60 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { collectionGroup, doc, onSnapshot, query, where } from 'firebase/firestore';
+import { onSnapshot } from 'firebase/firestore';
 import { auth, db, firebaseConfigurado } from './firebase.js';
-import { caminhos, GRUPO_MEMBROS } from './caminhos.js';
-import { decidirSessao } from './vinculos.js';
+import {
+  refUsuario, refAdminPlataforma, refEmpresa, consultaMembros, consultaVinculos,
+  colecaoSetores, colecaoUnidades, comEmpresa, comoMapa,
+} from './consultas.js';
+import { decidirEmpresa, ehAdminDaEmpresa } from './empresas.js';
+import { montarMenu, escolherSetorDoModulo } from './menu.js';
 
-const SessaoContext = createContext(null);
+export const SessaoContext = createContext(null);
 
-// Última empresa escolhida neste aparelho. É só conveniência: o acesso de verdade vem dos vínculos
-// (e das regras do banco), nunca deste valor.
-const chaveEmpresa = (uid) => `ronda:empresa:${uid}`;
-function lerEmpresaSalva(uid) {
+// Empresa e setor escolhidos neste aparelho. É só conveniência: o acesso de verdade vem dos
+// vínculos e das regras do banco, nunca destes valores.
+const chave = (tipo, ...partes) => ['ronda', tipo, ...partes].join(':');
+function ler(k) {
   try {
-    return localStorage.getItem(chaveEmpresa(uid));
+    return localStorage.getItem(k);
   } catch {
     return null;
   }
 }
-function gravarEmpresaSalva(uid, empresaId) {
+function gravar(k, valor) {
   try {
-    if (empresaId) localStorage.setItem(chaveEmpresa(uid), empresaId);
-    else localStorage.removeItem(chaveEmpresa(uid));
+    if (valor) localStorage.setItem(k, valor);
+    else localStorage.removeItem(k);
   } catch {
     /* sem armazenamento (janela privada etc.): segue sem lembrar */
   }
 }
 
 // status:
-//   carregando         ainda lendo login, perfil e vínculos
+//   carregando         ainda lendo login, empresas e setores
 //   sem_login          ninguém logado
-//   ok                 vínculo ativo numa empresa (empresaId, vinculo, papel)
-//   escolher_empresa   vários vínculos ativos e nenhum escolhido
-//   plataforma_apenas  admin da plataforma sem vínculo em empresa
-//   vinculo_inativo    só vínculos desativados
-//   sem_vinculo        logou, mas não faz parte de nenhuma empresa
-//   offline            sem internet e os vínculos ainda não estão guardados no aparelho
-//   erro               falha ao ler (permissão etc.)
+//   ok                 membro ativo de uma empresa (empresaId, membro, menu)
+//   escolher_empresa   membro ativo de várias empresas e nenhuma escolhida
+//   plataforma_apenas  dono da plataforma sem empresa
+//   acesso_desativado  só registros desativados
+//   sem_empresa        logou, mas não faz parte de nenhuma empresa
+//   offline            sem internet e os registros ainda não estão guardados no aparelho
+//   erro               falha ao ler (permissão, índice ainda em construção etc.)
 export function SessaoProvider({ children }) {
   const [authPronto, setAuthPronto] = useState(!firebaseConfigurado);
   const [user, setUser] = useState(null);
   const [nome, setNome] = useState(null);
   const [ehPlataforma, setEhPlataforma] = useState(false);
   const [plataformaLida, setPlataformaLida] = useState(false);
-  const [vinculos, setVinculos] = useState(null); // null = ainda não chegou
+  const [membros, setMembros] = useState(null); // null = ainda não chegou
+  const [vinculos, setVinculos] = useState(null);
   const [semCache, setSemCache] = useState(false);
   const [erro, setErro] = useState(null);
   const [empresaSalva, setEmpresaSalva] = useState(null);
+  const [setorSalvo, setSetorSalvo] = useState(null);
   const [empresaNome, setEmpresaNome] = useState(null);
+  const [setores, setSetores] = useState(null);
+  const [unidades, setUnidades] = useState(null);
 
   useEffect(() => {
     if (!firebaseConfigurado) return undefined;
@@ -56,32 +64,30 @@ export function SessaoProvider({ children }) {
     });
   }, []);
 
-  // Perfil, admin da plataforma e vínculos do usuário. O onSnapshot entrega primeiro o cache local,
-  // então o app abre offline depois do primeiro login.
+  // Perfil, dono da plataforma, empresas e setores do usuário. O onSnapshot entrega primeiro o
+  // cache local, então o app abre offline depois do primeiro login.
   useEffect(() => {
     setNome(null);
     setEhPlataforma(false);
     setPlataformaLida(false);
+    setMembros(null);
     setVinculos(null);
     setSemCache(false);
     setErro(null);
-    setEmpresaNome(null);
     if (!user) {
       setEmpresaSalva(null);
       return undefined;
     }
-
     const uid = user.uid;
-    setEmpresaSalva(lerEmpresaSalva(uid));
+    setEmpresaSalva(ler(chave('empresa', uid)));
     const falha = (e) => {
       console.error('Falha ao ler dados da sessão', e);
       setErro(e.code ?? 'erro');
     };
-
     const cancelar = [
-      onSnapshot(doc(db, ...caminhos.usuario(uid)), (s) => setNome(s.exists() ? (s.data().nome ?? null) : null), falha),
+      onSnapshot(refUsuario(db, uid), (s) => setNome(s.exists() ? (s.data().nome ?? null) : null), falha),
       onSnapshot(
-        doc(db, ...caminhos.adminPlataforma(uid)),
+        refAdminPlataforma(db, uid),
         (s) => {
           setEhPlataforma(s.exists());
           setPlataformaLida(true);
@@ -89,57 +95,94 @@ export function SessaoProvider({ children }) {
         falha,
       ),
       onSnapshot(
-        query(collectionGroup(db, GRUPO_MEMBROS), where('uid', '==', uid)),
+        consultaMembros(db, uid),
         (s) => {
-          // Sem internet e sem nada no cache: não dá para saber se há vínculo (não é "sem vínculo").
+          // Sem internet e sem nada no cache: não dá para saber se há vínculo (não é "sem empresa").
           setSemCache(s.empty && s.metadata.fromCache);
-          setVinculos(s.docs.map((d) => ({ ...d.data(), empresaId: d.ref.parent.parent.id })));
+          setMembros(s.docs.map(comEmpresa));
         },
         falha,
       ),
+      onSnapshot(consultaVinculos(db, uid), (s) => setVinculos(s.docs.map(comEmpresa)), falha),
     ];
     return () => cancelar.forEach((f) => f());
   }, [user]);
 
   const decisao = useMemo(
-    () => decidirSessao({ vinculos: vinculos ?? [], ehPlataforma, empresaSalva }),
-    [vinculos, ehPlataforma, empresaSalva],
+    () => decidirEmpresa({ membros: membros ?? [], ehPlataforma, empresaSalva }),
+    [membros, ehPlataforma, empresaSalva],
   );
+  const empresaId = decisao.status === 'ok' ? decisao.empresaId : null;
 
-  const empresaId = decisao.empresaId;
-
+  // Cadastros base da empresa escolhida (legíveis por todo membro ativo).
   useEffect(() => {
     setEmpresaNome(null);
-    if (!empresaId) return undefined;
-    return onSnapshot(
-      doc(db, ...caminhos.empresa(empresaId)),
-      (s) => setEmpresaNome(s.exists() ? (s.data().nome ?? null) : null),
-      () => setEmpresaNome(null),
-    );
-  }, [empresaId]);
+    setSetores(null);
+    setUnidades(null);
+    if (!empresaId || !user) return undefined;
+    setSetorSalvo(ler(chave('setor', user.uid, empresaId)));
+    const cancelar = [
+      onSnapshot(refEmpresa(db, empresaId), (s) => setEmpresaNome(s.exists() ? (s.data().nome ?? null) : null), () => setEmpresaNome(null)),
+      onSnapshot(colecaoSetores(db, empresaId), (s) => setSetores(comoMapa(s)), (e) => setErro(e.code ?? 'erro')),
+      onSnapshot(colecaoUnidades(db, empresaId), (s) => setUnidades(comoMapa(s)), (e) => setErro(e.code ?? 'erro')),
+    ];
+    return () => cancelar.forEach((f) => f());
+  }, [empresaId, user]);
 
   let status;
   if (!authPronto) status = 'carregando';
   else if (!user) status = 'sem_login';
   else if (erro) status = 'erro';
-  else if (vinculos === null || !plataformaLida) status = 'carregando';
+  else if (membros === null || vinculos === null || !plataformaLida) status = 'carregando';
   else if (semCache && !ehPlataforma) status = 'offline';
   else status = decisao.status;
 
+  const vinculosDaEmpresa = useMemo(
+    () => (empresaId ? (vinculos ?? []).filter((v) => v.empresaId === empresaId) : []),
+    [vinculos, empresaId],
+  );
+  const estruturaPronta = Boolean(empresaId) && setores !== null && unidades !== null;
+  const menu = useMemo(
+    () => montarMenu({ vinculos: vinculosDaEmpresa, setores: setores ?? {}, unidades: unidades ?? {} }),
+    [vinculosDaEmpresa, setores, unidades],
+  );
+
   const escolherEmpresa = useCallback(
     (id) => {
-      if (!user || !decisao.ativos.some((v) => v.empresaId === id)) return;
-      gravarEmpresaSalva(user.uid, id);
+      if (!user || !decisao.ativos.some((m) => m.empresaId === id)) return;
+      gravar(chave('empresa', user.uid), id);
       setEmpresaSalva(id);
     },
     [user, decisao.ativos],
   );
-
   const trocarEmpresa = useCallback(() => {
     if (!user) return;
-    gravarEmpresaSalva(user.uid, null);
+    gravar(chave('empresa', user.uid), null);
     setEmpresaSalva(null);
   }, [user]);
+
+  const escolherSetor = useCallback(
+    (setorId) => {
+      if (!user || !empresaId) return;
+      if (!vinculosDaEmpresa.some((v) => v.setorId === setorId && v.ativo === true)) return;
+      gravar(chave('setor', user.uid, empresaId), setorId);
+      setSetorSalvo(setorId);
+    },
+    [user, empresaId, vinculosDaEmpresa],
+  );
+
+  const limparSetor = useCallback(() => {
+    if (!user || !empresaId) return;
+    gravar(chave('setor', user.uid, empresaId), null);
+    setSetorSalvo(null);
+  }, [user, empresaId]);
+
+  /** Setor em uso num módulo: o escolhido, ou o único; null quando há vários e falta escolher. */
+  const setorDoModulo = useCallback(
+    (moduloId) => escolherSetorDoModulo(menu.find((e) => e.modulo.id === moduloId), setorSalvo),
+    [menu, setorSalvo],
+  );
+  const vinculoDoSetor = useCallback((setorId) => vinculosDaEmpresa.find((v) => v.setorId === setorId && v.ativo === true) ?? null, [vinculosDaEmpresa]);
 
   const valor = useMemo(
     () => ({
@@ -148,17 +191,25 @@ export function SessaoProvider({ children }) {
       user,
       nome,
       ehPlataforma,
-      empresaId: status === 'ok' ? empresaId : null,
+      empresaId,
       empresaNome,
-      vinculo: status === 'ok' ? decisao.vinculo : null,
-      papel: status === 'ok' ? (decisao.vinculo?.papel ?? null) : null,
-      ativos: decisao.ativos,
+      membro: empresaId ? decisao.membro : null,
+      ehAdminEmpresa: empresaId ? ehAdminDaEmpresa(decisao.membro) : false,
+      empresasAtivas: decisao.ativos,
+      estruturaPronta,
+      setores: setores ?? {},
+      unidades: unidades ?? {},
+      menu,
+      setorDoModulo,
+      vinculoDoSetor,
       entrar: (email, senha) => signInWithEmailAndPassword(auth, email.trim(), senha),
       sair: () => signOut(auth),
       escolherEmpresa,
       trocarEmpresa,
+      escolherSetor,
+      limparSetor,
     }),
-    [status, user, nome, ehPlataforma, empresaId, empresaNome, decisao, escolherEmpresa, trocarEmpresa],
+    [status, user, nome, ehPlataforma, empresaId, empresaNome, decisao, estruturaPronta, setores, unidades, menu, setorDoModulo, vinculoDoSetor, escolherEmpresa, trocarEmpresa, escolherSetor, limparSetor],
   );
 
   return <SessaoContext.Provider value={valor}>{children}</SessaoContext.Provider>;
