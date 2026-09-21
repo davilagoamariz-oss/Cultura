@@ -14,6 +14,7 @@ const SECOES = [
   { chave: 'acao', titulo: 'Atingiram o nível de ação' },
   { chave: 'limite_nao_definido', titulo: 'Sem limite definido (revisar)' },
   { chave: 'abaixo', titulo: 'Abaixo do nível de ação' },
+  { chave: 'sem_limite_nada', titulo: 'Sem limite definido (nada detectado)' },
   { chave: 'sem_dados', titulo: 'Sem dados' },
   { chave: 'informativo', titulo: 'Inimigos naturais e indicadores' },
   { chave: 'nao_aplicavel', titulo: 'Não se aplicam a este talhão' },
@@ -26,6 +27,8 @@ function linha(r) {
     nome: r.nome,
     orgao: r.orgao,
     status: r.status,
+    // "sem limite definido" só pede revisão quando a praga foi DETECTADA; sem detecção, fica numa seção discreta
+    secao: r.status === 'limite_nao_definido' && !(r.ni > 0) ? 'sem_limite_nada' : r.status,
     ni: r.ni,
     niTexto: pct(r.ni),
     avaliadas: r.avaliadas,
@@ -60,7 +63,7 @@ export function montarResumo(resultado, ficha) {
   const linhas = resultados.map(linha);
   const secoes = SECOES.map((s) => ({
     ...s,
-    itens: linhas.filter((l) => l.status === s.chave).sort((a, b) => (b.ni ?? -1) - (a.ni ?? -1) || a.nome.localeCompare(b.nome, 'pt-BR')),
+    itens: linhas.filter((l) => l.secao === s.chave).sort((a, b) => (b.ni ?? -1) - (a.ni ?? -1) || a.nome.localeCompare(b.nome, 'pt-BR')),
   })).filter((s) => s.itens.length > 0);
 
   return {

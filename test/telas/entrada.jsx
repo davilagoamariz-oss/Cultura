@@ -8,6 +8,8 @@ import Layout from '../../src/Layout.jsx';
 import Inicio from '../../src/paginas/Inicio.jsx';
 import Fitossanidade from '../../src/modulos/fitossanidade/Fitossanidade.jsx';
 import SemAcesso from '../../src/SemAcesso.jsx';
+import { ListaTalhoes, FormNovaAvaliacao, GradePlantas, FormularioPlanta, ResumoAvaliacao } from '../../src/campo/telas/apresentacao.jsx';
+import { PendentesContext } from '../../src/offline/PendentesProvider.jsx';
 
 export function sessaoDeMentira({ vinculos = [], setores = {}, unidades = {}, admin = false, plataforma = false, empresas = 1, status = 'ok', setorSalvo = null, nome = 'Fulano' } = {}) {
   const menu = montarMenu({ vinculos, setores, unidades });
@@ -32,6 +34,30 @@ export function renderizar(tela, sessao, rota = '/') {
       <MemoryRouter initialEntries={[rota]}>
         <Tela />
       </MemoryRouter>
+    </SessaoContext.Provider>,
+  );
+}
+
+// ---- telas de campo (apresentação): recebem tudo por propriedades
+export const COMPONENTES_CAMPO = { ListaTalhoes, FormNovaAvaliacao, GradePlantas, FormularioPlanta, ResumoAvaliacao };
+
+export function renderizarCampo(nome, props, rota = '/') {
+  const Componente = COMPONENTES_CAMPO[nome];
+  return renderToString(
+    <MemoryRouter initialEntries={[rota]}>
+      <Componente {...props} />
+    </MemoryRouter>,
+  );
+}
+
+export function renderizarLayoutComPendentes(sessao, total) {
+  return renderToString(
+    <SessaoContext.Provider value={sessao}>
+      <PendentesContext.Provider value={{ total, definir: () => {} }}>
+        <MemoryRouter>
+          <Layout><p>conteúdo</p></Layout>
+        </MemoryRouter>
+      </PendentesContext.Provider>
     </SessaoContext.Provider>,
   );
 }

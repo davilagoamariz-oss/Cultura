@@ -2,10 +2,12 @@ import { NavLink } from 'react-router-dom';
 import { NOME_APP } from './nucleo/config.js';
 import { useSessao } from './nucleo/Sessao.jsx';
 import { useOnline } from './offline/useOnline.js';
+import { usePendentes, textoPendentes } from './offline/PendentesProvider.jsx';
 
 export default function Layout({ children }) {
   const { nome, user, empresaNome, empresasAtivas, ehAdminEmpresa, ehPlataforma, menu, empresaId, sair, trocarEmpresa } = useSessao();
   const online = useOnline();
+  const pendentes = textoPendentes(usePendentes());
   const legenda = empresaNome ?? (ehPlataforma && !empresaId ? 'Plataforma' : null);
   const classe = ({ isActive }) => `aba${isActive ? ' aba--ativa' : ''}`;
 
@@ -17,6 +19,11 @@ export default function Layout({ children }) {
           <span className="estado__ponto" aria-hidden="true" />
           {online ? 'Online' : 'Offline'}
         </div>
+        {pendentes && (
+          <div className="pendentes" role="status">
+            {online ? `Enviando… ${pendentes}` : `${pendentes} (grava neste aparelho)`}
+          </div>
+        )}
         <div className="topo__usuario">
           <span className="topo__nome">{nome ?? user?.email ?? 'Usuário'}</span>
           {legenda && <span className="topo__papel">{legenda}</span>}

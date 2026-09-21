@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useSessao } from '../../nucleo/Sessao.jsx';
 import { podeAvaliar, podeAcompanhar, ehGerenteDoSetor } from '../../nucleo/permissoes.js';
 import { nomeDaFuncao, NOMES_PAPEL_VINCULO } from '../registro.js';
@@ -41,11 +42,10 @@ export default function Fitossanidade() {
 
       <div className="cartoes">
         {podeAvaliar(vinculo) && (
-          <div className="cartao cartao--espera" aria-disabled="true">
+          <Link to="/fitossanidade/campo" className="cartao">
             <span className="cartao__titulo">Avaliar plantas</span>
             <span className="cartao__texto">Ficha de campo por planta, funciona sem internet.</span>
-            <span className="selo">Próxima fase</span>
-          </div>
+          </Link>
         )}
         {podeAcompanhar(vinculo) && (
           <div className="cartao cartao--espera" aria-disabled="true">

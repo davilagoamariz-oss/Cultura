@@ -138,7 +138,9 @@ test('resumo: nível de ação atingido aparece primeiro, com NI, limite e TD', 
   const tripes = r.secoes[0].itens[0];
   assert.deepEqual([tripes.id, tripes.niTexto, tripes.limiteTexto, tripes.td, tripes.positivas, tripes.avaliadas], ['tripes_flor', '23,3%', '> 20,0%', 'TD3', 7, 30]);
   assert.equal(r.revisar[0].id, 'ferrugem_bgude'); // detectada sem limite
-  assert.equal(r.secoes.find((s) => s.chave === 'limite_nao_definido').itens.some((i) => i.id === 'ferrugem_bgude'), true);
+  // só a ferrugem (detectada) pede revisão; os outros itens pendentes, sem detecção, ficam à parte
+  assert.deepEqual(r.secoes.find((s) => s.chave === 'limite_nao_definido').itens.map((i) => i.id), ['ferrugem_bgude']);
+  assert.equal(r.secoes.find((s) => s.chave === 'sem_limite_nada').itens.some((i) => i.id === 'ferrugem_bgude'), false);
 });
 
 test('resumo: só REVISAR deixa claro que NÃO é "não pulverizar"', () => {
@@ -155,8 +157,11 @@ test('resumo: nada atingido e nada pendente é TD1; itens sem praga não viram R
   assert.deepEqual(r.tds, [{ codigo: 'TD1', texto: 'Não pulverizar' }]);
   assert.equal(r.revisar.length, 0);
   assert.equal(r.secoes.some((s) => s.chave === 'acao'), false);
-  // itens com limite pendente e SEM praga aparecem como "sem limite", mas não bloqueiam o TD1
-  assert.equal(r.secoes.find((s) => s.chave === 'limite_nao_definido').itens.every((i) => i.ni === 0), true);
+  // itens com limite pendente e SEM praga não pedem revisão: ficam numa seção discreta e não bloqueiam o TD1
+  assert.equal(r.secoes.some((s) => s.chave === 'limite_nao_definido'), false);
+  const discreta = r.secoes.find((s) => s.chave === 'sem_limite_nada');
+  assert.ok(discreta.itens.length >= 15);
+  assert.equal(discreta.itens.every((i) => i.ni === 0), true);
 });
 
 test('resumo: formatação em português e textos de limite', () => {

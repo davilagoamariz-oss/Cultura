@@ -8,6 +8,12 @@ import EscolherEmpresa from './EscolherEmpresa.jsx';
 import Carregando from './Carregando.jsx';
 import Inicio from './paginas/Inicio.jsx';
 import Fitossanidade from './modulos/fitossanidade/Fitossanidade.jsx';
+import Campo from './campo/telas/Campo.jsx';
+import NovaAvaliacao from './campo/telas/NovaAvaliacao.jsx';
+import Avaliacao from './campo/telas/Avaliacao.jsx';
+import EditorPlanta from './campo/telas/EditorPlanta.jsx';
+import Resumo from './campo/telas/Resumo.jsx';
+import { PendentesProvider } from './offline/PendentesProvider.jsx';
 import Admin from './admin/Admin.jsx';
 import Plataforma from './plataforma/Plataforma.jsx';
 
@@ -20,6 +26,7 @@ function Raiz() {
 export default function App() {
   return (
     <SessaoProvider>
+      <PendentesProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Raiz />} />
@@ -31,6 +38,11 @@ export default function App() {
             <Route path="/inicio" element={<Inicio />} />
             <Route element={<RequerModulo modulo="fitossanidade" />}>
               <Route path="/fitossanidade" element={<Fitossanidade />} />
+              <Route path="/fitossanidade/campo" element={<Campo />} />
+              <Route path="/fitossanidade/campo/novo/:talhaoId" element={<NovaAvaliacao />} />
+              <Route path="/fitossanidade/campo/:aid" element={<Avaliacao />} />
+              <Route path="/fitossanidade/campo/:aid/planta/:n" element={<EditorPlanta />} />
+              <Route path="/fitossanidade/campo/:aid/resumo" element={<Resumo />} />
             </Route>
             <Route element={<RequerAdminEmpresa />}>
               <Route path="/admin" element={<Admin />} />
@@ -44,6 +56,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
+      </PendentesProvider>
     </SessaoProvider>
   );
 }
