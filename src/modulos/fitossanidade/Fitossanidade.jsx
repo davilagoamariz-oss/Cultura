@@ -48,18 +48,16 @@ export default function Fitossanidade() {
           </Link>
         )}
         {podeAcompanhar(vinculo) && (
-          <div className="cartao cartao--espera" aria-disabled="true">
+          <Link to="/fitossanidade/acompanhamento" className="cartao">
             <span className="cartao__titulo">Acompanhar avaliações</span>
             <span className="cartao__texto">Avaliações da semana, nível de infestação e decisão de controle.</span>
-            <span className="selo">Próxima fase</span>
-          </div>
+          </Link>
         )}
         {ehGerenteDoSetor(vinculo) && (
-          <div className="cartao cartao--espera" aria-disabled="true">
+          <Link to="/fitossanidade/vinculos" className="cartao">
             <span className="cartao__titulo">Vínculos do setor</span>
             <span className="cartao__texto">Quem trabalha neste setor e o que cada pessoa faz.</span>
-            <span className="selo">Próxima fase</span>
-          </div>
+          </Link>
         )}
       </div>
 

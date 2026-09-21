@@ -628,6 +628,36 @@ textarea {
 .secao-resumo h2 { margin-top: 20px; }
 .finalizar { margin-top: 24px; padding-top: 8px; border-top: 3px solid var(--verde-900); }
 
+/* ---------- Gestão: semana, decisão e vínculos ---------- */
+
+.semana-nav { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; margin: 0 0 16px; }
+.semana-nav .botao { text-decoration: none; min-height: 48px; padding: 0 14px; }
+.semana-nav__meio { display: flex; flex-direction: column; align-items: center; text-align: center; }
+
+.vinculo { padding: 14px; border: 2px solid var(--verde-900); border-radius: 16px; background: var(--branco); }
+.vinculo--inativo { border-color: var(--borda); background: var(--verde-50); }
+.vinculo__topo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 1.1rem; }
+.vinculo .chips { margin-bottom: 8px; }
+.vinculo .chips:disabled { opacity: 0.75; }
+.selo--alerta { background: #fde68a; color: var(--aviso); }
+
+.historico { margin: 12px 0 0; padding: 0 0 0 20px; }
+.historico > li { margin-bottom: 10px; }
+.historico ul { margin: 4px 0 0; padding-left: 18px; color: var(--texto-suave); }
+
+select {
+  width: 100%;
+  min-height: var(--alvo);
+  padding: 0 12px;
+  border: 2px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--branco);
+  color: var(--texto);
+  font: inherit;
+}
+.faixa--info { border-color: var(--borda); background: var(--branco); }
+.faixa--info .linha-item__dica { margin-top: 4px; }
+
 /* ---------- Tablet (a partir de 768 px) ---------- */
 
 @media (min-width: 768px) {

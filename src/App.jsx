@@ -13,6 +13,10 @@ import NovaAvaliacao from './campo/telas/NovaAvaliacao.jsx';
 import Avaliacao from './campo/telas/Avaliacao.jsx';
 import EditorPlanta from './campo/telas/EditorPlanta.jsx';
 import Resumo from './campo/telas/Resumo.jsx';
+import Acompanhamento from './gestao/telas/Acompanhamento.jsx';
+import DetalheDaAvaliacao from './gestao/telas/DetalheDaAvaliacao.jsx';
+import VinculosDoSetor from './gestao/telas/VinculosDoSetor.jsx';
+import AdminVinculos from './admin/AdminVinculos.jsx';
 import { PendentesProvider } from './offline/PendentesProvider.jsx';
 import Admin from './admin/Admin.jsx';
 import Plataforma from './plataforma/Plataforma.jsx';
@@ -43,9 +47,13 @@ export default function App() {
               <Route path="/fitossanidade/campo/:aid" element={<Avaliacao />} />
               <Route path="/fitossanidade/campo/:aid/planta/:n" element={<EditorPlanta />} />
               <Route path="/fitossanidade/campo/:aid/resumo" element={<Resumo />} />
+              <Route path="/fitossanidade/acompanhamento" element={<Acompanhamento />} />
+              <Route path="/fitossanidade/acompanhamento/:aid" element={<DetalheDaAvaliacao />} />
+              <Route path="/fitossanidade/vinculos" element={<VinculosDoSetor />} />
             </Route>
             <Route element={<RequerAdminEmpresa />}>
               <Route path="/admin" element={<Admin />} />
+              <Route path="/admin/vinculos" element={<AdminVinculos />} />
             </Route>
           </Route>
 

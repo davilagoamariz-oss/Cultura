@@ -157,3 +157,29 @@ test('indicador online/offline: alerta só quando o navegador diz que caiu a con
   assert.match(chip({}), /estado--online/);
   assert.match(comNavigator(undefined, () => html('Layout', { vinculos: [] })), /estado--online/);
 });
+
+test('cartões do módulo levam cada função ao seu lugar', () => {
+  const pragueiro = html('Fitossanidade', { vinculos: [vinc('fit-1', 'funcionario', ['pragueiro'])] });
+  assert.match(pragueiro, /href="\/fitossanidade\/campo"/);
+  assert.doesNotMatch(pragueiro, /acompanhamento|\/fitossanidade\/vinculos/);
+
+  const agronomo = html('Fitossanidade', { vinculos: [vinc('fit-1', 'funcionario', ['agronomo'])] });
+  assert.match(agronomo, /href="\/fitossanidade\/acompanhamento"/);
+  assert.doesNotMatch(agronomo, /href="\/fitossanidade\/campo"|\/fitossanidade\/vinculos/);
+
+  const gerente = html('Fitossanidade', { vinculos: [vinc('fit-1', 'gerente', [])] });
+  assert.match(gerente, /href="\/fitossanidade\/acompanhamento"/);
+  assert.match(gerente, /href="\/fitossanidade\/vinculos"/);
+  assert.doesNotMatch(gerente, /href="\/fitossanidade\/campo"/);
+
+  const tudo = html('Fitossanidade', { vinculos: [vinc('fit-1', 'gerente', ['pragueiro', 'agronomo'])] });
+  for (const rota of ['campo', 'acompanhamento', 'vinculos']) assert.match(tudo, new RegExp(`href="\\/fitossanidade\\/${rota}"`));
+  assert.doesNotMatch(tudo, /Próxima fase/); // nada mais é "em breve" no módulo
+});
+
+test('administração: vínculos disponíveis; o resto aparece como próxima fase', () => {
+  const h = html('Admin', {});
+  assert.match(h, /href="\/admin\/vinculos"/);
+  assert.match(h, /Vínculos/);
+  assert.equal(h.split('Próxima fase').length - 1, 2);
+});

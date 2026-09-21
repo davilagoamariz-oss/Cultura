@@ -8,6 +8,7 @@ import Layout from '../../src/Layout.jsx';
 import Inicio from '../../src/paginas/Inicio.jsx';
 import Fitossanidade from '../../src/modulos/fitossanidade/Fitossanidade.jsx';
 import SemAcesso from '../../src/SemAcesso.jsx';
+import Admin from '../../src/admin/Admin.jsx';
 import { ListaTalhoes, FormNovaAvaliacao, GradePlantas, FormularioPlanta, ResumoAvaliacao } from '../../src/campo/telas/apresentacao.jsx';
 import { PendentesContext } from '../../src/offline/PendentesProvider.jsx';
 import { ListaAcompanhamento, DetalheAvaliacao, GestaoVinculos } from '../../src/gestao/telas/apresentacao.jsx';
@@ -26,7 +27,7 @@ export function sessaoDeMentira({ vinculos = [], setores = {}, unidades = {}, ad
   };
 }
 
-const TELAS = { Layout: () => <Layout><p>conteúdo</p></Layout>, Inicio, Fitossanidade, SemAcesso };
+const TELAS = { Layout: () => <Layout><p>conteúdo</p></Layout>, Inicio, Fitossanidade, SemAcesso, Admin };
 
 export function renderizar(tela, sessao, rota = '/') {
   const Tela = TELAS[tela];

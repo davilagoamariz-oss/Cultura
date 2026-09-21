@@ -43,6 +43,10 @@ export async function decisoesDeAvaliacoes(db, empresaId, setorId, avaliacaoIds)
   return mapa;
 }
 
+/** Todas as decisões do setor (para a lista da semana). Com o filtro de setor que as regras exigem. */
+export const consultaDecisoesDoSetor = (db, empresaId, setorId) =>
+  query(collection(db, ...caminhos.decisoes(empresaId)), where('setorId', '==', setorId));
+
 /** Ouve a decisão de UMA avaliação (consulta, não getDoc). Entrega o documento ou null. */
 export function ouvirDecisao(db, empresaId, setorId, avaliacaoId, aoMudar, aoFalhar) {
   return onSnapshot(
