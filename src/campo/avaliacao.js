@@ -44,7 +44,7 @@ export function montarCabecalho({ ficha, talhaoId, talhao, setorId, unidadeId, u
       semanaISO: semana,
       status: 'rascunho',
       faseCultura: fases,
-      criadoEm,
+      ...(criadoEm !== undefined ? { criadoEm } : {}),
     },
   };
 }

@@ -60,6 +60,7 @@ try {
     gerente: 'gerente@demo.test', // gerente do setor de fitossanidade da empresa 1
     agro: 'agro@demo.test', // agrônomo na empresa 1 e consultor na empresa 2
     paulo: 'paulo@demo.test', // pragueiro da empresa 1
+    paula: 'paula@demo.test', // segunda pragueira no mesmo setor
     motorista: 'motorista@demo.test', // só setor Frota (não vê fitossanidade)
     semvinculo: 'semvinculo@demo.test', // membro sem nenhum vínculo
     admin2: 'admin2@demo.test', // admin da empresa 2
@@ -69,7 +70,7 @@ try {
   for (const [chave, email] of Object.entries(emails)) uid[chave] = await criarUsuario(email);
   const nomes = {
     admin: 'Ana Admin', gerente: 'Gil Gerente', agro: 'Alberto Agrônomo', paulo: 'Paulo Pragueiro',
-    motorista: 'Mário Motorista', semvinculo: 'Sem Vínculo', admin2: 'Beatriz Admin', praga2: 'Pedro Pragueiro',
+    paula: 'Paula Pragueira', motorista: 'Mário Motorista', semvinculo: 'Sem Vínculo', admin2: 'Beatriz Admin', praga2: 'Pedro Pragueiro',
   };
   for (const [chave, id] of Object.entries(uid)) await gravar(`users/${id}`, { nome: nomes[chave] });
   await gravar(`plataforma_admins/${uid.admin}`, { criadoEm: 1 });
@@ -94,7 +95,7 @@ try {
   // ---- empresa 1: Fazenda Demonstração
   await gravar('empresas/demo-1', { nome: 'Fazenda Demonstração', status: 'ativa' });
   await membro('demo-1', uid.admin, 'admin');
-  for (const k of ['gerente', 'agro', 'paulo', 'motorista', 'semvinculo']) await membro('demo-1', uid[k]);
+  for (const k of ['gerente', 'agro', 'paulo', 'paula', 'motorista', 'semvinculo']) await membro('demo-1', uid[k]);
   await gravar('empresas/demo-1/unidades/un-1', { nome: 'Fazenda 1', municipio: 'Petrolina', ativa: true });
   await gravar('empresas/demo-1/setores/fit-1', { unidadeId: 'un-1', nome: 'Fitossanidade', modulos: ['fitossanidade'], ativo: true });
   await gravar('empresas/demo-1/setores/frota-1', { unidadeId: 'un-1', nome: 'Frota', modulos: ['frota'], ativo: true });
@@ -103,6 +104,7 @@ try {
   await vincular('demo-1', uid.gerente, 'fit-1', 'un-1', 'gerente', []);
   await vincular('demo-1', uid.agro, 'fit-1', 'un-1', 'funcionario', ['agronomo']);
   await vincular('demo-1', uid.paulo, 'fit-1', 'un-1', 'funcionario', ['pragueiro']);
+  await vincular('demo-1', uid.paula, 'fit-1', 'un-1', 'funcionario', ['pragueiro']);
   await vincular('demo-1', uid.motorista, 'frota-1', 'un-1', 'funcionario', []);
 
   // ---- empresa 2: Sítio Segunda Empresa (o agrônomo consultor atende as duas)
@@ -121,6 +123,7 @@ try {
   console.log('  gerente@demo.test      gerente de Fitossanidade (Fazenda Demonstração)');
   console.log('  agro@demo.test         agrônomo nas DUAS empresas (aparece a escolha de empresa)');
   console.log('  paulo@demo.test        pragueiro da Fazenda Demonstração');
+  console.log('  paula@demo.test        segunda pragueira do mesmo setor');
   console.log('  motorista@demo.test    só setor Frota (não vê Fitossanidade)');
   console.log('  semvinculo@demo.test   membro sem nenhum vínculo');
   console.log('  admin2@demo.test / pragueiro2@demo.test   empresa Sítio Segunda Empresa');
