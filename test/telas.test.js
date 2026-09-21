@@ -177,9 +177,10 @@ test('cartões do módulo levam cada função ao seu lugar', () => {
   assert.doesNotMatch(tudo, /Próxima fase/); // nada mais é "em breve" no módulo
 });
 
-test('administração: vínculos disponíveis; o resto aparece como próxima fase', () => {
+test('administração: os quatro cadastros estão disponíveis e nada é "próxima fase"', () => {
   const h = html('Admin', {});
-  assert.match(h, /href="\/admin\/vinculos"/);
-  assert.match(h, /Vínculos/);
-  assert.equal(h.split('Próxima fase').length - 1, 2);
+  for (const rota of ['estrutura', 'membros', 'vinculos', 'limites']) assert.match(h, new RegExp(`href="\\/admin\\/${rota}"`));
+  assert.match(h, /Unidades, setores e talhões/);
+  assert.match(h, /Limites de ação/);
+  assert.doesNotMatch(h, /Próxima fase/);
 });

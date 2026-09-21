@@ -17,6 +17,9 @@ import Acompanhamento from './gestao/telas/Acompanhamento.jsx';
 import DetalheDaAvaliacao from './gestao/telas/DetalheDaAvaliacao.jsx';
 import VinculosDoSetor from './gestao/telas/VinculosDoSetor.jsx';
 import AdminVinculos from './admin/AdminVinculos.jsx';
+import AdminEstrutura from './admin/AdminEstrutura.jsx';
+import AdminLimites from './admin/AdminLimites.jsx';
+import AdminMembros from './admin/AdminMembros.jsx';
 import { PendentesProvider } from './offline/PendentesProvider.jsx';
 import Admin from './admin/Admin.jsx';
 import Plataforma from './plataforma/Plataforma.jsx';
@@ -54,6 +57,9 @@ export default function App() {
             <Route element={<RequerAdminEmpresa />}>
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin/vinculos" element={<AdminVinculos />} />
+              <Route path="/admin/estrutura" element={<AdminEstrutura />} />
+              <Route path="/admin/limites" element={<AdminLimites />} />
+              <Route path="/admin/membros" element={<AdminMembros />} />
             </Route>
           </Route>
 
