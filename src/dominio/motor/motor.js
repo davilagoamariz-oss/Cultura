@@ -37,7 +37,7 @@ function paraMillis(v) {
  * - sem "nivelId", o ajuste só vale em regras de nível único;
  * - vale o mais recente com vigenteDe <= referencia (o histórico nunca é reescrito).
  */
-function escolherAjuste(ajustes, ficha, regra, nivel, referenciaMs) {
+export function escolherAjuste(ajustes, ficha, regra, nivel, referenciaMs) {
   const nivelUnico = regra.niveis.length === 1;
   let melhor = null;
   for (const a of ajustes) {
