@@ -89,3 +89,18 @@ propostas (manual da Embrapa e cliente) ficam no próprio nível, em `proposta`,
 - Ácaro da ferrugem: 5%, 10% ou 15% conforme o mercado; a empresa escolhe em `ajustes`.
 - Intensidade 1/2/3 com antecipação para 5% quando houver nível 3 (cliente): registrada em
   `propostas` da ficha, sem efeito no cálculo.
+
+## Detalhes da avaliação de campo (Fase 3)
+
+- O cabeçalho é criado sem `criadoEm`: repetir a criação é uma atualização sem mudanças (idempotente).
+- `armadilha { adultos }` (no cabeçalho, ao finalizar) guarda os adultos de bicho-furão contados. É
+  **informativo**: não entra no cálculo até a regra do bicho-furão ser confirmada.
+- Cada planta guarda `obs` só com o que foi respondido; `fotos[]` guarda referências `local:<id>` (a foto
+  fica no aparelho enquanto o envio ao Storage estiver desligado).
+- O item de lado único (bicho-furão) grava `{ A: null, B: valor }`; o resto grava `{ A, B }` com
+  `null`, `0`, `1`, `2` ou `3`.
+- Só se finaliza com as 30 plantas completas (todos os itens respondidos; `null` conta como resposta).
+  As regras não conseguem exigir isso; quem exige é o app, e o agrônomo vê se está completa.
+- Ler por id uma avaliação inexistente é negado; para saber se já existe, use a consulta com
+  `setorId`, `responsavelUid` e `semanaISO`.
+

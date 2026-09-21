@@ -16,3 +16,5 @@ uma nova página que a substitui; não se reescreve a história.
 | 009 | [Admin da empresa não lê dados operacionais sem vínculo](009-admin-sem-leitura-operacional.md) | vigente |
 | 010 | [Convites por e-mail adiados](010-convites-adiados.md) | vigente |
 | 011 | [Cadastros base legíveis por todo membro ativo](011-cadastros-base-legiveis.md) | vigente |
+| 012 | [Trabalho offline no campo](012-trabalho-offline-no-campo.md) | vigente |
+| 013 | [Fotos em fila local, envio desligado](013-fotos-em-fila-local.md) | vigente até o plano pago |

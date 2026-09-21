@@ -11,9 +11,11 @@ Hospedagem ainda não configurada.
 ## Estado
 
 Na branch `dev`: **Fase 1** (motor v2, catálogo e ficha do limão em dados, `firestore.rules` v2 com
-testes, seed com duas empresas) e **Fase 2** (casca do app: login, escolha de empresa, menu só com os
-módulos dos setores com vínculo, escolha de setor, cache offline e indicador online/offline). A ficha
-de campo, o painel de acompanhamento e a administração são as próximas fases (ver `docs/plano-v2.md`).
+testes, seed com duas empresas), **Fase 2** (casca do app: login, empresa, menu por módulo, setor,
+online/offline) e **Fase 3** (Fitossanidade no campo: escolha do talhão, ficha por planta gerada da
+ficha, quadrantes A/B, lado único, notas, fotos em fila local, aviso de avaliação duplicada, resumo com
+NI e TD, finalização e trabalho sem rede). O painel de acompanhamento e a administração são as
+próximas fases (ver `docs/plano-v2.md`).
 **As regras v2, os índices e a migração dos dados ainda não foram aplicados no Firebase real.**
 
 ## Onde está o quê
@@ -25,6 +27,8 @@ src/dominio/motor/           motor de regras v2 (função pura): métricas, nív
 src/dominio/fichas/          validador e conversor de fichas
 src/nucleo/                  firebase, caminhos do banco, sessão, menu por módulo, permissões, guardas de rota
 src/modulos/                 registro fixo de módulos e as telas de cada módulo (hoje: fitossanidade)
+src/campo/                   ficha de campo: lógica pura, repositório do Firestore, autosave, telas do pragueiro
+src/offline/                 online/offline, itens aguardando envio, fotos em fila local (IndexedDB)
 src/paginas/                 telas gerais (início)
 firestore.rules              segurança do banco (empresa > setor > vínculo > módulo)
 firestore.indexes.json       índices (grupos de coleções membros e vinculos)
@@ -39,9 +43,9 @@ Leia primeiro: `docs/decisoes/README.md` (as decisões), `docs/modelo-de-dados.m
 ## Testes
 
 ```
-npm test                 # motor, fichas, caminhos, menu, guardas e telas renderizadas (rápido; Node 20+)
+npm test                 # motor, fichas, caminhos, menu, guardas e telas renderizadas (rápido; Node 20+; inclui a renderização das telas e a fila de fotos)
 npm run test:rules       # firestore.rules no emulador (106 verificações, duas empresas; precisa de Java 21)
-npm run test:fluxo       # nos emuladores: menu de cada usuário, e o fluxo avaliar, calcular, decidir, executar
+npm run test:fluxo       # nos emuladores: menu por usuário, fluxo de decisão e a jornada do pragueiro (com trabalho sem rede)
 npm run test:migracao    # nos emuladores: prova a migração de produção (simula, aplica, repete, entra como davi e paulo)
 npm run build            # gera dist/
 ```
