@@ -10,6 +10,7 @@ import Fitossanidade from '../../src/modulos/fitossanidade/Fitossanidade.jsx';
 import SemAcesso from '../../src/SemAcesso.jsx';
 import { ListaTalhoes, FormNovaAvaliacao, GradePlantas, FormularioPlanta, ResumoAvaliacao } from '../../src/campo/telas/apresentacao.jsx';
 import { PendentesContext } from '../../src/offline/PendentesProvider.jsx';
+import { ListaAcompanhamento, DetalheAvaliacao, GestaoVinculos } from '../../src/gestao/telas/apresentacao.jsx';
 
 export function sessaoDeMentira({ vinculos = [], setores = {}, unidades = {}, admin = false, plataforma = false, empresas = 1, status = 'ok', setorSalvo = null, nome = 'Fulano' } = {}) {
   const menu = montarMenu({ vinculos, setores, unidades });
@@ -59,5 +60,17 @@ export function renderizarLayoutComPendentes(sessao, total) {
         </MemoryRouter>
       </PendentesContext.Provider>
     </SessaoContext.Provider>,
+  );
+}
+
+// ---- telas de gestão (apresentação)
+export const COMPONENTES_GESTAO = { ListaAcompanhamento, DetalheAvaliacao, GestaoVinculos };
+
+export function renderizarGestao(nome, props, rota = '/') {
+  const Componente = COMPONENTES_GESTAO[nome];
+  return renderToString(
+    <MemoryRouter initialEntries={[rota]}>
+      <Componente {...props} />
+    </MemoryRouter>,
   );
 }

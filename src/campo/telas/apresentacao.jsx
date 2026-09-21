@@ -283,16 +283,10 @@ export function FormularioPlanta({
 
 const SELO_STATUS = { acao: 'ação', limite_nao_definido: 'revisar', abaixo: 'abaixo', sem_dados: 'sem dados', informativo: 'informativo', nao_aplicavel: 'não se aplica' };
 
-export function ResumoAvaliacao({ titulo, semana, aid, modelo, progresso, incompletas, finalizada, formulario, aoMudarFormulario, aoFinalizar, finalizando, erro, confirmando, aoConfirmar }) {
+/** Manchete, TDs, aviso de produto seletivo e tabelas por situação. Usado no resumo do campo e no acompanhamento. */
+export function BlocoResultado({ modelo }) {
   return (
-    <section>
-      <h1>Resumo · {titulo}</h1>
-      <p className="lead">
-        Semana {semana} · {progresso.completas} de {progresso.total} plantas completas
-      </p>
-      {erro && <Faixa tipo="erro">{erro}</Faixa>}
-      {!finalizada && <Faixa tipo="aviso">Prévia: o cálculo definitivo usa os dados finalizados. O agrônomo decide o que fazer.</Faixa>}
-
+    <>
       <Faixa tipo={modelo.manchete.tipo === 'revisar' ? 'aviso' : modelo.manchete.tipo === 'acao' ? 'acao' : 'ok'}>
         <b>{modelo.manchete.texto}</b>
       </Faixa>
@@ -340,6 +334,22 @@ export function ResumoAvaliacao({ titulo, semana, aid, modelo, progresso, incomp
           </table>
         </div>
       ))}
+
+    </>
+  );
+}
+
+export function ResumoAvaliacao({ titulo, semana, aid, modelo, progresso, incompletas, finalizada, formulario, aoMudarFormulario, aoFinalizar, finalizando, erro, confirmando, aoConfirmar }) {
+  return (
+    <section>
+      <h1>Resumo · {titulo}</h1>
+      <p className="lead">
+        Semana {semana} · {progresso.completas} de {progresso.total} plantas completas
+      </p>
+      {erro && <Faixa tipo="erro">{erro}</Faixa>}
+      {!finalizada && <Faixa tipo="aviso">Prévia: o cálculo definitivo usa os dados finalizados. O agrônomo decide o que fazer.</Faixa>}
+
+      <BlocoResultado modelo={modelo} />
 
       {finalizada ? (
         <Faixa tipo="ok">Avaliação finalizada. O agrônomo vai analisar.</Faixa>
