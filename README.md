@@ -15,8 +15,9 @@ testes, seed com duas empresas), **Fase 2** (casca do app: login, empresa, menu 
 online/offline), **Fase 3** (Fitossanidade no campo: escolha do talhão, ficha por planta gerada da
 ficha, quadrantes A/B, lado único, notas, fotos em fila local, aviso de avaliação duplicada, resumo com
 NI e TD, finalização e trabalho sem rede) e **Fase 4** (gestão: acompanhamento da semana, decisão do
-agrônomo, execução pelo gerente e gestão de vínculos com histórico). A administração do cadastro
-(unidades, setores, talhões, ajustes) é a próxima fase (ver `docs/plano-v2.md`).
+agrônomo, execução pelo gerente e gestão de vínculos com histórico) e **Fase 5** (administração: unidades,
+setores com módulos, talhões com as características que a ficha pede, membros, limites de ação por ajuste
+e publicação de fichas no catálogo pelo dono da plataforma; ver `docs/decisoes/016`).
 **As regras v2, os índices e a migração dos dados ainda não foram aplicados no Firebase real.**
 
 ## Onde está o quê
@@ -48,7 +49,7 @@ Leia primeiro: `docs/decisoes/README.md` (as decisões), `docs/modelo-de-dados.m
 ```
 npm test                 # motor, fichas, caminhos, menu, guardas e telas renderizadas (rápido; Node 20+; inclui a renderização das telas e a fila de fotos)
 npm run test:rules       # firestore.rules no emulador (106 verificações, duas empresas; precisa de Java 21)
-npm run test:fluxo       # nos emuladores: menu por usuário, jornada do pragueiro (com trabalho sem rede) e a gestão (decisão, execução, vínculos)
+npm run test:fluxo       # nos emuladores: menu por usuário, jornada do pragueiro (com trabalho sem rede) e a gestão (decisão, execução, vínculos e a administração do cadastro)
 npm run test:migracao    # nos emuladores: prova a migração de produção (simula, aplica, repete, entra como davi e paulo)
 npm run build            # gera dist/
 ```

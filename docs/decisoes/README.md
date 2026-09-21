@@ -20,3 +20,4 @@ uma nova página que a substitui; não se reescreve a história.
 | 013 | [Fotos em fila local, envio desligado](013-fotos-em-fila-local.md) | vigente até o plano pago |
 | 014 | [Decisão do agrônomo e execução pelo gerente](014-decisao-e-execucao.md) | vigente |
 | 015 | [Gestão de vínculos com histórico](015-gestao-de-vinculos.md) | vigente (proposta 001 pendente) |
+| 016 | [Administração do cadastro](016-administracao-do-cadastro.md) | vigente |

@@ -1,13 +1,13 @@
 # Plano v2 (Fase 0): empresas, unidades, setores e cultura como dado
 
-**Estado:** aprovado em 2026-09-20; as **Fases 1 a 4 estão implementadas** na branch `dev`
+**Estado:** aprovado em 2026-09-20; as **Fases 1 a 5 estão implementadas** na branch `dev`
 (Fase 1: motor v2, catálogo e ficha do limão, regras v2 com 106 testes, seed com duas empresas,
 decisões em `docs/decisoes/`. Fase 2: casca do app com menu por módulo, escolha de empresa e setor,
 guardas de rota, telas testadas por renderização, migração de produção provada nos emuladores.
 Fase 3: Fitossanidade no campo, com trabalho sem rede provado nos emuladores. Fase 4: acompanhamento,
 decisão, execução e vínculos com histórico, sem mudar as regras; uma mudança de regras foi **proposta** em
 `docs/propostas/001-leitura-dos-membros.md`, aguardando confirmação).
-A Fase 5 (administração do cadastro) segue pendente. Onde este plano diverge do código, vale o código
+Fase 5: administração do cadastro (estrutura, membros, limites de ação, fichas), também sem mudar as regras. Onde este plano diverge do código, vale o código
 e as decisões em `docs/decisoes/`; divergências conhecidas: o índice `vinculos.pessoaUid`, convites
 fora da v2 e o setor sem `_` no id.
 

@@ -116,3 +116,18 @@ propostas (manual da Embrapa e cliente) ficam no próprio nível, em `proposta`,
 - Nomes das pessoas: só o admin lê o registro de outros membros hoje. As telas mostram um trecho do código
   quando não conseguem ler o nome (proposta 001 em `docs/propostas/`).
 
+## Administração do cadastro (Fase 5)
+
+- **Ids** de unidade, setor e talhão saem do nome (`fazenda-sao-joao`); setor e talhão só com letras, números
+  e hífen. Nada é apagado: desativar é `ativo: false` (`ativa: false` na unidade).
+- `talhoes/{id}.atributos` tem exatamente as chaves que a ficha usa em `aplicaSe` e `quando` (hoje
+  `tipoPomar`: `adulto`|`novo`, e `citrosVizinhos`: booleano). Cada avaliação guarda a cópia
+  (`atributosTalhao`), então editar o talhão não reescreve o passado.
+- `ajustes/{id}`: `culturaId`, `itemId`, `nivelId`, `limite`, `motivo?`, `vigenteDe` (hora do servidor) e `criadoPor`.
+  O `limite` tem a mesma unidade da ficha: fração (0,4 = 40%) em `percent_plantas`, contagem em
+  `plantas_positivas`. Vale o ajuste mais recente com `vigenteDe` até a data de referência.
+- `catalogo_fichas/{fichaId}/versoes/{n}`: cada publicação é a próxima versão da cultura
+  (`catalogo_culturas/{id}.fichaAtual` passa a apontar para ela). Só o dono da plataforma grava.
+- Consultas da administração: o admin lê tudo da empresa com listagens simples (`unidades`, `setores`,
+  `talhoes`, `ajustes`, `membros`); não há consulta nova nem índice novo.
+
