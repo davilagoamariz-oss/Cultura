@@ -14,10 +14,11 @@
     "dev:emulador": "vite --mode emulador --port 5174",
     "semear": "node scripts/semear-emulador.mjs",
     "verificar:fluxo": "node scripts/verificar-fluxo-emulador.mjs",
-    "test:fluxo": "firebase emulators:exec --only auth,firestore --project demo-ronda \"npm run semear && npm run verificar:sessao && npm run verificar:fluxo && npm run verificar:campo\"",
+    "test:fluxo": "firebase emulators:exec --only auth,firestore --project demo-ronda \"npm run semear && npm run verificar:sessao && npm run verificar:fluxo && npm run verificar:campo && npm run verificar:gestao\"",
     "verificar:sessao": "node scripts/verificar-sessao-emulador.mjs",
     "test:migracao": "firebase emulators:exec --only auth,firestore --project demo-ronda \"node scripts/verificar-migracao-emulador.mjs\"",
-    "verificar:campo": "node scripts/verificar-campo-emulador.mjs"
+    "verificar:campo": "node scripts/verificar-campo-emulador.mjs",
+    "verificar:gestao": "node scripts/verificar-gestao-emulador.mjs"
   },
   "dependencies": {
     "firebase": "^12.19.0",

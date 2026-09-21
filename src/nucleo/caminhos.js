@@ -50,6 +50,7 @@ export const caminhos = {
     if (!Number.isInteger(versao) || versao < 1) throw new Error('versao inválida');
     return dentro(e, 'vinculos', idVinculo(pessoaUid, setorId), 'historico', String(versao));
   },
+  historico: (e, pessoaUid, setorId) => dentro(e, 'vinculos', idVinculo(pessoaUid, setorId), 'historico'),
   safras: (e) => dentro(e, 'safras'),
   safra: (e, safraId) => dentro(e, 'safras', id(safraId, 'safraId')),
   talhoes: (e) => dentro(e, 'talhoes'),
