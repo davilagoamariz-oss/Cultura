@@ -13,7 +13,7 @@ import { semanaISO, dataISO, semanaAnterior } from '../src/campo/semana.js';
 import { montarResumo } from '../src/campo/resumo.js';
 import { avaliar } from '../src/dominio/motor/index.js';
 import {
-  consultaAvaliacoesDoSetor, avaliacaoDaSemanaAnterior, decisoesDeAvaliacoes, criarDecisao, executarDecisao,
+  consultaAvaliacoesDoSetor, avaliacaoDaSemanaAnterior, decisoesDeAvaliacoes, criarDecisao, executarDecisao, consultaDecisoesDoSetor, ouvirDecisao,
   consultaVinculosDoSetor, colecaoHistorico, alterarVinculo, criarVinculo, resolverNomes, listarMembros,
 } from '../src/gestao/repositorio.js';
 import { tdsSugeridos, montarDecisao } from '../src/gestao/decisao.js';
@@ -66,6 +66,25 @@ async function avaliacaoFinalizada({ uid, talhaoId, semana, cenario = {}, adulto
   return id;
 }
 const getDocsUm = (caminho) => getDoc(doc(db, ...caminho));
+
+function esperar(condicao, ms = 8000) {
+  return new Promise((resolve, reject) => {
+    const inicio = Date.now();
+    const t = setInterval(() => {
+      if (condicao()) { clearInterval(t); resolve(); } else if (Date.now() - inicio > ms) { clearInterval(t); reject(new Error('tempo esgotado')); }
+    }, 40);
+  });
+}
+// a escuta de UMA decisão (a consulta que a tela de detalhe usa): entrega o documento ou null
+async function escutarDecisao(setorId, aid) {
+  let visto;
+  let falha = null;
+  const parar = ouvirDecisao(db, E, setorId, aid, (d) => { visto = d; }, (e) => { falha = e; });
+  await esperar(() => visto !== undefined || falha).catch(() => {});
+  parar();
+  if (falha) throw falha;
+  return visto;
+}
 
 async function rascunho({ uid, talhaoId, semana }) {
   const talhao = comId(await getDocsUm(caminhos.talhao(E, talhaoId)));
@@ -144,6 +163,14 @@ try {
   await executarDecisao(db, E, aidTripes, { uid: uidGerente, observacao: 'aplicado às 6h, talhão inteiro' });
   const exec = (await decisoesDeAvaliacoes(db, E, S, [aidTripes]))[aidTripes];
   conferir(exec.status === 'executada' && exec.executadoPor === uidGerente && exec.observacaoExecucao === 'aplicado às 6h, talhão inteiro', 'marcou como executada, com quem e a observação');
+  const todasDoSetor = (await getDocs(consultaDecisoesDoSetor(db, E, S))).docs.map((d) => d.data());
+  const aids = todasDoSetor.map((d) => d.avaliacaoId);
+  // (o script do fluxo de decisão, que roda antes, também deixa uma decisão neste setor: por isso "inclui", não "igual a 2")
+  conferir(aids.includes(aidTripes) && aids.includes(aidLimpa) && todasDoSetor.every((d) => d.setorId === S), 'a lista de decisões do setor (usada na tela da semana) traz as duas desta verificação, todas do setor');
+  const escutada = await escutarDecisao(S, aidTripes);
+  conferir(escutada?.status === 'executada' && escutada.avaliacaoId === aidTripes, 'a escuta de uma decisão (tela de detalhe) entrega a decisão já executada');
+  conferir((await escutarDecisao(S, aidRascunho)) === null, 'e entrega null quando ainda não há decisão (sem erro de permissão)');
+  conferir(await negado(() => escutarDecisao('frota-1', aidTripes)), 'escutar com o setor errado é negado');
   conferir(await negado(() => executarDecisao(db, E, aidTripes, { uid: uidGerente })), 'não executa duas vezes');
   await sair();
 

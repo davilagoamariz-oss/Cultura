@@ -104,3 +104,15 @@ propostas (manual da Embrapa e cliente) ficam no próprio nível, em `proposta`,
 - Ler por id uma avaliação inexistente é negado; para saber se já existe, use a consulta com
   `setorId`, `responsavelUid` e `semanaISO`.
 
+## Decisões e vínculos (Fase 4)
+
+- `decisoes/{avaliacaoId}`: uma por avaliação finalizada, imutável. Campos: `tds[]` (o que foi decidido; na
+  rejeição, o que o cálculo sugeria), `motivos[]` (`{ id, nivel, td }`), `status` (`aprovada`, `rejeitada` e,
+  depois de executada pelo gerente, `executada`), `decididoPor/Em`, `observacao`, `executadoPor/Em`,
+  `observacaoExecucao`.
+- Toda alteração de `vinculos/{uid}_{setorId}` sobe `versao` e grava `historico/{versao}` no mesmo lote.
+- Consultas exigidas pelas regras, além das já listadas: decisões e histórico de vínculo sempre com
+  `where setorId == X`; ler por id uma decisão inexistente é negado (use consulta por `avaliacaoId`).
+- Nomes das pessoas: só o admin lê o registro de outros membros hoje. As telas mostram um trecho do código
+  quando não conseguem ler o nome (proposta 001 em `docs/propostas/`).
+
