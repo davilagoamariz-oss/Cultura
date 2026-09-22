@@ -99,7 +99,7 @@ export function ouvirPlantas(db, empresaId, aid, aoMudar, aoFalhar, opcoes) {
           let pendentes = 0;
           for (const d of snap.docs) {
             const dados = d.data();
-            porN[dados.n] = { obs: dados.obs ?? {}, notas: dados.notas ?? '', fotos: dados.fotos ?? [] };
+            porN[dados.n] = { obs: dados.obs ?? {}, notas: dados.notas ?? '', fotos: dados.fotos ?? [], pendente: d.metadata.hasPendingWrites };
             if (d.metadata.hasPendingWrites) pendentes += 1;
           }
           mudou({ porN, pendentes, doCache: snap.metadata.fromCache });

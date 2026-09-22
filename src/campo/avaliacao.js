@@ -69,6 +69,11 @@ export function dadosDaPlanta({ ficha, n, obs, notas, fotos = [], atualizadoEm }
   };
 }
 
+/** Quais plantas (números) ainda não foram confirmadas pelo servidor: gravadas no aparelho, a caminho. */
+export function plantasPendentes(plantasPorN = {}) {
+  return Object.fromEntries(Object.entries(plantasPorN).filter(([, p]) => p?.pendente).map(([n]) => [n, true]));
+}
+
 /** Situação de cada planta e o total. `plantas` = { [n]: obs }. */
 export function progresso(ficha, plantas = {}) {
   const total = totalDePlantas(ficha);

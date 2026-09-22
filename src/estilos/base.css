@@ -511,6 +511,7 @@ a.cartao:active {
   margin: 16px 0;
 }
 .ladrilho {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -527,6 +528,18 @@ a.cartao:active {
 .ladrilho--completa { background: var(--verde-900); border-color: var(--verde-900); color: var(--branco); }
 .ladrilho--parcial { background: var(--nivel1); border-color: var(--nivel1-borda); }
 .ladrilho--vazia { background: var(--branco); }
+/* Planta gravada só neste aparelho, ainda a caminho do servidor: mesma cor do aviso "Offline". */
+.ladrilho--pendente::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--aviso);
+  border: 1px solid var(--branco);
+}
 
 .planta { padding-bottom: 96px; } /* espaço para a barra fixa */
 .planta__topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; }

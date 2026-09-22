@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { progresso as calcularProgresso, proximaIncompleta } from '../avaliacao.js';
+import { progresso as calcularProgresso, proximaIncompleta, plantasPendentes } from '../avaliacao.js';
 import { useRegistrarPendentes } from '../../offline/PendentesProvider.jsx';
 import Carregando from '../../Carregando.jsx';
 import { useContextoCampo } from './contexto.js';
@@ -11,7 +11,7 @@ import { SemSetor } from './Campo.jsx';
 export default function Avaliacao() {
   const { aid } = useParams();
   const { db, empresaId, setor, pode } = useContextoCampo();
-  const { avaliacao, ficha, porN, pendentes, pronto, erro } = useDadosDaAvaliacao(db, empresaId, aid);
+  const { avaliacao, ficha, plantas, porN, pendentes, pronto, erro } = useDadosDaAvaliacao(db, empresaId, aid);
   useRegistrarPendentes('plantas', pendentes);
 
   if (!setor) return <SemSetor />;
@@ -28,6 +28,7 @@ export default function Avaliacao() {
       semana={avaliacao.semanaISO}
       progresso={progresso}
       pendentes={pendentes}
+      pendentesPorPlanta={plantasPendentes(plantas.porN)}
       finalizada={avaliacao.status === 'finalizada'}
       proxima={proximaIncompleta(ficha, porN, 0)}
     />

@@ -119,7 +119,7 @@ export function FormNovaAvaliacao({ talhao, opcoesFase, selecionadas, aoAlternar
 
 const ROTULO_STATUS = { completa: 'completa', parcial: 'em andamento', vazia: 'não começou' };
 
-export function GradePlantas({ aid, titulo, semana, progresso, pendentes, finalizada, proxima }) {
+export function GradePlantas({ aid, titulo, semana, progresso, pendentes, pendentesPorPlanta = {}, finalizada, proxima }) {
   return (
     <section>
       <h1>{titulo}</h1>
@@ -130,11 +130,20 @@ export function GradePlantas({ aid, titulo, semana, progresso, pendentes, finali
       {finalizada && <Faixa tipo="ok">Avaliação finalizada. Só leitura.</Faixa>}
 
       <div className="grade" role="list">
-        {Array.from({ length: progresso.total }, (_, i) => i + 1).map((n) => (
-          <Link key={n} role="listitem" to={rotaCampo(aid, 'planta', n)} className={`ladrilho ladrilho--${progresso.porPlanta[n]}`} aria-label={`Planta ${n}: ${ROTULO_STATUS[progresso.porPlanta[n]]}`}>
-            {n}
-          </Link>
-        ))}
+        {Array.from({ length: progresso.total }, (_, i) => i + 1).map((n) => {
+          const pendente = Boolean(pendentesPorPlanta[n]);
+          return (
+            <Link
+              key={n}
+              role="listitem"
+              to={rotaCampo(aid, 'planta', n)}
+              className={`ladrilho ladrilho--${progresso.porPlanta[n]}${pendente ? ' ladrilho--pendente' : ''}`}
+              aria-label={`Planta ${n}: ${ROTULO_STATUS[progresso.porPlanta[n]]}${pendente ? ', aguardando envio' : ''}`}
+            >
+              {n}
+            </Link>
+          );
+        })}
       </div>
 
       <div className="pilha">

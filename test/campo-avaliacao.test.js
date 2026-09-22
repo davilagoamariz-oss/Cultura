@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   montarCabecalho, dadosDaPlanta, progresso, plantasIncompletas, proximaIncompleta, dadosParaFinalizar,
-  avisoDeAvaliacaoExistente, opcoesDeFase, totalDePlantas,
+  avisoDeAvaliacaoExistente, opcoesDeFase, totalDePlantas, plantasPendentes,
 } from '../src/campo/avaliacao.js';
 import { montarResumo, formatarPercentual, textoDoLimite } from '../src/campo/resumo.js';
 import { agruparPorOrgao, definirGrupo, definirValor, definirItem, obsParaGravar } from '../src/campo/ficha-campo.js';
@@ -173,4 +173,13 @@ test('resumo: formatação em português e textos de limite', () => {
   assert.equal(textoDoLimite({ limite: 0.2, operador: '>' }), '> 20,0%');
   assert.equal(textoDoLimite({ limite: null }), 'sem limite definido');
   assert.equal(textoDoLimite(undefined), 'sem limite definido');
+});
+
+// ---------------------------------------------------------------- pendentes de envio
+
+test('plantas pendentes: só as que ainda não foram confirmadas pelo servidor', () => {
+  const porN = { 1: { pendente: true }, 2: { pendente: false }, 3: { pendente: true }, 4: {} };
+  assert.deepEqual(plantasPendentes(porN), { 1: true, 3: true });
+  assert.deepEqual(plantasPendentes({}), {});
+  assert.deepEqual(plantasPendentes(undefined), {});
 });

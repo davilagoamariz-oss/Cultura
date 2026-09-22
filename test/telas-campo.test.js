@@ -153,6 +153,17 @@ test('grade: 30 plantas com a situação de cada uma e o caminho para continuar'
   assert.match(h, /Resumo e finalizar/);
 });
 
+test('grade: planta ainda não confirmada pelo servidor ganha o marcador de pendente', () => {
+  const plantas = { 1: tudoAusente(), 2: tudoAusente() };
+  const p = progresso(ficha, plantas);
+  const h = tela('GradePlantas', { aid: AID, titulo: 't-01', semana: '2026-W39', progresso: p, pendentes: 1, pendentesPorPlanta: { 2: true }, finalizada: false, proxima: 3 });
+  assert.equal(conta(h, 'ladrilho--pendente'), 1);
+  assert.match(h, /Planta 2: completa, aguardando envio/);
+  assert.doesNotMatch(h, /Planta 1: completa, aguardando envio/);
+  const sem = tela('GradePlantas', { aid: AID, titulo: 't-01', semana: '2026-W39', progresso: p, pendentes: 0, finalizada: false, proxima: 3 });
+  assert.doesNotMatch(sem, /ladrilho--pendente/); // sem a propriedade, nenhuma marcada (padrão seguro)
+});
+
 test('grade: sem nada feito convida a começar; finalizada é só leitura', () => {
   const vazia = tela('GradePlantas', { aid: AID, titulo: 't-01', semana: '2026-W39', progresso: progresso(ficha, {}), pendentes: 0, finalizada: false, proxima: 1 });
   assert.match(vazia, /Começar pela planta 1/);
