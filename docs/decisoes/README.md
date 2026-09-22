@@ -23,3 +23,4 @@ uma nova página que a substitui; não se reescreve a história.
 | 016 | [Administração do cadastro](016-administracao-do-cadastro.md) | vigente |
 | 017 | [Módulo Frota (maquinário)](017-frota.md) | vigente |
 | 018 | [storage.rules corrigida para o desenho multiempresa](018-storage-rules-multiempresa.md) | vigente |
+| 019 | [LGPD: base legal e direito ao esquecimento](019-lgpd-base-legal-e-direito-ao-esquecimento.md) | vigente (anonimização ainda não implementada) |
