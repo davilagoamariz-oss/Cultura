@@ -244,10 +244,11 @@ service cloud.firestore {
     }
 
     // Qualquer membro ativo sinaliza um problema leve: só de "operacional" para "manutenção sugerida".
-    function manutencaoSugerivel() {
+    function manutencaoSugerivel(e) {
       let r = resource.data;
       let d = request.resource.data;
-      return d.diff(r).affectedKeys().hasOnly(['status', 'atualizadoEm'])
+      return membroAtivo(e)
+        && d.diff(r).affectedKeys().hasOnly(['status', 'atualizadoEm'])
         && r.status == 'operacional'
         && d.status == 'manutencao_sugerida';
     }
@@ -656,7 +657,7 @@ service cloud.firestore {
         allow update: if (ehAdmin(e) && (maquinaEditavelPeloAdmin() || manutencaoAlteravelPeloAdmin()))
           || usoIniciavel(e, mid)
           || usoEncerravel(e, mid)
-          || manutencaoSugerivel();
+          || manutencaoSugerivel(e);
         allow delete: if false;
 
         // Histórico de uso: quem operou lê o próprio; o gerente do setor lê o do seu setor.

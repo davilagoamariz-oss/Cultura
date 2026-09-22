@@ -91,8 +91,11 @@ const uidAdmin = await criarUsuario('admin@frota.test');
 const uidOp = await criarUsuario('op@frota.test');
 const uidOutro = await criarUsuario('outro@frota.test');
 const uidSemVinculo = await criarUsuario('sem@frota.test');
+const uidOutraEmpresa = await criarUsuario('outraempresa@frota.test');
 
 await gravar(`empresas/${E}`, { nome: 'Empresa da Frota' });
+await gravar('empresas/frota-2-empresa', { nome: 'Outra Empresa' });
+await gravar(`empresas/frota-2-empresa/membros/${uidOutraEmpresa}`, { uid: uidOutraEmpresa, papelEmpresa: 'membro', ativo: true }); // membro ativo, mas de OUTRA empresa
 for (const [u, papel] of [[uidAdmin, 'admin'], [uidOp, 'membro'], [uidOutro, 'membro'], [uidSemVinculo, 'membro']]) {
   await gravar(`empresas/${E}/membros/${u}`, { uid: u, papelEmpresa: papel, ativo: true });
 }
@@ -156,6 +159,10 @@ conferir(await recusado(() => iniciarUso(db, E, { maquina: { ...m, disponibilida
 await sair();
 
 console.log('\n== Manutenção ==');
+await entrar('outraempresa'); // membro ativo, mas de OUTRA empresa: não pode nem sinalizar
+conferir(await negado(() => sugerirManutencao(db, E, { maquina: m, maquinaId: idM, uid: uidOutraEmpresa, descricao: 'tentando de fora' })), 'membro de OUTRA empresa não sinaliza manutenção nesta máquina');
+await sair();
+
 await entrar('sem'); // sem nenhum vínculo, só membro
 await sugerirManutencao(db, E, { maquina: m, maquinaId: idM, uid: uidSemVinculo, descricao: 'barulho estranho no motor' });
 m = (await listarMaquinas(db, E)).find((x) => x.id === idM);
