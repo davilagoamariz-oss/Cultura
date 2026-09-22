@@ -92,6 +92,13 @@ test('resumo da semana: "1 avaliação" no singular, e só aparece a situação 
   assert.doesNotMatch(h, /aguardando decisão|em andamento|concluída/);
 });
 
+test('exportar CSV: o botão só aparece com pelo menos uma avaliação', () => {
+  const semLinhas = tela('ListaAcompanhamento', propsLista());
+  assert.doesNotMatch(semLinhas, /Exportar esta semana/);
+  const comLinhas = tela('ListaAcompanhamento', propsLista({ linhas: [linha()] }));
+  assert.match(comLinhas, /Exportar esta semana \(CSV\)/);
+});
+
 test('lista da semana: avisa o que ainda aguarda envio', () => {
   const h = tela('ListaAcompanhamento', propsLista({ linhas: [linha({ pendente: true })] }));
   assert.match(h, /aguardando envio/);

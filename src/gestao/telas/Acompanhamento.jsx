@@ -9,8 +9,20 @@ import { SemSetor } from '../../campo/telas/Campo.jsx';
 import { Faixa } from '../../campo/telas/apresentacao.jsx';
 import { consultaAvaliacoesDoSetor, consultaDecisoesDoSetor } from '../repositorio.js';
 import { formatarDia } from '../formato.js';
+import { csvDaSemana, nomeDoArquivo } from '../exportar-semana.js';
 import { useContextoGestao, useNomes } from './contexto.js';
 import { ListaAcompanhamento } from './apresentacao.jsx';
+
+/** Baixa o CSV no aparelho (sem servidor). BOM no início: o Excel em pt-BR só acerta os acentos com ele. */
+function baixarCsv(nome, texto) {
+  const blob = new Blob(['﻿', texto], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nome;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 /** Semana pedida na URL, ou a atual se não vier ou for inválida. */
 function semanaDaUrl(pedida, atual) {
@@ -64,6 +76,7 @@ export default function Acompanhamento() {
       dataTexto: formatarDia(a.data),
       status: a.status,
       decisaoStatus: decisoes[a.id]?.status ?? null,
+      tds: decisoes[a.id]?.tds ?? [],
       pendente: a.pendente || Boolean(decisoes[a.id]?.pendente),
     }))
     .sort((x, y) => x.talhaoNome.localeCompare(y.talhaoNome, 'pt-BR', { numeric: true }));
@@ -76,6 +89,7 @@ export default function Acompanhamento() {
       semanaSeguinte={semanaSeguinte(semana)}
       ehSemanaAtual={semana === atual}
       linhas={linhas}
+      aoExportar={() => baixarCsv(nomeDoArquivo(semana), csvDaSemana(linhas))}
     />
   );
 }

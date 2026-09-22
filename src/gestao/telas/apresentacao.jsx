@@ -48,7 +48,7 @@ function ResumoDaSemana({ resumo }) {
   );
 }
 
-export function ListaAcompanhamento({ semana, rotuloSemana, semanaAnterior, semanaSeguinte, ehSemanaAtual, linhas }) {
+export function ListaAcompanhamento({ semana, rotuloSemana, semanaAnterior, semanaSeguinte, ehSemanaAtual, linhas, aoExportar }) {
   return (
     <section>
       <h1>Acompanhar avaliações</h1>
@@ -64,7 +64,14 @@ export function ListaAcompanhamento({ semana, rotuloSemana, semanaAnterior, sema
           Próxima ›
         </Link>
       </nav>
-      {linhas.length > 0 && <ResumoDaSemana resumo={resumirSemana(linhas)} />}
+      {linhas.length > 0 && (
+        <>
+          <ResumoDaSemana resumo={resumirSemana(linhas)} />
+          <button type="button" className="botao botao--contorno" onClick={aoExportar}>
+            Exportar esta semana (CSV)
+          </button>
+        </>
+      )}
 
       {linhas.length === 0 ? (
         <div className="vazio">Nenhuma avaliação neste setor nesta semana.</div>
