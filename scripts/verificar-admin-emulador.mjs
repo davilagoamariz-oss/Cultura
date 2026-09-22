@@ -15,8 +15,10 @@ import { criarVinculo } from '../src/gestao/repositorio.js';
 import {
   listarUnidades, listarSetores, listarTalhoes, listarAjustes, listarMembrosDaEmpresa, listarCulturas,
   criarUnidade, alterarUnidade, criarSetor, alterarSetor, criarTalhao, alterarTalhao, criarAjuste, criarMembro, alterarMembro, publicarFicha,
+  importarTalhoes,
 } from '../src/admin/repositorio.js';
 import { atributosDaFicha } from '../src/admin/cadastros.js';
+import { prepararImportacaoDeTalhoes, validos, invalidos } from '../src/admin/importar-talhoes.js';
 import { linhasDeLimites } from '../src/admin/limites.js';
 import { getDocs } from 'firebase/firestore';
 
@@ -78,6 +80,24 @@ const talhoes0 = await listarTalhoes(db, E);
 const idTal = await criarTalhao(db, E, { ficha, unidadeId: idUn, nome: 'Talhão Novo 01', culturaId: 'limao-tahiti', variedade: 'Tahiti CPB', areaHa: '7,5', atributos: { tipoPomar: 'adulto', citrosVizinhos: true } }, talhoes0.map((t) => t.id));
 const talhao = (await listarTalhoes(db, E)).find((t) => t.id === idTal);
 conferir(idTal === 'talhao-novo-01' && talhao.areaHa === 7.5 && talhao.atributos.tipoPomar === 'adulto' && talhao.atributos.citrosVizinhos === true, `talhão criado com atributos e área (${idTal})`);
+
+console.log('\n== Importação de talhões em lote (CSV) ==');
+const csv = [
+  'nome;variedade;areaha;tipoPomar;citrosVizinhos',
+  'Talhão CSV 01;Tahiti CPB;4,2;adulto;sim',
+  'Talhão CSV 02;;;novo;não',
+  ';;;adulto;sim', // sem nome: inválida
+].join('\n');
+const preview = prepararImportacaoDeTalhoes({ ficha, unidadeId: idUn, culturaId: 'limao-tahiti', texto: csv, existentes: (await listarTalhoes(db, E)).map((t) => t.id) });
+conferir(validos(preview).length === 2 && invalidos(preview).length === 1, 'a prévia separa as 2 linhas válidas da 1 inválida, sem gravar nada');
+await importarTalhoes(db, E, validos(preview));
+const talhoesAposImportar = await listarTalhoes(db, E);
+conferir(talhoesAposImportar.some((t) => t.id === 'talhao-csv-01' && t.areaHa === 4.2) && talhoesAposImportar.some((t) => t.id === 'talhao-csv-02' && t.atributos.tipoPomar === 'novo'), 'as 2 linhas válidas foram gravadas de uma vez, com os dados certos');
+await sair();
+await entrar('paulo');
+conferir(await negado(() => importarTalhoes(db, E, [{ id: 'talhao-do-pragueiro', dados: { unidadeId: idUn, nome: 'X', culturaId: 'limao-tahiti', atributos: { tipoPomar: 'adulto', citrosVizinhos: false }, ativo: true } }])), 'pragueiro não importa talhões em lote');
+await sair();
+await entrar('admin');
 
 const membroNovo = 'uid-novo-membro-123';
 await criarMembro(db, E, { uid: membroNovo, nome: 'Nova Pessoa' });

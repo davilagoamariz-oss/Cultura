@@ -74,6 +74,40 @@ test('o formulário de talhão pede os atributos da ficha; ao editar, a cultura 
   assert.match(edicao, /<input type="hidden" name="culturaId" value="limao-tahiti"/); // o valor ainda é enviado
 });
 
+test('importar talhões: só aparece depois de ter alguma unidade cadastrada', () => {
+  assert.doesNotMatch(tela('Estrutura', base), /Importar vários talhões/);
+  const comUnidade = tela('Estrutura', { ...base, unidades: [{ id: 'un-1', nome: 'U', ativa: true }] });
+  assert.match(comUnidade, /\+ Importar vários talhões \(CSV\)/);
+});
+
+const acoesImportacao = { aoMudarUnidade: nada, aoMudarCultura: nada, aoLerArquivo: nada, aoImportar: nada };
+const unidadesImp = [{ id: 'un-1', nome: 'Fazenda 1' }];
+
+test('importar talhões: sem arquivo lido ainda, sem prévia nenhuma', () => {
+  const h = tela('ImportarTalhoes', { unidades: unidadesImp, culturas, unidadeId: '', culturaId: '', preview: null, ocupado: false, ...acoesImportacao });
+  assert.doesNotMatch(h, /aria-label="Prévia da importação"/);
+  assert.match(h, /accept="\.csv,text\/csv"/);
+});
+
+test('importar talhões: prévia mostra válidos e erros, e só oferece importar se houver algum válido', () => {
+  const preview = [
+    { numero: 2, nome: 'Talhão 01', id: 'talhao-01', dados: {} },
+    { numero: 3, nome: 'Talhão 02', id: 'talhao-02', dados: {} },
+    { numero: 4, nome: '', erro: 'Nome: preencha' },
+  ];
+  const h = tela('ImportarTalhoes', { unidades: unidadesImp, culturas, unidadeId: 'un-1', culturaId: 'limao-tahiti', preview, ocupado: false, ...acoesImportacao });
+  assert.match(h, /2 válidos, 1 com erro/);
+  assert.match(h, /Linha 4 \(sem nome\): Nome: preencha/);
+  assert.match(h, /Importar 2 talhões/);
+});
+
+test('importar talhões: só erros não oferece o botão de importar', () => {
+  const preview = [{ numero: 2, nome: 'X', erro: 'Y' }];
+  const h = tela('ImportarTalhoes', { unidades: unidadesImp, culturas, unidadeId: 'un-1', culturaId: 'limao-tahiti', preview, ocupado: false, ...acoesImportacao });
+  assert.match(h, /0 válidos, 1 com erro/);
+  assert.doesNotMatch(h, /Importar 0/);
+});
+
 test('o formulário de setor lista os módulos que o sistema conhece', () => {
   const t = tela('Estrutura', { ...base, unidades: [{ id: 'un-1', nome: 'U', ativa: true }] });
   assert.match(t, /name="modulos" value="fitossanidade"/);

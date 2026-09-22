@@ -3,6 +3,7 @@
 import { Link } from 'react-router-dom';
 import { MODULOS } from '../../modulos/registro.js';
 import { atributosDaFicha, ROTULOS_OPCAO } from '../cadastros.js';
+import { validos, invalidos } from '../importar-talhoes.js';
 import { Faixa } from '../../campo/telas/apresentacao.jsx';
 
 /** Formulário sem estado: `aoEnviar(FormData)` devolve true (ou uma promessa de true) para limpar os campos. */
@@ -147,7 +148,74 @@ function ResumoTalhao({ t, culturas, fichasPorCultura }) {
   return [cultura?.nome ?? t.culturaId, t.variedade, t.areaHa ? `${String(t.areaHa).replace('.', ',')} ha` : null, ...attrs].filter(Boolean).join(' · ');
 }
 
-export function Estrutura({ unidades, setores, talhoes, culturas, fichasPorCultura, aoCriarUnidade, aoAlterarUnidade, aoCriarSetor, aoAlterarSetor, aoCriarTalhao, aoAlterarTalhao, ocupado, erro, aviso }) {
+export function ImportarTalhoes({ unidades, culturas, unidadeId, culturaId, aoMudarUnidade, aoMudarCultura, aoLerArquivo, preview, aoImportar, ocupado, erro }) {
+  const ok = preview ? validos(preview) : [];
+  const ruim = preview ? invalidos(preview) : [];
+  return (
+    <Recolhido titulo="+ Importar vários talhões (CSV)">
+      <p className="legenda">
+        Cabeçalho da planilha: nome, variedade, areaha, e uma coluna por característica da ficha (ex.: tipoPomar, citrosVizinhos). Separador "," ou ";".
+      </p>
+      {erro ? <Faixa tipo="erro">{erro}</Faixa> : null}
+      <Campo rotulo="Unidade">
+        <select value={unidadeId} onChange={(e) => aoMudarUnidade(e.target.value)}>
+          <option value="" disabled>
+            Escolha…
+          </option>
+          {unidades.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.nome}
+            </option>
+          ))}
+        </select>
+      </Campo>
+      <Campo rotulo="Cultura da planilha">
+        <select value={culturaId} onChange={(e) => aoMudarCultura(e.target.value)}>
+          <option value="" disabled>
+            Escolha…
+          </option>
+          {culturas.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nome ?? c.id}
+            </option>
+          ))}
+        </select>
+      </Campo>
+      <label className="campo">
+        <span>Arquivo (.csv)</span>
+        <input type="file" accept=".csv,text/csv" disabled={!unidadeId || !culturaId} onChange={(e) => aoLerArquivo(e.target.files?.[0])} />
+      </label>
+      {preview && (
+        <div className="cartao" aria-label="Prévia da importação">
+          <strong>
+            {ok.length} válido{ok.length === 1 ? '' : 's'}
+            {ruim.length > 0 ? `, ${ruim.length} com erro` : ''}
+          </strong>
+          {ruim.length > 0 ? (
+            <ul>
+              {ruim.map((l) => (
+                <li key={l.numero}>
+                  Linha {l.numero} ({l.nome || 'sem nome'}): {l.erro}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {ok.length > 0 ? (
+            <button type="button" className="botao botao--principal botao--cheio" disabled={ocupado} onClick={aoImportar}>
+              {ocupado ? 'Importando…' : `Importar ${ok.length} ${ok.length === 1 ? 'talhão' : 'talhões'}`}
+            </button>
+          ) : null}
+        </div>
+      )}
+    </Recolhido>
+  );
+}
+
+export function Estrutura({
+  unidades, setores, talhoes, culturas, fichasPorCultura, aoCriarUnidade, aoAlterarUnidade, aoCriarSetor, aoAlterarSetor, aoCriarTalhao, aoAlterarTalhao,
+  importacao, aoMudarUnidadeImportacao, aoMudarCulturaImportacao, aoLerArquivoImportacao, aoImportarTalhoes,
+  ocupado, erro, aviso,
+}) {
   const porNome = (a, b) => (a.nome ?? '').localeCompare(b.nome ?? '', 'pt-BR');
   return (
     <section>
@@ -213,6 +281,22 @@ export function Estrutura({ unidades, setores, talhoes, culturas, fichasPorCultu
       <Recolhido titulo="+ Nova unidade" aberto={unidades.length === 0}>
         <FormUnidade ocupado={ocupado} rotuloEnviar="Criar unidade" aoEnviar={aoCriarUnidade} />
       </Recolhido>
+
+      {unidades.length > 0 ? (
+        <ImportarTalhoes
+          unidades={unidades}
+          culturas={culturas}
+          unidadeId={importacao?.unidadeId ?? ''}
+          culturaId={importacao?.culturaId ?? ''}
+          preview={importacao?.preview ?? null}
+          aoMudarUnidade={aoMudarUnidadeImportacao}
+          aoMudarCultura={aoMudarCulturaImportacao}
+          aoLerArquivo={aoLerArquivoImportacao}
+          aoImportar={aoImportarTalhoes}
+          ocupado={ocupado}
+          erro={importacao?.erro}
+        />
+      ) : null}
       <p>
         <Link to="/admin">Voltar à administração</Link>
       </p>

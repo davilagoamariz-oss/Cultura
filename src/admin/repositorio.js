@@ -7,7 +7,7 @@
 //  - ajuste é append-only e `vigenteDe` TEM de ser o carimbo do servidor (nunca uma data escolhida por quem grava);
 //  - a ficha do catálogo é imutável (versão nova = documento novo) e só o admin da plataforma publica;
 //  - só o admin lista os membros; ao criar, o usuário já existe no Firebase Authentication (criado no console).
-import { collection, doc, getDoc, getDocs, runTransaction, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, runTransaction, serverTimestamp, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
 import { caminhos } from '../nucleo/caminhos.js';
 import { comId } from '../campo/repositorio.js';
 import { validarFicha } from '../dominio/fichas/ficha.js';
@@ -52,6 +52,17 @@ export async function criarTalhao(db, e, dados, existentes = []) {
   const id = gerarId(dados.nome, existentes);
   await setDoc(doc(db, ...caminhos.talhao(e, id)), { ...montarTalhao(dados), criadoEm: serverTimestamp() });
   return id;
+}
+
+const DE_400 = 400; // folga sob o limite de 500 escritas por lote do Firestore
+
+/** Grava vários talhões de uma vez (importação por CSV). `itens`: só os que já passaram por montarTalhao. */
+export async function importarTalhoes(db, e, itens) {
+  for (let i = 0; i < itens.length; i += DE_400) {
+    const lote = writeBatch(db);
+    for (const { id, dados } of itens.slice(i, i + DE_400)) lote.set(doc(db, ...caminhos.talhao(e, id)), { ...dados, criadoEm: serverTimestamp() });
+    await lote.commit();
+  }
 }
 /**
  * Altera o talhão. Só vale para as avaliações NOVAS: cada avaliação guarda a cópia dos atributos do talhão de
