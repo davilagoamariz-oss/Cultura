@@ -131,3 +131,12 @@ propostas (manual da Embrapa e cliente) ficam no próprio nível, em `proposta`,
 - Consultas da administração: o admin lê tudo da empresa com listagens simples (`unidades`, `setores`,
   `talhoes`, `ajustes`, `membros`); não há consulta nova nem índice novo.
 
+## Índices (revisão antes do deploy)
+
+Nenhuma consulta do app usa `orderBy`, e todo filtro composto é só igualdade (`==`/`in`), que o Firestore
+resolve sem índice dedicado. `firestore.indexes.json` por isso só tem os **overrides de grupo de coleções**
+(`membros.uid`, `vinculos.pessoaUid`), exigidos para o app descobrir empresas e setores; os 4 índices
+compostos que existiam (setor/talhão + data ou `decididoEm`, todos com ordenação) nunca foram usados por
+nenhuma consulta e foram removidos. Confirmado sem eles: `npm run test:fluxo` (174 OK, nenhum
+`FAILED_PRECONDITION`). Se uma tela futura precisar de ordenação no servidor, o índice volta então.
+

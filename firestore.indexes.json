@@ -1,39 +1,5 @@
 {
-  "indexes": [
-    {
-      "collectionGroup": "decisoes",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "setorId", "order": "ASCENDING" },
-        { "fieldPath": "decididoEm", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "avaliacoes",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "setorId", "order": "ASCENDING" },
-        { "fieldPath": "data", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "avaliacoes",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "setorId", "order": "ASCENDING" },
-        { "fieldPath": "responsavelUid", "order": "ASCENDING" },
-        { "fieldPath": "data", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "avaliacoes",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "talhaoId", "order": "ASCENDING" },
-        { "fieldPath": "data", "order": "DESCENDING" }
-      ]
-    }
-  ],
+  "indexes": [],
   "fieldOverrides": [
     {
       "collectionGroup": "membros",
