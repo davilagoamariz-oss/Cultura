@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { MODULOS, moduloConhecido, nomeDaFuncao } from '../src/modulos/registro.js';
 import { decidirEmpresa, ehAdminDaEmpresa } from '../src/nucleo/empresas.js';
 import { montarMenu, escolherSetorDoModulo } from '../src/nucleo/menu.js';
-import { podeAvaliar, podeDecidir, podeAcompanhar, ehGerenteDoSetor } from '../src/nucleo/permissoes.js';
+import { podeAvaliar, podeDecidir, podeAcompanhar, ehGerenteDoSetor, ehOperadorDeFrota } from '../src/nucleo/permissoes.js';
 
 const m = (empresaId, papelEmpresa = 'membro', ativo = true) => ({ empresaId, papelEmpresa, ativo });
 const v = (setorId, papel = 'funcionario', funcoes = [], ativo = true, unidadeId = 'un-1') => ({ setorId, unidadeId, papel, funcoes, ativo });
@@ -130,11 +130,13 @@ test('permissões: cada função abre só o que as regras abrem', () => {
   assert.deepEqual([podeDecidir(pragueiro), podeDecidir(agronomo), podeDecidir(gerente)], [false, true, false]);
   assert.deepEqual([ehGerenteDoSetor(pragueiro), ehGerenteDoSetor(agronomo), ehGerenteDoSetor(gerente)], [false, false, true]);
   assert.deepEqual([podeAcompanhar(pragueiro), podeAcompanhar(agronomo), podeAcompanhar(gerente), podeAcompanhar(motorista)], [false, true, true, false]);
+  const operador = v('s', 'funcionario', ['operador']);
+  assert.deepEqual([ehOperadorDeFrota(operador), ehOperadorDeFrota(pragueiro), ehOperadorDeFrota(motorista)], [true, false, false]);
 });
 
 test('permissões: vínculo desativado ou ausente não dá poder algum', () => {
   const desativado = v('s', 'gerente', ['pragueiro', 'agronomo'], false);
-  for (const f of [podeAvaliar, podeDecidir, ehGerenteDoSetor, podeAcompanhar]) {
+  for (const f of [podeAvaliar, podeDecidir, ehGerenteDoSetor, podeAcompanhar, ehOperadorDeFrota]) {
     assert.equal(f(desativado), false, f.name);
     assert.equal(f(null), false, f.name);
     assert.equal(f(undefined), false, f.name);

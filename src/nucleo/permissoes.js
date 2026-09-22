@@ -14,3 +14,6 @@ export const ehGerenteDoSetor = (v) => ativo(v) && v.papel === 'gerente';
 
 /** Acompanha as avaliações do setor: agrônomo ou gerente. */
 export const podeAcompanhar = (v) => podeDecidir(v) || ehGerenteDoSetor(v);
+
+/** Pode operar o maquinário (começar e encerrar um uso, com o combustível): função de operador. */
+export const ehOperadorDeFrota = (v) => ativo(v) && Array.isArray(v.funcoes) && v.funcoes.includes('operador');

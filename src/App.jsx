@@ -8,6 +8,8 @@ import EscolherEmpresa from './EscolherEmpresa.jsx';
 import Carregando from './Carregando.jsx';
 import Inicio from './paginas/Inicio.jsx';
 import Fitossanidade from './modulos/fitossanidade/Fitossanidade.jsx';
+import Frota from './modulos/frota/Frota.jsx';
+import Maquinas from './frota/telas/Maquinas.jsx';
 import Campo from './campo/telas/Campo.jsx';
 import NovaAvaliacao from './campo/telas/NovaAvaliacao.jsx';
 import Avaliacao from './campo/telas/Avaliacao.jsx';
@@ -20,6 +22,7 @@ import AdminVinculos from './admin/AdminVinculos.jsx';
 import AdminEstrutura from './admin/AdminEstrutura.jsx';
 import AdminLimites from './admin/AdminLimites.jsx';
 import AdminMembros from './admin/AdminMembros.jsx';
+import AdminMaquinas from './admin/AdminMaquinas.jsx';
 import { PendentesProvider } from './offline/PendentesProvider.jsx';
 import Admin from './admin/Admin.jsx';
 import Plataforma from './plataforma/Plataforma.jsx';
@@ -54,12 +57,17 @@ export default function App() {
               <Route path="/fitossanidade/acompanhamento/:aid" element={<DetalheDaAvaliacao />} />
               <Route path="/fitossanidade/vinculos" element={<VinculosDoSetor />} />
             </Route>
+            <Route element={<RequerModulo modulo="frota" />}>
+              <Route path="/frota" element={<Frota />} />
+              <Route path="/frota/maquinas" element={<Maquinas />} />
+            </Route>
             <Route element={<RequerAdminEmpresa />}>
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin/vinculos" element={<AdminVinculos />} />
               <Route path="/admin/estrutura" element={<AdminEstrutura />} />
               <Route path="/admin/limites" element={<AdminLimites />} />
               <Route path="/admin/membros" element={<AdminMembros />} />
+              <Route path="/admin/maquinas" element={<AdminMaquinas />} />
             </Route>
           </Route>
 

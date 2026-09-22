@@ -25,3 +25,10 @@ export function lerTalhao(fd, fichasPorCultura) {
 export const lerAjuste = (fd) => ({ entrada: texto(fd, 'entrada'), motivo: texto(fd, 'motivo') });
 
 export const lerMembro = (fd) => ({ uid: texto(fd, 'uid'), nome: texto(fd, 'nome'), papelEmpresa: texto(fd, 'papelEmpresa') || 'membro', ativo: fd.get('ativo') !== 'nao' });
+
+export const lerMaquina = (fd) => ({
+  nome: texto(fd, 'nome'), modelo: texto(fd, 'modelo'), tipo: texto(fd, 'tipo'), documento: texto(fd, 'documento'),
+  combustivel: texto(fd, 'combustivel'), ativo: fd.get('ativo') === 'sim',
+});
+
+export const lerDescricao = (fd) => texto(fd, 'descricao');

@@ -382,3 +382,101 @@ export function PublicarFicha({ culturas, resumo, aoLerArquivo, aoPublicar, ocup
     </section>
   );
 }
+
+// ---------------------------------------------------------------- máquinas (Frota)
+
+export const ROTULO_DISPONIBILIDADE = { disponivel: 'Disponível', em_uso: 'Em uso' };
+export const ROTULO_STATUS_MAQUINA = { operacional: 'Operacional', precisa_manutencao: 'Precisa de manutenção', manutencao_sugerida: 'Manutenção sugerida' };
+
+export function FormMaquina({ inicial = {}, aoEnviar, ocupado, rotuloEnviar, novo = false }) {
+  return (
+    <Formulario aoEnviar={aoEnviar} ocupado={ocupado} rotuloEnviar={rotuloEnviar}>
+      <Campo rotulo="Nome">
+        <input name="nome" required maxLength={120} defaultValue={inicial.nome ?? ''} />
+      </Campo>
+      <Campo rotulo="Modelo (opcional)">
+        <input name="modelo" maxLength={120} defaultValue={inicial.modelo ?? ''} />
+      </Campo>
+      <Campo rotulo="Tipo (opcional)" dica="Ex.: trator, pulverizador, caminhão">
+        <input name="tipo" maxLength={60} defaultValue={inicial.tipo ?? ''} />
+      </Campo>
+      <Campo rotulo="Documento (opcional)" dica="Nota fiscal, placa, patrimônio...">
+        <input name="documento" maxLength={200} defaultValue={inicial.documento ?? ''} />
+      </Campo>
+      {novo && (
+        <Campo rotulo="Combustível inicial (%)">
+          <input name="combustivel" required inputMode="decimal" defaultValue="100" />
+        </Campo>
+      )}
+      <Ativo nome="ativo" ligado={inicial.ativo ?? true} rotulo="Máquina ativa" />
+    </Formulario>
+  );
+}
+
+function ManutencaoAdmin({ m, aoMarcarUrgente, aoConcluir, ocupado }) {
+  return (
+    <Recolhido titulo="Manutenção">
+      <p className="cartao__texto">
+        Status atual: <b>{ROTULO_STATUS_MAQUINA[m.status]}</b>
+      </p>
+      {m.status !== 'precisa_manutencao' && (
+        <Formulario ocupado={ocupado} rotuloEnviar="Marcar urgente" aoEnviar={(fd) => aoMarcarUrgente(m, fd)}>
+          <Campo rotulo="Descrição (opcional)">
+            <textarea name="descricao" rows={2} maxLength={1000} />
+          </Campo>
+        </Formulario>
+      )}
+      {m.status !== 'operacional' && (
+        <Formulario ocupado={ocupado} rotuloEnviar="Concluir manutenção" aoEnviar={(fd) => aoConcluir(m, fd)}>
+          <Campo rotulo="O que foi feito">
+            <textarea name="descricao" required rows={2} maxLength={1000} />
+          </Campo>
+        </Formulario>
+      )}
+    </Recolhido>
+  );
+}
+
+export function Maquinas({ unidades, maquinas, aoCriar, aoAlterar, aoMarcarUrgente, aoConcluir, ocupado, erro, aviso }) {
+  const porNome = (a, b) => (a.nome ?? '').localeCompare(b.nome ?? '', 'pt-BR');
+  return (
+    <section>
+      <h1>Frota (maquinário)</h1>
+      <p className="lead">O maquinário é da fazenda (unidade): qualquer setor com o módulo Frota o usa. Nada é apagado: para tirar de uso, desative.</p>
+      {erro ? <Faixa tipo="erro">{erro}</Faixa> : null}
+      {aviso ? <Faixa tipo="ok">{aviso}</Faixa> : null}
+
+      {unidades.length === 0 ? <div className="vazio">Ainda não há unidades. Cadastre uma em Unidades, setores e talhões.</div> : null}
+      {[...unidades].sort(porNome).map((u) => {
+        const suas = maquinas.filter((m) => m.unidadeId === u.id).sort(porNome);
+        return (
+          <article key={u.id} className="cartao" aria-label={`Máquinas de ${u.nome}`}>
+            <h2 className="cartao__titulo">{u.nome}</h2>
+            {suas.length === 0 ? <div className="vazio">Sem máquinas.</div> : null}
+            {suas.map((m) => (
+              <div key={m.id} className="cartao cartao--linha">
+                <strong>
+                  {m.nome} {ROTULO_ATIVO(m.ativo)}
+                </strong>
+                <span className="cartao__texto">{[m.modelo, m.tipo, m.documento].filter(Boolean).join(' · ') || 'Sem modelo, tipo ou documento informado'}</span>
+                <span className="cartao__texto">
+                  {ROTULO_DISPONIBILIDADE[m.disponibilidade]} · {ROTULO_STATUS_MAQUINA[m.status]} · combustível {Math.round((m.combustivel ?? 0) * 100)}%
+                </span>
+                <Recolhido titulo={`Editar ${m.nome}`}>
+                  <FormMaquina inicial={m} ocupado={ocupado} aoEnviar={(fd) => aoAlterar(m, fd)} />
+                </Recolhido>
+                <ManutencaoAdmin m={m} aoMarcarUrgente={aoMarcarUrgente} aoConcluir={aoConcluir} ocupado={ocupado} />
+              </div>
+            ))}
+            <Recolhido titulo="+ Nova máquina">
+              <FormMaquina novo ocupado={ocupado} rotuloEnviar="Cadastrar máquina" aoEnviar={(fd) => aoCriar(u.id, fd)} />
+            </Recolhido>
+          </article>
+        );
+      })}
+      <p>
+        <Link to="/admin">Voltar à administração</Link>
+      </p>
+    </section>
+  );
+}

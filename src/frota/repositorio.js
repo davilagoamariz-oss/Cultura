@@ -7,7 +7,7 @@
 //  - sugerir/alterar o status da máquina grava a máquina E o registro em "manutencoes" juntos, por
 //    consistência (não é exigido pelas regras, mas é como o app sempre faz);
 //  - ler por id um documento que não existe é negado: listagens usam consulta simples.
-import { collection, deleteField, doc, getDocs, onSnapshot, serverTimestamp, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
+import { collection, deleteField, doc, getDocs, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore';
 import { caminhos } from '../nucleo/caminhos.js';
 import { comId } from '../campo/repositorio.js';
 import { montarMaquina, montarEdicaoMaquina } from './cadastro.js';
@@ -20,8 +20,12 @@ export const listarMaquinas = (db, e) => lista(collection(db, ...caminhos.maquin
 export const listarUsos = (db, e, maquinaId) => lista(collection(db, ...caminhos.usos(e, maquinaId)));
 export const listarManutencoes = (db, e, maquinaId) => lista(collection(db, ...caminhos.manutencoes(e, maquinaId)));
 
-export function ouvirMaquinas(db, e, aoMudar, aoFalhar) {
-  return onSnapshot(collection(db, ...caminhos.maquinas(e)), { includeMetadataChanges: true }, (s) => aoMudar(s.docs.map((d) => ({ ...comId(d), pendente: d.metadata.hasPendingWrites }))), aoFalhar);
+/** As máquinas ativas de uma unidade (a tela do operador escolhe pelo setor, que já sabe a unidade). */
+export const consultaMaquinasDaUnidade = (db, e, unidadeId) =>
+  query(collection(db, ...caminhos.maquinas(e)), where('unidadeId', '==', unidadeId), where('ativo', '==', true));
+
+export function ouvirMaquinasDaUnidade(db, e, unidadeId, aoMudar, aoFalhar) {
+  return onSnapshot(consultaMaquinasDaUnidade(db, e, unidadeId), { includeMetadataChanges: true }, (s) => aoMudar(s.docs.map((d) => ({ ...comId(d), pendente: d.metadata.hasPendingWrites }))), aoFalhar);
 }
 
 // ---------------------------------------------------------------- cadastro (admin)

@@ -7,12 +7,14 @@ import { montarMenu, escolherSetorDoModulo } from '../../src/nucleo/menu.js';
 import Layout from '../../src/Layout.jsx';
 import Inicio from '../../src/paginas/Inicio.jsx';
 import Fitossanidade from '../../src/modulos/fitossanidade/Fitossanidade.jsx';
+import Frota from '../../src/modulos/frota/Frota.jsx';
 import SemAcesso from '../../src/SemAcesso.jsx';
 import Admin from '../../src/admin/Admin.jsx';
 import { ListaTalhoes, FormNovaAvaliacao, GradePlantas, FormularioPlanta, ResumoAvaliacao } from '../../src/campo/telas/apresentacao.jsx';
 import { PendentesContext } from '../../src/offline/PendentesProvider.jsx';
 import { ListaAcompanhamento, DetalheAvaliacao, GestaoVinculos, SeloPendencias } from '../../src/gestao/telas/apresentacao.jsx';
-import { Estrutura, Limites, Membros, PublicarFicha, FormTalhao } from '../../src/admin/telas/apresentacao.jsx';
+import { Estrutura, Limites, Membros, PublicarFicha, FormTalhao, Maquinas as MaquinasAdmin, FormMaquina } from '../../src/admin/telas/apresentacao.jsx';
+import { Maquinas as MaquinasFrota } from '../../src/frota/telas/apresentacao.jsx';
 
 export function sessaoDeMentira({ vinculos = [], setores = {}, unidades = {}, admin = false, plataforma = false, empresas = 1, status = 'ok', setorSalvo = null, nome = 'Fulano' } = {}) {
   const menu = montarMenu({ vinculos, setores, unidades });
@@ -28,7 +30,7 @@ export function sessaoDeMentira({ vinculos = [], setores = {}, unidades = {}, ad
   };
 }
 
-const TELAS = { Layout: () => <Layout><p>conteúdo</p></Layout>, Inicio, Fitossanidade, SemAcesso, Admin };
+const TELAS = { Layout: () => <Layout><p>conteúdo</p></Layout>, Inicio, Fitossanidade, Frota, SemAcesso, Admin };
 
 export function renderizar(tela, sessao, rota = '/') {
   const Tela = TELAS[tela];
@@ -78,10 +80,22 @@ export function renderizarGestao(nome, props, rota = '/') {
 }
 
 // ---- telas de administração do cadastro (apresentação)
-export const COMPONENTES_ADMIN = { Estrutura, Limites, Membros, PublicarFicha, FormTalhao };
+export const COMPONENTES_ADMIN = { Estrutura, Limites, Membros, PublicarFicha, FormTalhao, Maquinas: MaquinasAdmin, FormMaquina };
 
 export function renderizarAdmin(nome, props, rota = '/') {
   const Componente = COMPONENTES_ADMIN[nome];
+  return renderToString(
+    <MemoryRouter initialEntries={[rota]}>
+      <Componente {...props} />
+    </MemoryRouter>,
+  );
+}
+
+// ---- telas da Frota (apresentação)
+export const COMPONENTES_FROTA = { Maquinas: MaquinasFrota };
+
+export function renderizarFrota(nome, props, rota = '/') {
+  const Componente = COMPONENTES_FROTA[nome];
   return renderToString(
     <MemoryRouter initialEntries={[rota]}>
       <Componente {...props} />
