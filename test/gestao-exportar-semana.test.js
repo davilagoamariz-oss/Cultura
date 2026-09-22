@@ -29,6 +29,20 @@ test('CSV escapa campo com ";", aspas ou quebra de linha', () => {
   assert.match(csv, /"Com\nquebra"/);
 });
 
+test('injeção de fórmula: campo que começa com =, +, -, @ ou tab ganha um apóstrofo na frente', () => {
+  for (const bruto of ['=1+1', '+SOMA(A1:A9)', '-2', '@SUM(1,2)', '\tconteudo']) {
+    const csv = csvDaSemana([linha({ talhaoNome: bruto })]);
+    const [, l1] = csv.split('\r\n');
+    assert.ok(l1.startsWith(`'${bruto}`), `${bruto} -> ${l1}`);
+  }
+});
+
+test('texto comum, mesmo com "=" no meio, não ganha apóstrofo', () => {
+  const csv = csvDaSemana([linha({ talhaoNome: 'Talhão A=B' })]);
+  const [, l1] = csv.split('\r\n');
+  assert.ok(l1.startsWith('Talhão A=B'));
+});
+
 test('lista vazia: só o cabeçalho', () => {
   assert.equal(csvDaSemana([]), 'Talhão;Pragueiro;Data da inspeção;Situação;Tomadas de decisão');
 });

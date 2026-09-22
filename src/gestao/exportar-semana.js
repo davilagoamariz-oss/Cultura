@@ -6,9 +6,15 @@ const CABECALHO = ['Talhão', 'Pragueiro', 'Data da inspeção', 'Situação', '
 
 const SITUACAO_SEM_DECISAO = { rascunho: 'Em andamento', finalizada: 'Aguardando decisão' };
 
-/** Escapa uma célula para CSV: aspas quando tem ";", aspas ou quebra de linha; aspas internas dobradas. */
+/**
+ * Escapa uma célula para CSV: aspas quando tem ";", aspas ou quebra de linha; aspas internas
+ * dobradas. Um "'" na frente de quem começa com =, +, -, @, tab ou CR neutraliza "injeção de
+ * fórmula" (a célula abriria como fórmula executável no Excel/Sheets); o apóstrofo faz o programa
+ * tratar como texto. O nome do talhão e o nome da pessoa vêm de texto livre digitado no cadastro.
+ */
 function celula(valor) {
-  const texto = String(valor ?? '');
+  let texto = String(valor ?? '');
+  if (/^[=+\-@\t\r]/.test(texto)) texto = `'${texto}`;
   return /[;"\n]/.test(texto) ? `"${texto.replaceAll('"', '""')}"` : texto;
 }
 
