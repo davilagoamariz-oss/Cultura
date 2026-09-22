@@ -13,9 +13,10 @@ import { semanaISO, dataISO, semanaAnterior } from '../src/campo/semana.js';
 import { montarResumo } from '../src/campo/resumo.js';
 import { avaliar } from '../src/dominio/motor/index.js';
 import {
-  consultaAvaliacoesDoSetor, avaliacaoDaSemanaAnterior, decisoesDeAvaliacoes, criarDecisao, executarDecisao, consultaDecisoesDoSetor, ouvirDecisao,
-  consultaVinculosDoSetor, colecaoHistorico, alterarVinculo, criarVinculo, resolverNomes, listarMembros,
+  consultaAvaliacoesDoSetor, consultaAvaliacoesFinalizadasDoSetor, avaliacaoDaSemanaAnterior, decisoesDeAvaliacoes, criarDecisao, executarDecisao,
+  consultaDecisoesDoSetor, ouvirDecisao, consultaVinculosDoSetor, colecaoHistorico, alterarVinculo, criarVinculo, resolverNomes, listarMembros,
 } from '../src/gestao/repositorio.js';
+import { contarPendencias } from '../src/gestao/pendencias.js';
 import { tdsSugeridos, montarDecisao } from '../src/gestao/decisao.js';
 import { quemPodeAlterar, linhasDoHistorico, candidatosParaVincular } from '../src/gestao/vinculos.js';
 
@@ -143,6 +144,20 @@ try {
   conferir(decisoes[aidTripes]?.status === 'aprovada' && decisoes[aidLimpa]?.status === 'rejeitada' && !decisoes[aidRascunho], 'as decisões aparecem por avaliação');
   conferir(await negado(() => criarDecisao(db, E, { ficha: calc.ficha, avaliacao: calc.avaliacao, uid: uidAgro, status: 'rejeitada', tds: ['TD1'], observacao: 'mudei de ideia' })), 'não decide duas vezes a mesma avaliação');
   conferir(await negado(() => executarDecisao(db, E, aidTripes, { uid: uidAgro })), 'o agrônomo não marca como executada (é do gerente)');
+
+  console.log('3b) Selo de pendências: a consulta de finalizadas do setor (para o total na aba)');
+  const finalizadasDoSetor = (await getDocs(consultaAvaliacoesFinalizadasDoSetor(db, E, S))).docs.map(comId);
+  conferir(finalizadasDoSetor.some((a) => a.id === aidTripes) && finalizadasDoSetor.some((a) => a.id === aidLimpa), 'traz as duas avaliações finalizadas deste setor');
+  conferir(finalizadasDoSetor.every((a) => a.status === 'finalizada'), 'só traz finalizadas (nunca rascunho, mesmo sem filtrar por semana)');
+  const decisoesAgora = (await getDocs(consultaDecisoesDoSetor(db, E, S))).docs.map((d) => d.data());
+  // outros scripts de verificação também deixam avaliações finalizadas neste setor; conferimos só as DUAS
+  // desta verificação, não o total (que varia conforme o que rodou antes).
+  const decididasAgora = new Set(decisoesAgora.map((d) => d.avaliacaoId));
+  conferir(decididasAgora.has(aidTripes) && decididasAgora.has(aidLimpa), 'as duas avaliações decididas aqui já saem de "aguardando decisão" do agrônomo');
+  const pendAgro = contarPendencias({ avaliacoes: finalizadasDoSetor, decisoes: decisoesAgora, podeDecidir: true });
+  conferir(pendAgro.aguardandoDecisao === finalizadasDoSetor.length - decisoesAgora.length, 'o total "aguardando decisão" é exatamente finalizadas menos decididas');
+  const pendGerente = contarPendencias({ decisoes: decisoesAgora, ehGerente: true });
+  conferir(pendGerente.aguardandoExecucao >= 1, 'o gerente tem ao menos uma aprovada aguardando execução (o talhão 01, TD3)');
   await sair();
 
   console.log('4) Quem não é agrônomo não decide');

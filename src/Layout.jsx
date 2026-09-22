@@ -3,11 +3,14 @@ import { NOME_APP } from './nucleo/config.js';
 import { useSessao } from './nucleo/Sessao.jsx';
 import { useOnline } from './offline/useOnline.js';
 import { usePendentes, textoPendentes } from './offline/PendentesProvider.jsx';
+import { useContagemPendencias } from './gestao/telas/contexto.js';
+import { SeloPendencias } from './gestao/telas/apresentacao.jsx';
 
 export default function Layout({ children }) {
   const { nome, user, empresaNome, empresasAtivas, ehAdminEmpresa, ehPlataforma, menu, empresaId, sair, trocarEmpresa } = useSessao();
   const online = useOnline();
   const pendentes = textoPendentes(usePendentes());
+  const { total: pendenciasFitossanidade } = useContagemPendencias();
   const legenda = empresaNome ?? (ehPlataforma && !empresaId ? 'Plataforma' : null);
   const classe = ({ isActive }) => `aba${isActive ? ' aba--ativa' : ''}`;
 
@@ -44,6 +47,7 @@ export default function Layout({ children }) {
         {menu.map((e) => (
           <NavLink key={e.modulo.id} to={e.modulo.rota} className={classe}>
             {e.modulo.rotulo}
+            {e.modulo.id === 'fitossanidade' && <SeloPendencias total={pendenciasFitossanidade} />}
           </NavLink>
         ))}
         {ehAdminEmpresa && (

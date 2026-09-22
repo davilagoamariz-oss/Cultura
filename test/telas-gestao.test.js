@@ -298,3 +298,13 @@ test('vínculos: lista vazia e erro', () => {
   assert.match(tela('GestaoVinculos', propsVinculos()), /Ninguém está ligado a este setor/);
   assert.match(tela('GestaoVinculos', propsVinculos({ erro: 'O servidor recusou (permission-denied).' })), /role="alert"/);
 });
+
+// ---------------------------------------------------------------- selo de pendências na aba
+
+test('selo de pendências: escondido em zero, mostra o total e um aria-label legível', () => {
+  assert.equal(tela('SeloPendencias', { total: 0 }), '');
+  const h = tela('SeloPendencias', { total: 3 });
+  assert.match(h, /class="selo selo--alerta"/);
+  assert.match(h, />3</);
+  assert.match(h, /aria-label="3 aguardando você"/);
+});

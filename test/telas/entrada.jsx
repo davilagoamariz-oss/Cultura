@@ -11,7 +11,7 @@ import SemAcesso from '../../src/SemAcesso.jsx';
 import Admin from '../../src/admin/Admin.jsx';
 import { ListaTalhoes, FormNovaAvaliacao, GradePlantas, FormularioPlanta, ResumoAvaliacao } from '../../src/campo/telas/apresentacao.jsx';
 import { PendentesContext } from '../../src/offline/PendentesProvider.jsx';
-import { ListaAcompanhamento, DetalheAvaliacao, GestaoVinculos } from '../../src/gestao/telas/apresentacao.jsx';
+import { ListaAcompanhamento, DetalheAvaliacao, GestaoVinculos, SeloPendencias } from '../../src/gestao/telas/apresentacao.jsx';
 import { Estrutura, Limites, Membros, PublicarFicha, FormTalhao } from '../../src/admin/telas/apresentacao.jsx';
 
 export function sessaoDeMentira({ vinculos = [], setores = {}, unidades = {}, admin = false, plataforma = false, empresas = 1, status = 'ok', setorSalvo = null, nome = 'Fulano' } = {}) {
@@ -66,7 +66,7 @@ export function renderizarLayoutComPendentes(sessao, total) {
 }
 
 // ---- telas de gestão (apresentação)
-export const COMPONENTES_GESTAO = { ListaAcompanhamento, DetalheAvaliacao, GestaoVinculos };
+export const COMPONENTES_GESTAO = { ListaAcompanhamento, DetalheAvaliacao, GestaoVinculos, SeloPendencias };
 
 export function renderizarGestao(nome, props, rota = '/') {
   const Componente = COMPONENTES_GESTAO[nome];

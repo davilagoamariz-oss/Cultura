@@ -19,6 +19,10 @@ import { montarAlteracao, montarNovoVinculo } from './vinculos.js';
 export const consultaAvaliacoesDoSetor = (db, empresaId, setorId, semana) =>
   query(collection(db, ...caminhos.avaliacoes(empresaId)), where('setorId', '==', setorId), where('semanaISO', '==', semana));
 
+/** Avaliações finalizadas do setor, de QUALQUER semana (para saber quantas ainda esperam decisão). */
+export const consultaAvaliacoesFinalizadasDoSetor = (db, empresaId, setorId) =>
+  query(collection(db, ...caminhos.avaliacoes(empresaId)), where('setorId', '==', setorId), where('status', '==', 'finalizada'));
+
 /** Todas as avaliações de um talhão no setor (para ver a semana anterior, ex.: armadilha do bicho-furão). */
 export const consultaAvaliacoesDoTalhao = (db, empresaId, setorId, talhaoId) =>
   query(collection(db, ...caminhos.avaliacoes(empresaId)), where('setorId', '==', setorId), where('talhaoId', '==', talhaoId));

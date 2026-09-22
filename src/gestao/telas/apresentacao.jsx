@@ -8,6 +8,16 @@ import { NOMES_PAPEL_VINCULO } from '../../modulos/registro.js';
 
 export const rotaAcompanhamento = (...partes) => ['/fitossanidade/acompanhamento', ...partes].join('/');
 
+/** Selo com o total de itens que esperam a ação da pessoa (aguardando decisão ou execução), na aba do módulo. */
+export function SeloPendencias({ total }) {
+  if (!total) return null;
+  return (
+    <span className="selo selo--alerta" aria-label={`${total} aguardando você`}>
+      {total}
+    </span>
+  );
+}
+
 // ---------------------------------------------------------------- lista da semana
 
 const GRUPOS = [

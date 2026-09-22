@@ -75,6 +75,7 @@ test('cabeçalho: online, nome, empresa, sair; abas só com o que a pessoa pode 
   assert.match(pragueiro, /Sair/);
   assert.match(pragueiro, />Início</);
   assert.match(pragueiro, />Fitossanidade</);
+  assert.doesNotMatch(pragueiro, /selo--alerta/); // pragueiro não decide nem executa: sem selo de pendências
   assert.doesNotMatch(pragueiro, /Administração/);
   assert.doesNotMatch(pragueiro, /Plataforma/);
   assert.doesNotMatch(pragueiro, /Trocar empresa/);

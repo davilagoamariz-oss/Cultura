@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { onSnapshot } from 'firebase/firestore';
 import { useSessao } from '../../nucleo/Sessao.jsx';
 import { podeAcompanhar, podeDecidir, ehGerenteDoSetor } from '../../nucleo/permissoes.js';
 import { db } from '../../nucleo/firebase.js';
-import { resolverNomes } from '../repositorio.js';
+import { resolverNomes, consultaAvaliacoesFinalizadasDoSetor, consultaDecisoesDoSetor } from '../repositorio.js';
 import { nomeParaMostrar } from '../vinculos.js';
+import { contarPendencias } from '../pendencias.js';
 
 const MODULO = 'fitossanidade';
 
@@ -26,6 +28,33 @@ export function useContextoGestao() {
     setores: s.setores,
     unidades: s.unidades,
   };
+}
+
+/**
+ * Quantas coisas esperam a ação da pessoa no setor de Fitossanidade em uso (para o selo na aba). Sem
+ * vínculo que dê nisso (nem agrônomo, nem gerente), nem chega a ouvir nada: fica sempre em 0.
+ */
+export function useContagemPendencias() {
+  const { empresaId, setor, podeDecidir, ehGerente } = useContextoGestao();
+  const [avaliacoes, setAvaliacoes] = useState([]);
+  const [decisoes, setDecisoes] = useState([]);
+
+  useEffect(() => {
+    if (!setor || !(podeDecidir || ehGerente)) {
+      setAvaliacoes([]);
+      setDecisoes([]);
+      return undefined;
+    }
+    const parar = [
+      onSnapshot(consultaDecisoesDoSetor(db, empresaId, setor.setorId), (s) => setDecisoes(s.docs.map((d) => d.data())), () => setDecisoes([])),
+    ];
+    if (podeDecidir) {
+      parar.push(onSnapshot(consultaAvaliacoesFinalizadasDoSetor(db, empresaId, setor.setorId), (s) => setAvaliacoes(s.docs.map((d) => ({ id: d.id, ...d.data() }))), () => setAvaliacoes([])));
+    }
+    return () => parar.forEach((f) => f());
+  }, [empresaId, setor, podeDecidir, ehGerente]);
+
+  return contarPendencias({ avaliacoes, decisoes, podeDecidir, ehGerente });
 }
 
 /**

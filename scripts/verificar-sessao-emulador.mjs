@@ -71,7 +71,7 @@ try {
 
   s = await sessaoDe('motorista');
   conferir(s.decisao.status === 'ok' && s.vinculos.length === 1, 'motorista é membro e tem 1 vínculo (setor Frota)');
-  conferir(s.menu.length === 0, 'motorista NÃO vê Fitossanidade nem outro módulo (Frota ainda não existe no app)');
+  conferir(setoresDoMenu(s.menu).join() === 'frota/frota-1', 'motorista vê Frota (é operador), não Fitossanidade');
 
   s = await sessaoDe('semvinculo');
   conferir(s.decisao.status === 'ok' && s.menu.length === 0, 'membro sem vínculo entra na empresa e não vê nenhum módulo');
