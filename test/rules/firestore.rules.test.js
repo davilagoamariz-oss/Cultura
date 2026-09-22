@@ -288,7 +288,8 @@ describe('cadastros base (unidades, setores, safras, talhões)', () => {
     await assertFails(setDoc(p(db, 'empresas', A, 'setores', 'fit_novo'), novo())); // "_" quebraria o id do vínculo
     await assertFails(setDoc(p(db, 'empresas', A, 'setores', 'x'.repeat(61)), novo()));
     await assertFails(setDoc(p(db, 'empresas', A, 'setores', 'fit-x'), novo({ unidadeId: 'un-b1' }))); // unidade de outra empresa
-    await assertFails(setDoc(p(db, 'empresas', A, 'setores', 'fit-y'), novo({ modulos: ['frota'] }))); // módulo ainda não existe
+    await assertSucceeds(setDoc(p(db, 'empresas', A, 'setores', 'fit-y'), novo({ modulos: ['frota'] }))); // frota já é um módulo conhecido
+    await assertFails(setDoc(p(db, 'empresas', A, 'setores', 'fit-w'), novo({ modulos: ['colheita'] }))); // módulo ainda não existe
     await assertFails(setDoc(p(db, 'empresas', A, 'setores', 'fit-z'), novo({ modulos: 'fitossanidade' })));
   });
 

@@ -150,7 +150,8 @@ await sair();
 
 console.log('\n== Regras que valem mesmo com o app ajustado à mão ==');
 await entrar('admin');
-conferir(await negado(() => setDoc(doc(db, ...caminhos.setor(E, 'setor-frota')), { unidadeId: idUn, nome: 'Frota', modulos: ['frota'], ativo: true })), 'setor com módulo desconhecido é negado');
+conferir(await negado(() => setDoc(doc(db, ...caminhos.setor(E, 'setor-colheita')), { unidadeId: idUn, nome: 'Colheita', modulos: ['colheita'], ativo: true })), 'setor com módulo desconhecido é negado');
+conferir(!(await negado(() => setDoc(doc(db, ...caminhos.setor(E, 'setor-frota')), { unidadeId: idUn, nome: 'Frota', modulos: ['frota'], ativo: true }))), 'setor com o módulo Frota (já existe) é aceito');
 conferir(await negado(() => setDoc(doc(db, ...caminhos.setor(E, 'setor-sem-unidade')), { unidadeId: 'nao-existe', nome: 'X', modulos: [], ativo: true })), 'setor numa unidade que não existe é negado');
 conferir(await negado(() => updateDoc(doc(db, ...caminhos.setor(E, idSetor)), { unidadeId: 'un-1' })), 'setor não troca de unidade');
 conferir(await negado(() => updateDoc(doc(db, ...caminhos.talhao(E, idTal)), { unidadeId: 'un-1' })), 'talhão não troca de unidade');

@@ -109,7 +109,7 @@ service cloud.firestore {
         && d.keys().hasAll(['unidadeId', 'nome', 'modulos', 'ativo'])
         && textoAte(d.unidadeId, 128)
         && textoAte(d.nome, 120)
-        && d.modulos is list && d.modulos.size() <= 20 && d.modulos.hasOnly(['fitossanidade'])
+        && d.modulos is list && d.modulos.size() <= 20 && d.modulos.hasOnly(['fitossanidade', 'frota'])
         && d.ativo is bool;
     }
 
@@ -153,6 +153,153 @@ service cloud.firestore {
         && (!('motivo' in d) || textoAte(d.motivo, 500));
     }
 
+    // ---------- Frota (maquinário) ----------
+    // A máquina é da UNIDADE (como o talhão): setores diferentes da mesma fazenda a compartilham.
+    // "usoAtual" (na máquina) e o registro em "usos" são escritos JUNTOS pelo app (mesmo lote, mesmo
+    // usoId), mas as regras avaliam cada escrita por si: cruzar as duas com getAfter/existsAfter
+    // esbarrou no limite de avaliação do Firestore (regras caras demais). O pior caso de uma escrita
+    // sem a outra é um registro sem log, não uma falha de autorização: cada escrita já exige sozinha
+    // a função "operador" no setor certo, da mesma unidade da máquina. O mesmo vale para "manutencoes".
+
+    function usoAtualValido(u) {
+      return u == null
+        || (u.keys().hasOnly(['usoId', 'operadorUid', 'setorId', 'inicioEm'])
+            && u.keys().hasAll(['usoId', 'operadorUid', 'setorId', 'inicioEm'])
+            && u.usoId is string && u.usoId.size() > 0 && u.usoId.size() <= 60
+            && textoAte(u.operadorUid, 128)
+            && idSemSublinhado(u.setorId)
+            && u.inicioEm is timestamp);
+    }
+
+    function maquinaValida() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['unidadeId', 'nome', 'modelo', 'tipo', 'documento', 'ativo',
+                               'disponibilidade', 'status', 'combustivel', 'usoAtual', 'criadoEm', 'atualizadoEm'])
+        && d.keys().hasAll(['unidadeId', 'nome', 'ativo', 'disponibilidade', 'status', 'combustivel'])
+        && textoAte(d.unidadeId, 128)
+        && textoAte(d.nome, 120)
+        && (!('modelo' in d) || textoAte(d.modelo, 120))
+        && (!('tipo' in d) || textoAte(d.tipo, 60))
+        && (!('documento' in d) || textoAte(d.documento, 200))
+        && d.ativo is bool
+        && d.disponibilidade in ['disponivel', 'em_uso']
+        && d.status in ['operacional', 'precisa_manutencao', 'manutencao_sugerida']
+        && d.combustivel is number && d.combustivel >= 0 && d.combustivel <= 1
+        && (!('usoAtual' in d) || usoAtualValido(d.usoAtual));
+    }
+
+    // Só o admin cadastra, e ela nasce disponível, operacional e ativa (o dia a dia começa depois).
+    function maquinaCriavel(e) {
+      let d = request.resource.data;
+      return maquinaValida()
+        && d.disponibilidade == 'disponivel'
+        && d.status == 'operacional'
+        && d.ativo == true
+        && !('usoAtual' in d)
+        && exists(/databases/$(database)/documents/empresas/$(e)/unidades/$(d.unidadeId));
+    }
+
+    // O admin edita o cadastro (nome, modelo, tipo, documento, ativo); nunca mexe no dia a dia por aqui.
+    function maquinaEditavelPeloAdmin() {
+      let r = resource.data;
+      let d = request.resource.data;
+      return maquinaValida()
+        && d.unidadeId == r.unidadeId
+        && d.disponibilidade == r.disponibilidade
+        && d.status == r.status
+        && d.combustivel == r.combustivel
+        && (('usoAtual' in d) == ('usoAtual' in r))
+        && (!('usoAtual' in d) || d.usoAtual == r.usoAtual);
+    }
+
+    // Iniciar um uso: só quem tem a função "operador" no setor (do módulo Frota, da MESMA unidade da
+    // máquina), com a máquina ativa e disponível. O uso nasce no mesmo lote (mesmo usoId nos dois).
+    function usoIniciavel(e, mid) {
+      let r = resource.data;
+      let d = request.resource.data;
+      return d.diff(r).affectedKeys().hasOnly(['disponibilidade', 'usoAtual', 'atualizadoEm'])
+        && r.ativo == true
+        && r.disponibilidade == 'disponivel'
+        && !('usoAtual' in r)
+        && d.disponibilidade == 'em_uso'
+        && usoAtualValido(d.usoAtual)
+        && d.usoAtual.operadorUid == request.auth.uid
+        && d.usoAtual.inicioEm == request.time
+        && temFuncao(e, d.usoAtual.setorId, 'operador')
+        && moduloAtivo(e, d.usoAtual.setorId, 'frota')
+        && get(/databases/$(database)/documents/empresas/$(e)/setores/$(d.usoAtual.setorId)).data.unidadeId == r.unidadeId;
+    }
+
+    // Encerrar um uso: só quem começou, e o combustível vira o vigente da máquina.
+    function usoEncerravel(e, mid) {
+      let r = resource.data;
+      let d = request.resource.data;
+      return d.diff(r).affectedKeys().hasOnly(['disponibilidade', 'usoAtual', 'combustivel', 'atualizadoEm'])
+        && r.disponibilidade == 'em_uso'
+        && r.usoAtual.operadorUid == request.auth.uid
+        && d.disponibilidade == 'disponivel'
+        && !('usoAtual' in d)
+        && d.combustivel is number && d.combustivel >= 0 && d.combustivel <= 1
+        && temFuncao(e, r.usoAtual.setorId, 'operador');
+    }
+
+    // Qualquer membro ativo sinaliza um problema leve: só de "operacional" para "manutenção sugerida".
+    function manutencaoSugerivel() {
+      let r = resource.data;
+      let d = request.resource.data;
+      return d.diff(r).affectedKeys().hasOnly(['status', 'atualizadoEm'])
+        && r.status == 'operacional'
+        && d.status == 'manutencao_sugerida';
+    }
+
+    // Só o admin marca urgente (de qualquer estado, menos já urgente) ou conclui (volta a operacional).
+    function manutencaoAlteravelPeloAdmin() {
+      let r = resource.data;
+      let d = request.resource.data;
+      return d.diff(r).affectedKeys().hasOnly(['status', 'atualizadoEm'])
+        && ((d.status == 'precisa_manutencao' && r.status != 'precisa_manutencao')
+            || (d.status == 'operacional' && r.status != 'operacional'));
+    }
+
+    // Registro do uso: nasce com o mesmo id que a máquina referencia em "usoAtual.usoId".
+    function usoCriavel(e, mid) {
+      let d = request.resource.data;
+      let m = get(/databases/$(database)/documents/empresas/$(e)/maquinas/$(mid)).data;
+      return d.keys().hasOnly(['operadorUid', 'setorId', 'unidadeId', 'inicioEm', 'fimEm', 'combustivelInicio', 'combustivelFim'])
+        && d.keys().hasAll(['operadorUid', 'setorId', 'unidadeId', 'inicioEm'])
+        && d.operadorUid == request.auth.uid
+        && idSemSublinhado(d.setorId)
+        && d.unidadeId == m.unidadeId
+        && d.inicioEm == request.time
+        && !('fimEm' in d)
+        && (!('combustivelInicio' in d) || (d.combustivelInicio is number && d.combustivelInicio >= 0 && d.combustivelInicio <= 1))
+        && temFuncao(e, d.setorId, 'operador')
+        && moduloAtivo(e, d.setorId, 'frota')
+        && get(/databases/$(database)/documents/empresas/$(e)/setores/$(d.setorId)).data.unidadeId == m.unidadeId;
+    }
+
+    // Fechar o registro do uso: só quem começou, com o fim e o combustível; a máquina tem que ter voltado a "disponível".
+    function usoFechavel(e, mid) {
+      let r = resource.data;
+      let d = request.resource.data;
+      return d.diff(r).affectedKeys().hasOnly(['fimEm', 'combustivelFim'])
+        && r.operadorUid == request.auth.uid
+        && !('fimEm' in r)
+        && d.fimEm == request.time
+        && d.combustivelFim is number && d.combustivelFim >= 0 && d.combustivelFim <= 1;
+    }
+
+    // Registro de manutenção: log, só acrescenta (quem grava é sempre quem está autenticado).
+    function manutencaoCriavel() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['tipo', 'descricao', 'criadoPor', 'criadoEm'])
+        && d.keys().hasAll(['tipo', 'criadoPor', 'criadoEm'])
+        && d.tipo in ['sugestao', 'realizada']
+        && d.criadoPor == request.auth.uid
+        && d.criadoEm == request.time
+        && (!('descricao' in d) || textoAte(d.descricao, 1000));
+    }
+
     function vinculoCamposValidos() {
       let d = request.resource.data;
       return d.keys().hasOnly(['pessoaUid', 'setorId', 'unidadeId', 'papel', 'funcoes', 'ativo', 'versao', 'alteradoPor', 'alteradoEm'])
@@ -161,7 +308,7 @@ service cloud.firestore {
         && idSemSublinhado(d.setorId)
         && textoAte(d.unidadeId, 128)
         && d.papel in ['gerente', 'funcionario']
-        && d.funcoes is list && d.funcoes.size() <= 4 && d.funcoes.hasOnly(['pragueiro', 'agronomo'])
+        && d.funcoes is list && d.funcoes.size() <= 4 && d.funcoes.hasOnly(['pragueiro', 'agronomo', 'operador'])
         && d.ativo is bool
         && d.versao is int;
     }
@@ -499,6 +646,34 @@ service cloud.firestore {
         allow read: if membroAtivo(e);
         allow create: if ehAdmin(e) && ajusteValido();
         allow update, delete: if false;
+      }
+
+      // Maquinário (módulo Frota). Cadastro legível por todo membro ativo, como talhão; o dia a dia
+      // (uso e manutenção) exige a função "operador" no setor certo, ou é reservado ao admin.
+      match /maquinas/{mid} {
+        allow read: if membroAtivo(e);
+        allow create: if ehAdmin(e) && maquinaCriavel(e);
+        allow update: if (ehAdmin(e) && (maquinaEditavelPeloAdmin() || manutencaoAlteravelPeloAdmin()))
+          || usoIniciavel(e, mid)
+          || usoEncerravel(e, mid)
+          || manutencaoSugerivel();
+        allow delete: if false;
+
+        // Histórico de uso: quem operou lê o próprio; o gerente do setor lê o do seu setor.
+        match /usos/{usoId} {
+          allow read: if moduloAtivo(e, resource.data.setorId, 'frota')
+            && (resource.data.operadorUid == request.auth.uid || ehGerente(e, resource.data.setorId));
+          allow create: if usoCriavel(e, mid);
+          allow update: if usoFechavel(e, mid);
+          allow delete: if false;
+        }
+
+        // Histórico de manutenção: legível por todo membro ativo (baixo risco, mesma régua do cadastro).
+        match /manutencoes/{mnid} {
+          allow read: if membroAtivo(e);
+          allow create: if membroAtivo(e) && manutencaoCriavel();
+          allow update, delete: if false;
+        }
       }
     }
 
