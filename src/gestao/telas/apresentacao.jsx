@@ -5,6 +5,7 @@ import { BlocoResultado, Faixa } from '../../campo/telas/apresentacao.jsx';
 import { ROTULO_STATUS_DECISAO } from '../decisao.js';
 import { FUNCOES, NOMES_FUNCAO } from '../vinculos.js';
 import { NOMES_PAPEL_VINCULO } from '../../modulos/registro.js';
+import { grupoDaLinha, resumirSemana } from '../acompanhamento.js';
 
 export const rotaAcompanhamento = (...partes) => ['/fitossanidade/acompanhamento', ...partes].join('/');
 
@@ -27,12 +28,24 @@ const GRUPOS = [
   { chave: 'em_andamento', titulo: 'Em andamento (o pragueiro ainda está avaliando)' },
 ];
 
-/** Em qual grupo a linha cai. */
-export function grupoDaLinha(l) {
-  if (l.status !== 'finalizada') return 'em_andamento';
-  if (!l.decisaoStatus) return 'aguardando_decisao';
-  if (l.decisaoStatus === 'aprovada') return 'aprovada';
-  return 'concluida';
+const ROTULO_RESUMO = {
+  aguardando_decisao: 'aguardando decisão', aprovada: 'aguardando execução', concluida: 'concluída', em_andamento: 'em andamento',
+};
+
+function ResumoDaSemana({ resumo }) {
+  const partes = ['aguardando_decisao', 'aprovada', 'em_andamento', 'concluida'].filter((chave) => resumo[chave] > 0);
+  return (
+    <p className="lead" aria-label="Resumo da semana">
+      <b>{resumo.total}</b> avaliaç{resumo.total === 1 ? 'ão' : 'ões'}
+      {partes.length > 0 ? ': ' : ''}
+      {partes.map((chave, i) => (
+        <span key={chave}>
+          {i > 0 ? ' · ' : ''}
+          <b>{resumo[chave]}</b> {ROTULO_RESUMO[chave]}
+        </span>
+      ))}
+    </p>
+  );
 }
 
 export function ListaAcompanhamento({ semana, rotuloSemana, semanaAnterior, semanaSeguinte, ehSemanaAtual, linhas }) {
@@ -51,6 +64,7 @@ export function ListaAcompanhamento({ semana, rotuloSemana, semanaAnterior, sema
           Próxima ›
         </Link>
       </nav>
+      {linhas.length > 0 && <ResumoDaSemana resumo={resumirSemana(linhas)} />}
 
       {linhas.length === 0 ? (
         <div className="vazio">Nenhuma avaliação neste setor nesta semana.</div>

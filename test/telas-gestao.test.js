@@ -57,6 +57,11 @@ test('lista da semana: agrupa por o que falta fazer, com a contagem de cada grup
       linha({ id: 'a5', talhaoNome: 'Talhão 05', status: 'rascunho' }),
     ],
   }));
+  assert.match(h, /<b>5<\/b> avaliações:/);
+  assert.match(h, /<b>1<\/b> aguardando decisão/);
+  assert.match(h, /<b>1<\/b> aguardando execução/);
+  assert.match(h, /<b>1<\/b> em andamento/);
+  assert.match(h, /<b>2<\/b> concluída/);
   assert.match(h, /Aguardando decisão do agrônomo \(1\)/);
   assert.match(h, /Aprovadas, aguardando execução \(1\)/);
   assert.match(h, /Concluídas \(2\)/);
@@ -76,7 +81,15 @@ test('lista da semana: navegação entre semanas e a semana atual', () => {
   assert.match(h, /<b>2026-W39<\/b>/);
   assert.match(h, /21\/09 a 27\/09\/2026 · esta semana/);
   assert.match(h, /Nenhuma avaliação neste setor nesta semana/);
+  assert.doesNotMatch(h, /aria-label="Resumo da semana"/); // sem linha nenhuma, o resumo some (o "vazio" já diz isso)
   assert.doesNotMatch(tela('ListaAcompanhamento', propsLista({ ehSemanaAtual: false })), /· esta semana/);
+});
+
+test('resumo da semana: "1 avaliação" no singular, e só aparece a situação que existe', () => {
+  const h = tela('ListaAcompanhamento', propsLista({ linhas: [linha({ decisaoStatus: 'aprovada' })] }));
+  assert.match(h, /<b>1<\/b> avaliação:/);
+  assert.match(h, /<b>1<\/b> aguardando execução/);
+  assert.doesNotMatch(h, /aguardando decisão|em andamento|concluída/);
 });
 
 test('lista da semana: avisa o que ainda aguarda envio', () => {
