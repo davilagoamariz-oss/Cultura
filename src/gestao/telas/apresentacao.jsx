@@ -67,9 +67,14 @@ export function ListaAcompanhamento({ semana, rotuloSemana, semanaAnterior, sema
       {linhas.length > 0 && (
         <>
           <ResumoDaSemana resumo={resumirSemana(linhas)} />
-          <button type="button" className="botao botao--contorno" onClick={aoExportar}>
-            Exportar esta semana (CSV)
-          </button>
+          <div className="grupo__acoes">
+            <button type="button" className="botao botao--contorno" onClick={aoExportar}>
+              Exportar esta semana (CSV)
+            </button>
+            <Link to={`${rotaAcompanhamento('comparativo')}?semana=${semana}`} className="botao botao--contorno">
+              Comparar talhões
+            </Link>
+          </div>
         </>
       )}
 
@@ -383,6 +388,77 @@ export function GestaoVinculos({
           </form>
         )}
       </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------- visão comparativa entre talhões
+
+export function Comparativo({ semana, quantasFinalizadas, linhas, porItem, carregando, calculado, erro, aoCalcular }) {
+  return (
+    <section>
+      <h1>Comparar talhões</h1>
+      <p className="lead">
+        Semana {semana} · {quantasFinalizadas} avaliaç{quantasFinalizadas === 1 ? 'ão finalizada' : 'ões finalizadas'}
+      </p>
+      {erro && <Faixa tipo="erro">{erro}</Faixa>}
+
+      {!calculado && (
+        <>
+          <p className="legenda">Calcula o nível de infestação de cada talhão finalizado nesta semana e junta o que pede atenção, do mais crítico para o menos.</p>
+          <button type="button" className="botao botao--principal botao--cheio" disabled={carregando || quantasFinalizadas === 0} onClick={aoCalcular}>
+            {carregando ? 'Calculando…' : 'Calcular'}
+          </button>
+          {quantasFinalizadas === 0 && <p className="legenda">Nenhuma avaliação finalizada nesta semana ainda.</p>}
+        </>
+      )}
+
+      {calculado && linhas.length === 0 && <div className="vazio">Nenhum item em ação ou a revisar nesta semana: todos os talhões finalizados estão abaixo do nível de ação.</div>}
+
+      {calculado && linhas.length > 0 && (
+        <>
+          {porItem.some((p) => p.talhoes.length > 1) && (
+            <div className="secao-resumo">
+              <h2>Itens que aparecem em mais de um talhão</h2>
+              <ul>
+                {porItem.filter((p) => p.talhoes.length > 1).map((p) => (
+                  <li key={p.itemNome}>
+                    <b>{p.itemNome}</b>: {p.talhoes.length} talhões ({p.talhoes.join(', ')})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <table className="tabela">
+            <thead>
+              <tr>
+                <th>Talhão</th>
+                <th>Item</th>
+                <th>NI</th>
+                <th>Situação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {linhas.map((l, i) => (
+                <tr key={`${l.talhaoNome}-${l.itemNome}-${i}`} className={`linha--${l.status}`}>
+                  <td>{l.talhaoNome}</td>
+                  <td>
+                    {l.itemNome}
+                    <span className="linha-item__dica">{l.orgao}</span>
+                  </td>
+                  <td>{l.niTexto}</td>
+                  <td>{l.status === 'acao' ? l.td : 'Revisar'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+
+      <p>
+        <Link to={`${rotaAcompanhamento()}?semana=${semana}`}>Voltar à lista da semana</Link>
+      </p>
     </section>
   );
 }

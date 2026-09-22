@@ -92,11 +92,42 @@ test('resumo da semana: "1 avaliação" no singular, e só aparece a situação 
   assert.doesNotMatch(h, /aguardando decisão|em andamento|concluída/);
 });
 
-test('exportar CSV: o botão só aparece com pelo menos uma avaliação', () => {
+test('exportar CSV e comparar talhões: os links só aparecem com pelo menos uma avaliação', () => {
   const semLinhas = tela('ListaAcompanhamento', propsLista());
   assert.doesNotMatch(semLinhas, /Exportar esta semana/);
+  assert.doesNotMatch(semLinhas, /Comparar talhões/);
   const comLinhas = tela('ListaAcompanhamento', propsLista({ linhas: [linha()] }));
   assert.match(comLinhas, /Exportar esta semana \(CSV\)/);
+  assert.match(comLinhas, /href="\/fitossanidade\/acompanhamento\/comparativo\?semana=2026-W39"[^>]*>Comparar talhões/);
+});
+
+// ---------------------------------------------------------------- comparativo entre talhões
+
+const linhaComparativa = (extra) => ({ talhaoNome: 'Talhão 01', itemNome: 'Tripes', orgao: 'flor', status: 'acao', ni: 0.7, niTexto: '70,0%', td: 'TD3', ...extra });
+
+test('comparativo: antes de calcular, só o botão (desabilitado sem nenhuma finalizada)', () => {
+  const sem = tela('Comparativo', { semana: '2026-W39', quantasFinalizadas: 0, carregando: false, calculado: false, linhas: [], porItem: [], erro: null, aoCalcular: () => {} });
+  assert.match(sem, /<button[^>]*disabled=""[^>]*>Calcular/);
+  assert.match(sem, /Nenhuma avaliação finalizada nesta semana ainda/);
+  const com = tela('Comparativo', { semana: '2026-W39', quantasFinalizadas: 3, carregando: false, calculado: false, linhas: [], porItem: [], erro: null, aoCalcular: () => {} });
+  assert.doesNotMatch(com, /disabled=""/);
+  assert.match(com, /3 avaliações finalizadas/);
+});
+
+test('comparativo: nada em ação nem revisar depois de calculado', () => {
+  const h = tela('Comparativo', { semana: '2026-W39', quantasFinalizadas: 2, carregando: false, calculado: true, linhas: [], porItem: [], erro: null, aoCalcular: () => {} });
+  assert.match(h, /Nenhum item em ação ou a revisar/);
+});
+
+test('comparativo: tabela ordenada, com o item recorrente destacado no topo', () => {
+  const linhas = [linhaComparativa(), linhaComparativa({ talhaoNome: 'Talhão 02', ni: 0.5, niTexto: '50,0%' })];
+  const porItem = [{ itemNome: 'Tripes', talhoes: ['Talhão 01', 'Talhão 02'] }];
+  const h = tela('Comparativo', { semana: '2026-W39', quantasFinalizadas: 2, carregando: false, calculado: true, linhas, porItem, erro: null, aoCalcular: () => {} });
+  assert.match(h, /Itens que aparecem em mais de um talhão/);
+  assert.match(h, /Tripes<\/b>: 2 talhões \(Talhão 01, Talhão 02\)/);
+  assert.equal(conta(h, 'class="linha--acao"'), 2);
+  assert.match(h, /70,0%/);
+  assert.match(h, /TD3/);
 });
 
 test('lista da semana: avisa o que ainda aguarda envio', () => {

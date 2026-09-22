@@ -12,7 +12,7 @@ import SemAcesso from '../../src/SemAcesso.jsx';
 import Admin from '../../src/admin/Admin.jsx';
 import { ListaTalhoes, FormNovaAvaliacao, GradePlantas, FormularioPlanta, ResumoAvaliacao } from '../../src/campo/telas/apresentacao.jsx';
 import { PendentesContext } from '../../src/offline/PendentesProvider.jsx';
-import { ListaAcompanhamento, DetalheAvaliacao, GestaoVinculos, SeloPendencias } from '../../src/gestao/telas/apresentacao.jsx';
+import { ListaAcompanhamento, DetalheAvaliacao, GestaoVinculos, SeloPendencias, Comparativo } from '../../src/gestao/telas/apresentacao.jsx';
 import { Estrutura, Limites, Membros, PublicarFicha, FormTalhao, Maquinas as MaquinasAdmin, FormMaquina, ImportarTalhoes } from '../../src/admin/telas/apresentacao.jsx';
 import { Maquinas as MaquinasFrota } from '../../src/frota/telas/apresentacao.jsx';
 
@@ -68,7 +68,7 @@ export function renderizarLayoutComPendentes(sessao, total) {
 }
 
 // ---- telas de gestão (apresentação)
-export const COMPONENTES_GESTAO = { ListaAcompanhamento, DetalheAvaliacao, GestaoVinculos, SeloPendencias };
+export const COMPONENTES_GESTAO = { ListaAcompanhamento, DetalheAvaliacao, GestaoVinculos, SeloPendencias, Comparativo };
 
 export function renderizarGestao(nome, props, rota = '/') {
   const Componente = COMPONENTES_GESTAO[nome];
