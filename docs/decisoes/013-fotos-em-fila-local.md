@@ -10,4 +10,5 @@ Storage, e quem ligar o envio injeta a função de envio (`enviarPendentes`).
 **Consequências.** As fotos ficam no aparelho e a fila sobrevive a fechar o app. Com o envio desligado elas
 **não** contam como "aguardando envio" (senão o indicador ficaria aceso para sempre). A ordem de envio é a
 de chegada, mesmo com várias fotos no mesmo milissegundo. Uma foto fica ligada à planta, ainda não a um
-item ou quadrante. Trocar de aparelho perde as fotos ainda não enviadas.
+item ou quadrante. Trocar de aparelho perde as fotos ainda não enviadas. Quando o envio for ligado, o
+caminho no Storage precisa ser `empresas/{empresaId}/avaliacoes/{aid}/{arquivo}` (decisão 018).

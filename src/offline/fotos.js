@@ -2,6 +2,9 @@
 // A planta guarda só a referência ("local:<id>"). O envio ao Storage exige o plano Blaze e está
 // DESLIGADO (VITE_ENABLE_PHOTO_UPLOAD=false): sem ele, as fotos ficam no aparelho como pendentes.
 // Este arquivo NÃO importa o SDK do Storage: quem ligar o envio injeta a função `enviar`.
+//
+// Caminho exigido pelas storage.rules (decisão 018): `empresas/{empresaId}/avaliacoes/{aid}/{arquivo}`
+// — sem o `empresaId` no caminho, a regra nega (só membro ativo DAQUELA empresa lê ou envia).
 
 export const ALVO_BYTES = 300_000;
 export const LADO_MAXIMO = 1600;

@@ -52,7 +52,7 @@ Leia primeiro: `docs/decisoes/README.md` (as decisões), `docs/modelo-de-dados.m
 
 ```
 npm test                 # motor, fichas, caminhos, menu, guardas e telas renderizadas (rápido; Node 20+; inclui a renderização das telas e a fila de fotos)
-npm run test:rules       # firestore.rules no emulador (106 verificações, duas empresas; precisa de Java 21)
+npm run test:rules       # firestore.rules e storage.rules no emulador (112 verificações, duas empresas; precisa de Java 21)
 npm run test:fluxo       # nos emuladores: menu por usuário, jornada do pragueiro (com trabalho sem rede) e a gestão (decisão, execução, vínculos e a administração do cadastro)
 npm run test:migracao    # nos emuladores: prova a migração de produção (simula, aplica, repete, entra como davi e paulo)
 npm run build            # gera dist/

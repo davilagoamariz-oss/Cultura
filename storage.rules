@@ -2,12 +2,28 @@ rules_version = '2';
 
 // Fotos das avaliações. Limite de 2 MB por foto e só imagens.
 // O app deve comprimir a foto no celular antes do envio (alvo: ~300 KB).
-// Melhoria futura: restringir por papel usando firestore.get() nestas regras.
+//
+// Segurança: o caminho segue o mesmo desenho multiempresa do Firestore (empresas/{empresaId}/...),
+// e só quem é membro ativo DAQUELA empresa lê ou envia — nunca "qualquer pessoa autenticada" (a versão
+// anterior desta regra era a original do kit, de antes do redesenho multiempresa, e vazava fotos entre
+// empresas; o envio de fotos ainda não foi ligado — VITE_ENABLE_PHOTO_UPLOAD=false — então isso nunca
+// chegou a ser explorável em produção). `firestore.get()`/`firestore.exists()` fazem a checagem
+// cruzando com o Firestore, o mesmo dado que `membroAtivo(e)` usa lá.
 service firebase.storage {
   match /b/{bucket}/o {
-    match /avaliacoes/{aid}/{arquivo} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null
+    match /empresas/{empresaId}/avaliacoes/{aid}/{arquivo} {
+      function membroAtivo() {
+        let caminho = /databases/(default)/documents/empresas/$(empresaId)/membros/$(request.auth.uid);
+        return request.auth != null
+          && firestore.exists(caminho)
+          && firestore.get(caminho).data.ativo == true;
+      }
+
+      allow read: if membroAtivo();
+      // resource == null: o Storage avalia um reenvio por cima como "create" de novo, não "update" —
+      // sem isto, "allow update: if false" não impediria sobrescrever uma foto já enviada.
+      allow create: if membroAtivo()
+        && resource == null
         && request.resource.size < 2 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
       allow update, delete: if false;
