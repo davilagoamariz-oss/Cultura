@@ -24,6 +24,13 @@ empresas/{empresaId}                          nome, status, configuracoes
                                               atributos { tipoPomar, citrosVizinhos, ... }, ativo   (id sem "_")
   ajustes/{id}                                culturaId, alvoId | itemId, nivelId?, limite,
                                               vigenteDe (= hora do servidor), criadoPor    (só acrescenta)
+  maquinas/{id}                                unidadeId, nome, modelo?, tipo?, documento?, ativo,
+                                              disponibilidade (disponivel | em_uso), status (operacional |
+                                              precisa_manutencao | manutencao_sugerida), combustivel (0–1),
+                                              usoAtual { usoId, operadorUid, setorId, inicioEm } | ausente
+    usos/{usoId}                               operadorUid, setorId, unidadeId, inicioEm, fimEm?,
+                                              combustivelInicio?, combustivelFim?
+    manutencoes/{id}                           tipo (sugestao | realizada), descricao?, criadoPor, criadoEm
   avaliacoes/{talhaoId}_{semanaISO}_{uid}     talhaoId, unidadeId, setorId, safraId?, fichaId, fichaVersao,
                                               atributosTalhao (cópia do talhão), responsavelUid, data,
                                               semanaISO, faseCultura[], status (rascunho | finalizada),
@@ -130,6 +137,21 @@ propostas (manual da Embrapa e cliente) ficam no próprio nível, em `proposta`,
   (`catalogo_culturas/{id}.fichaAtual` passa a apontar para ela). Só o dono da plataforma grava.
 - Consultas da administração: o admin lê tudo da empresa com listagens simples (`unidades`, `setores`,
   `talhoes`, `ajustes`, `membros`); não há consulta nova nem índice novo.
+
+## Módulo Frota (maquinário)
+
+- A máquina é da **unidade**, como o talhão: setores diferentes da mesma fazenda com o módulo `frota`
+  a compartilham. Módulo novo (`frota`) e função nova no vínculo (`operador`), decisão 017.
+- Dois campos parecidos, mas diferentes: `ativo` (em serviço ou baixada; só o admin muda) e
+  `disponibilidade` (disponível/em uso; muda a cada operação do operador). `status` (condição
+  mecânica) é independente dos dois.
+- `usoAtual` na máquina e o registro em `usos/{usoId}` nascem com o MESMO `usoId` (gerado pelo app),
+  mas as regras não cruzam as duas escritas com `getAfter`/`existsAfter` (custo de avaliação alto
+  demais); cada uma se autoriza sozinha. O combustível informado ao encerrar vira o `combustivel`
+  vigente da máquina.
+- Sinalizar manutenção: qualquer membro ativo da empresa, sem precisar de vínculo em setor nenhum.
+  Marcar urgente e concluir: só o admin da empresa (`/admin/maquinas`, que também é onde a máquina é
+  cadastrada — a única tela de Frota que não exige vínculo em setor).
 
 ## Índices (revisão antes do deploy)
 

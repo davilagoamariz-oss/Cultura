@@ -17,8 +17,10 @@ ficha, quadrantes A/B, lado único, notas, fotos em fila local, aviso de avalia�
 NI e TD, finalização e trabalho sem rede) e **Fase 4** (gestão: acompanhamento da semana, decisão do
 agrônomo, execução pelo gerente e gestão de vínculos com histórico) e **Fase 5** (administração: unidades,
 setores com módulos, talhões com as características que a ficha pede, membros, limites de ação por ajuste
-e publicação de fichas no catálogo pelo dono da plataforma; ver `docs/decisoes/016`).
-**As regras v2, os índices e a migração dos dados ainda não foram aplicados no Firebase real.**
+e publicação de fichas no catálogo pelo dono da plataforma; ver `docs/decisoes/016`) e o **módulo Frota**
+(maquinário: uso com combustível, manutenção; ver `docs/decisoes/017`).
+**As regras v2 (já com a Frota), os índices e a migração dos dados ainda não foram aplicados no
+Firebase real**; o app roda contra os emuladores, e a produção segue nas regras antigas.
 
 ## Onde está o quê
 
@@ -28,10 +30,12 @@ regras/regras-iniciais.json  fonte da ficha do limão (convertida por scripts/co
 src/dominio/motor/           motor de regras v2 (função pura): métricas, níveis, ajustes
 src/dominio/fichas/          validador e conversor de fichas
 src/nucleo/                  firebase, caminhos do banco, sessão, menu por módulo, permissões, guardas de rota
-src/modulos/                 registro fixo de módulos e as telas de cada módulo (hoje: fitossanidade)
+src/modulos/                 registro fixo de módulos e as telas de cada módulo (fitossanidade, frota)
 src/campo/                   ficha de campo: lógica pura, repositório do Firestore, autosave, telas do pragueiro
 src/offline/                 online/offline, itens aguardando envio, fotos em fila local (IndexedDB)
 src/gestao/                  decisão e execução, vínculos com histórico, repositório e telas do agrônomo e do gerente
+src/frota/                   maquinário: cadastro, uso (com combustível), manutenção, repositório e telas
+src/admin/                   administração da empresa (unidades, setores, talhões, membros, limites, máquinas)
 docs/propostas/              mudanças de regras propostas e ainda NÃO aplicadas (aguardam confirmação)
 src/paginas/                 telas gerais (início)
 firestore.rules              segurança do banco (empresa > setor > vínculo > módulo)

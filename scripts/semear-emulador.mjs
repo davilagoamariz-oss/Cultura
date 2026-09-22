@@ -106,6 +106,7 @@ try {
   await vincular('demo-1', uid.paulo, 'fit-1', 'un-1', 'funcionario', ['pragueiro']);
   await vincular('demo-1', uid.paula, 'fit-1', 'un-1', 'funcionario', ['pragueiro']);
   await vincular('demo-1', uid.motorista, 'frota-1', 'un-1', 'funcionario', ['operador']);
+  await gravar('empresas/demo-1/maquinas/trator-01', { unidadeId: 'un-1', nome: 'Trator 01', modelo: 'Massey Ferguson', tipo: 'Trator', ativo: true, disponibilidade: 'disponivel', status: 'operacional', combustivel: 0.75 });
 
   // ---- empresa 2: Sítio Segunda Empresa (o agrônomo consultor atende as duas)
   await gravar('empresas/demo-2', { nome: 'Sítio Segunda Empresa', status: 'ativa' });

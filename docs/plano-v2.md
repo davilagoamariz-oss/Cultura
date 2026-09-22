@@ -7,7 +7,9 @@ guardas de rota, telas testadas por renderização, migração de produção pro
 Fase 3: Fitossanidade no campo, com trabalho sem rede provado nos emuladores. Fase 4: acompanhamento,
 decisão, execução e vínculos com histórico, sem mudar as regras; uma mudança de regras foi **proposta** em
 `docs/propostas/001-leitura-dos-membros.md`, aguardando confirmação).
-Fase 5: administração do cadastro (estrutura, membros, limites de ação, fichas), também sem mudar as regras. Onde este plano diverge do código, vale o código
+Fase 5: administração do cadastro (estrutura, membros, limites de ação, fichas), também sem mudar as regras.
+Depois das 5 fases: **módulo Frota** (maquinário, decisão 017) — módulo e função novos nas regras
+(`frota`, `operador`), aplicados depois de mostrados em diff. Onde este plano diverge do código, vale o código
 e as decisões em `docs/decisoes/`; divergências conhecidas: o índice `vinculos.pessoaUid`, convites
 fora da v2 e o setor sem `_` no id.
 
