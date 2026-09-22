@@ -1,8 +1,8 @@
 // Registro FIXO dos módulos que o app conhece. Um setor pode habilitar módulos, mas só os que
 // estão aqui aparecem no menu. Módulo novo = entrada nova aqui (e nas firestore.rules, de propósito).
 //
-// Só a Fitossanidade está implementada. Os demais (Frota, Colheita, Aplicações...) NÃO existem
-// ainda: um setor que habilite um módulo desconhecido simplesmente não mostra nada no menu.
+// Fitossanidade e Frota estão implementados. Os demais (Colheita, Aplicações...) NÃO existem ainda:
+// um setor que habilite um módulo desconhecido simplesmente não mostra nada no menu.
 
 export const MODULOS = {
   fitossanidade: {
@@ -11,6 +11,13 @@ export const MODULOS = {
     descricao: 'Monitoramento de pragas e doenças, decisões de controle',
     rota: '/fitossanidade',
     funcoes: { pragueiro: 'Pragueiro', agronomo: 'Agrônomo' },
+  },
+  frota: {
+    id: 'frota',
+    rotulo: 'Frota',
+    descricao: 'Maquinário: uso, combustível e manutenção',
+    rota: '/frota',
+    funcoes: { operador: 'Operador' },
   },
 };
 

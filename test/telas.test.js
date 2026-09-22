@@ -29,6 +29,7 @@ const setores = {
   'fit-1': { nome: 'Fitossanidade', unidadeId: 'un-1', modulos: ['fitossanidade'], ativo: true },
   'fit-2': { nome: 'Fito Norte', unidadeId: 'un-1', modulos: ['fitossanidade'], ativo: true },
   'frota-1': { nome: 'Frota', unidadeId: 'un-1', modulos: ['frota'], ativo: true },
+  'geral-1': { nome: 'Administrativo', unidadeId: 'un-1', modulos: [], ativo: true },
 };
 const vinc = (setorId, papel, funcoes, ativo = true) => ({ setorId, unidadeId: 'un-1', papel, funcoes, ativo });
 const sessao = (extra) => R.sessaoDeMentira({ setores, unidades: un, ...extra });
@@ -44,11 +45,18 @@ test('início do pragueiro: só Fitossanidade, com o papel dele', () => {
   assert.doesNotMatch(h, /Administra/);
 });
 
-test('início do motorista (só Frota): nenhum módulo, com orientação; sem link de módulo', () => {
-  const h = html('Inicio', { vinculos: [vinc('frota-1', 'funcionario', [])] });
+test('início de quem só tem vínculo num setor sem módulo: orientação, sem link nenhum', () => {
+  const h = html('Inicio', { vinculos: [vinc('geral-1', 'funcionario', [])] });
   assert.match(h, /Nenhum módulo disponível para você/);
   assert.doesNotMatch(h, /Fitossanidade/);
   assert.doesNotMatch(h, /href="\/fitossanidade"/);
+});
+
+test('início do motorista (setor Frota, sem função ainda): vê a Frota, não a Fitossanidade', () => {
+  const h = html('Inicio', { vinculos: [vinc('frota-1', 'funcionario', [])] });
+  assert.match(h, /href="\/frota"/);
+  assert.match(h, /Frota/);
+  assert.doesNotMatch(h, /Fitossanidade/);
 });
 
 test('início do admin sem vínculo: sem módulos operacionais, mas com o caminho para a Administração', () => {

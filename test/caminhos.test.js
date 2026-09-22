@@ -16,6 +16,9 @@ test('tudo o que é da empresa fica dentro de empresas/{id}', () => {
     caminhos.safra(e, 's1'),
     caminhos.talhao(e, 't1'),
     caminhos.ajuste(e, 'aj1'),
+    caminhos.maquina(e, 'm1'),
+    caminhos.uso(e, 'm1', 'u1'),
+    caminhos.manutencao(e, 'm1', 'mn1'),
     caminhos.avaliacoes(e),
     caminhos.avaliacao(e, 'a1'),
     caminhos.plantas(e, 'a1'),
@@ -28,6 +31,8 @@ test('tudo o que é da empresa fica dentro de empresas/{id}', () => {
   assert.deepEqual(caminhos.planta(e, 'a1', 30), ['empresas', e, 'avaliacoes', 'a1', 'plantas', '30']);
   assert.deepEqual(caminhos.historicoVinculo(e, 'u1', 'fit-a1', 3), ['empresas', e, 'vinculos', 'u1_fit-a1', 'historico', '3']);
   assert.deepEqual(caminhos.historico(e, 'u1', 'fit-a1'), ['empresas', e, 'vinculos', 'u1_fit-a1', 'historico']);
+  assert.deepEqual(caminhos.uso(e, 'm1', 'u1'), ['empresas', e, 'maquinas', 'm1', 'usos', 'u1']);
+  assert.deepEqual(caminhos.manutencao(e, 'm1', 'mn1'), ['empresas', e, 'maquinas', 'm1', 'manutencoes', 'mn1']);
   assert.equal(GRUPO_MEMBROS, 'membros');
   assert.equal(GRUPO_VINCULOS, 'vinculos');
 });

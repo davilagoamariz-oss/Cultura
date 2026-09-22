@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { salvarPlanta } from '../repositorio.js';
-import { definirValor, definirGrupo, definirItem, proximoValor, quadrantesDoItem } from '../ficha-campo.js';
+import { definirValor, definirGrupo, definirItem, proximoValor, quadrantesDoItem, copiarObs } from '../ficha-campo.js';
 import { proximaIncompleta, totalDePlantas } from '../avaliacao.js';
 import { criarSalvador } from '../autosave.js';
 import { useRegistrarPendentes } from '../../offline/PendentesProvider.jsx';
@@ -91,6 +91,8 @@ function EditorPlanta({ aid, n }) {
       return definirItem(o, item, tudoNulo ? 0 : null);
     });
   const aoGrupo = (grupo, valor) => aplicar((o) => definirGrupo(o, grupo, valor));
+  const anterior = n > 1 && !finalizada ? porN[n - 1] : null;
+  const aoCopiarAnterior = anterior && Object.keys(anterior).length > 0 ? () => aplicar(() => copiarObs(ficha, anterior)) : null;
   const aoNotas = (texto) => {
     estado.current = { ...estado.current, notas: texto };
     setNotas(texto);
@@ -139,6 +141,7 @@ function EditorPlanta({ aid, n }) {
       aviso={aviso}
       proximaIncompleta={proximaIncompleta(ficha, { ...porN, [n]: obs }, n)}
       aid={aid}
+      aoCopiarAnterior={aoCopiarAnterior}
     />
   );
 }

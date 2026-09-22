@@ -61,7 +61,7 @@ try {
     agro: 'agro@demo.test', // agrônomo na empresa 1 e consultor na empresa 2
     paulo: 'paulo@demo.test', // pragueiro da empresa 1
     paula: 'paula@demo.test', // segunda pragueira no mesmo setor
-    motorista: 'motorista@demo.test', // só setor Frota (não vê fitossanidade)
+    motorista: 'motorista@demo.test', // operador do setor Frota (não vê fitossanidade)
     semvinculo: 'semvinculo@demo.test', // membro sem nenhum vínculo
     admin2: 'admin2@demo.test', // admin da empresa 2
     praga2: 'pragueiro2@demo.test', // pragueiro da empresa 2
@@ -105,7 +105,7 @@ try {
   await vincular('demo-1', uid.agro, 'fit-1', 'un-1', 'funcionario', ['agronomo']);
   await vincular('demo-1', uid.paulo, 'fit-1', 'un-1', 'funcionario', ['pragueiro']);
   await vincular('demo-1', uid.paula, 'fit-1', 'un-1', 'funcionario', ['pragueiro']);
-  await vincular('demo-1', uid.motorista, 'frota-1', 'un-1', 'funcionario', []);
+  await vincular('demo-1', uid.motorista, 'frota-1', 'un-1', 'funcionario', ['operador']);
 
   // ---- empresa 2: Sítio Segunda Empresa (o agrônomo consultor atende as duas)
   await gravar('empresas/demo-2', { nome: 'Sítio Segunda Empresa', status: 'ativa' });

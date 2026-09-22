@@ -97,6 +97,25 @@ export function obsParaGravar(ficha, obs) {
   return saida;
 }
 
+/**
+ * Copia as respostas de outra planta (tipicamente a anterior): a maioria das plantas vizinhas se parece
+ * ("tudo ausente"), então o pragueiro só ajusta as exceções em vez de responder tudo de novo. Só copia
+ * itens e quadrantes que existem NESTA ficha (defensivo; a ficha não muda no meio de uma avaliação).
+ */
+export function copiarObs(ficha, obsOrigem) {
+  const saida = {};
+  for (const item of ficha.itens) {
+    const linha = obsOrigem?.[item.id];
+    if (!linha) continue;
+    const nova = {};
+    for (const q of quadrantesDoItem(item)) {
+      if (valorDefinido(linha[q])) nova[q] = linha[q];
+    }
+    if (Object.keys(nova).length > 0) saida[item.id] = nova;
+  }
+  return saida;
+}
+
 /** Itens pendentes agrupados por órgão, para dizer onde falta responder. */
 export function pendenciasPorGrupo(ficha, obs) {
   return agruparPorOrgao(ficha)

@@ -115,6 +115,13 @@ test('navegação entre plantas: barra fixa com anterior, posição e próxima; 
   assert.doesNotMatch(ultima, /planta\/31/);
 });
 
+test('repetir planta anterior: só aparece quando o contêiner passa a ação (há o que copiar)', () => {
+  const sem = tela('FormularioPlanta', propsPlanta({ n: 5, aoCopiarAnterior: null }));
+  assert.doesNotMatch(sem, /Repetir planta/);
+  const com = tela('FormularioPlanta', propsPlanta({ n: 5, aoCopiarAnterior: () => {} }));
+  assert.match(com, /Repetir planta 4 \(ajuste só as diferenças\)/);
+});
+
 test('avaliação finalizada: só leitura (sem ações em bloco, sem foto, células desabilitadas)', () => {
   const h = tela('FormularioPlanta', propsPlanta({ somenteLeitura: true, obs: tudoAusente() }));
   assert.match(h, /Só leitura/);

@@ -40,10 +40,11 @@ test('unidade: nome obrigatório, município opcional, ativa por padrão', () =>
   assert.throws(() => montarUnidade({ nome: 'ok', municipio: 'x'.repeat(121) }), /Município/);
 });
 
-test('setor: só módulos conhecidos (hoje, fitossanidade), sem repetir, com unidade', () => {
+test('setor: só módulos conhecidos (fitossanidade, frota), sem repetir, com unidade', () => {
   assert.deepEqual(montarSetor({ unidadeId: 'un-1', nome: 'Fitossanidade', modulos: ['fitossanidade', 'fitossanidade'] }), { unidadeId: 'un-1', nome: 'Fitossanidade', modulos: ['fitossanidade'], ativo: true });
+  assert.deepEqual(montarSetor({ unidadeId: 'un-1', nome: 'Frota', modulos: ['frota'] }).modulos, ['frota']);
   assert.deepEqual(montarSetor({ unidadeId: 'un-1', nome: 'Sem módulo', modulos: [] }).modulos, []);
-  assert.throws(() => montarSetor({ unidadeId: 'un-1', nome: 'Frota', modulos: ['frota'] }), /desconhecido: frota/);
+  assert.throws(() => montarSetor({ unidadeId: 'un-1', nome: 'Colheita', modulos: ['colheita'] }), /desconhecido: colheita/);
   assert.throws(() => montarSetor({ unidadeId: 'un-1', nome: 'X', modulos: ['__proto__'] }), /desconhecido/);
   assert.throws(() => montarSetor({ unidadeId: '', nome: 'X' }), /unidade/);
   assert.throws(() => montarSetor({ unidadeId: 'u', nome: 'X', modulos: 'fitossanidade' }), /inválidos/);

@@ -158,6 +158,7 @@ const CLASSE_CELULA = (v) => (v === undefined ? 'vazio' : v === null ? 'nulo' : 
 
 export function FormularioPlanta({
   ficha, obs, n, total, notas, fotos, somenteLeitura, semFotos, aoQuadrante, aoItemNulo, aoGrupo, aoNotas, aoFoto, aviso, proximaIncompleta, aid,
+  aoCopiarAnterior,
 }) {
   const grupos = agruparPorOrgao(ficha);
   return (
@@ -171,6 +172,11 @@ export function FormularioPlanta({
       <p className="legenda" aria-label="Legenda">
         Toque para mudar: <b>0</b> ausente · <b>1</b> {LEGENDA_INTENSIDADE[1]} · <b>2</b> {LEGENDA_INTENSIDADE[2]} · <b>3</b> {LEGENDA_INTENSIDADE[3]} pragas · <b>–</b> não avaliável
       </p>
+      {aoCopiarAnterior && (
+        <button type="button" className="botao botao--contorno botao--cheio" onClick={aoCopiarAnterior}>
+          Repetir planta {n - 1} (ajuste só as diferenças)
+        </button>
+      )}
       {aviso && <Faixa tipo="erro">{aviso}</Faixa>}
       {somenteLeitura && <Faixa tipo="ok">Avaliação finalizada. Só leitura.</Faixa>}
 

@@ -77,7 +77,8 @@ test('o formulário de talhão pede os atributos da ficha; ao editar, a cultura 
 test('o formulário de setor lista os módulos que o sistema conhece', () => {
   const t = tela('Estrutura', { ...base, unidades: [{ id: 'un-1', nome: 'U', ativa: true }] });
   assert.match(t, /name="modulos" value="fitossanidade"/);
-  assert.doesNotMatch(t, /value="frota"/); // módulo que não existe ainda não é oferecido
+  assert.match(t, /name="modulos" value="frota"/);
+  assert.doesNotMatch(t, /value="colheita"/); // módulo que não existe ainda não é oferecido
 });
 
 // ---------------------------------------------------------------- limites

@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { semanaISO, dataISO } from '../src/campo/semana.js';
 import {
   agruparPorOrgao, quadrantesDoItem, proximoValor, definirValor, definirItem, definirGrupo, itemCompleto,
-  itensPendentes, statusDaPlanta, obsParaGravar, pendenciasPorGrupo, grupoCompleto, VALORES, LADO_UNICO,
+  itensPendentes, statusDaPlanta, obsParaGravar, pendenciasPorGrupo, grupoCompleto, copiarObs, VALORES, LADO_UNICO,
 } from '../src/campo/ficha-campo.js';
 import { avaliar } from '../src/dominio/motor/index.js';
 
@@ -159,4 +159,25 @@ test('"sem o órgão" (null) fica fora da conta: NI usa só as plantas avaliadas
   assert.equal(r.avaliadas, 20);
   assert.equal(r.positivas, 4);
   assert.equal(r.ni, 0.2);
+});
+
+// ---------------------------------------------------------------- copiar planta anterior
+
+test('copiar planta anterior: reproduz as respostas, só com o que existe nesta ficha', () => {
+  let origem = definirGrupo({}, agruparPorOrgao(ficha)[0], 0); // tudo ausente no primeiro órgão
+  origem = definirValor(origem, item('tripes_flor'), 'A', 2);
+  const copia = copiarObs(ficha, origem);
+  assert.deepEqual(copia, origem);
+  assert.notEqual(copia, origem); // é uma cópia nova, não a mesma referência
+});
+
+test('copiar planta anterior: ignora item que não existe mais na ficha e quadrante ainda não respondido', () => {
+  const origem = { ...definirValor({}, item('tripes_flor'), 'A', 1), 'item-fantasma': { A: 3, B: 3 } };
+  assert.deepEqual(copiarObs(ficha, origem), { tripes_flor: { A: 1 } }); // B do tripes ainda não respondido: não copia undefined
+});
+
+test('copiar planta anterior: origem vazia ou ausente vira obs vazio', () => {
+  assert.deepEqual(copiarObs(ficha, {}), {});
+  assert.deepEqual(copiarObs(ficha, undefined), {});
+  assert.deepEqual(copiarObs(ficha, null), {});
 });

@@ -11,13 +11,15 @@ const setor = (modulos, extra = {}) => ({ nome: 'Setor', unidadeId: 'un-1', modu
 
 // ---------------------------------------------------------------- registro
 
-test('só a Fitossanidade é um módulo conhecido; os futuros não aparecem', () => {
-  assert.deepEqual(Object.keys(MODULOS), ['fitossanidade']);
+test('Fitossanidade e Frota são módulos conhecidos; os demais futuros não aparecem', () => {
+  assert.deepEqual(Object.keys(MODULOS), ['fitossanidade', 'frota']);
   assert.equal(moduloConhecido('fitossanidade'), true);
-  for (const futuro of ['frota', 'manutencao', 'colheita', 'aplicacoes', 'insumos', 'constructor', '__proto__', 'toString']) {
+  assert.equal(moduloConhecido('frota'), true);
+  for (const futuro of ['manutencao', 'colheita', 'aplicacoes', 'insumos', 'constructor', '__proto__', 'toString']) {
     assert.equal(moduloConhecido(futuro), false, futuro);
   }
   assert.equal(nomeDaFuncao('agronomo'), 'Agrônomo');
+  assert.equal(nomeDaFuncao('operador'), 'Operador');
   assert.equal(nomeDaFuncao('desconhecida'), 'desconhecida');
 });
 
@@ -70,19 +72,22 @@ test('menu: um vínculo em setor com Fitossanidade mostra Fitossanidade', () => 
   assert.equal(menu[0].setores[0].unidadeNome, 'Fazenda 1');
 });
 
-test('menu: o motorista (só setor Frota) não vê Fitossanidade nem módulo nenhum', () => {
+test('menu: o motorista (só setor Frota) vê Frota, não Fitossanidade', () => {
   const menu = montarMenu({ vinculos: [v('frota-1')], setores: { 'frota-1': setor(['frota']) } });
-  assert.deepEqual(menu, []);
+  assert.equal(menu.length, 1);
+  assert.equal(menu[0].modulo.id, 'frota');
 });
 
 test('menu: é a soma dos módulos dos setores com vínculo; sem vínculo, sem menu', () => {
   const setores = { 'fit-1': setor(['fitossanidade']), 'frota-1': setor(['frota']), 'misto-1': setor(['frota', 'fitossanidade']) };
   assert.deepEqual(montarMenu({ vinculos: [], setores }), []);
   const soFrota = montarMenu({ vinculos: [v('frota-1')], setores });
-  assert.deepEqual(soFrota, []);
+  assert.equal(soFrota.length, 1);
+  assert.equal(soFrota[0].modulo.id, 'frota');
   const misto = montarMenu({ vinculos: [v('frota-1'), v('misto-1')], setores });
-  assert.equal(misto.length, 1); // só a Fitossanidade existe; a Frota do setor misto é ignorada
-  assert.deepEqual(misto[0].setores.map((s) => s.setorId), ['misto-1']);
+  assert.equal(misto.length, 2); // Frota e Fitossanidade, um setor cada
+  assert.deepEqual(misto.find((x) => x.modulo.id === 'fitossanidade').setores.map((s) => s.setorId), ['misto-1']);
+  assert.deepEqual(misto.find((x) => x.modulo.id === 'frota').setores.map((s) => s.setorId).sort(), ['frota-1', 'misto-1']);
 });
 
 test('menu: vínculo desativado, setor desativado ou sem o módulo não mostram nada', () => {
