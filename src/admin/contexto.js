@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { useSessao } from '../nucleo/Sessao.jsx';
 import { db } from '../nucleo/firebase.js';
 import { caminhos } from '../nucleo/caminhos.js';
-import { useOnline } from '../offline/useOnline.js';
+import { useExecutar as useExecutarBase } from '../nucleo/useExecutar.js';
 import { carregarFicha, comId } from '../campo/repositorio.js';
 import { listarCulturas } from './repositorio.js';
 
@@ -37,30 +37,10 @@ export function useCatalogo() {
 
 /** Executa uma gravação: só com conexão (a administração confirma no servidor), mostra o aviso ou o erro. */
 export function useExecutar() {
-  const online = useOnline();
-  const [ocupado, setOcupado] = useState(false);
-  const [erro, setErro] = useState(null);
-  const [aviso, setAviso] = useState(null);
-  const executar = useCallback(async (acao, textoOk) => {
-    setErro(null);
-    setAviso(null);
-    if (!online) {
-      setErro('Sem conexão. A administração precisa de internet para gravar.');
-      return false;
-    }
-    setOcupado(true);
-    try {
-      await acao();
-      setAviso(textoOk);
-      return true;
-    } catch (e) {
-      setErro(e.code === 'permission-denied' ? 'O servidor recusou. Confira se você ainda é administrador da empresa.' : e.message);
-      return false;
-    } finally {
-      setOcupado(false);
-    }
-  }, [online]);
-  return { executar, ocupado, erro, aviso, setErro, online };
+  return useExecutarBase({
+    exigirOnline: true,
+    mensagemRecusa: 'O servidor recusou. Confira se você ainda é administrador da empresa.',
+  });
 }
 
 /** O que as telas de cadastro da empresa precisam da sessão: unidades e setores (ao vivo) e os talhões (ao vivo). */

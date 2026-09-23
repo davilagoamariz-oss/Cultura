@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getDocs, onSnapshot } from 'firebase/firestore';
 import { useRegistrarPendentes } from '../../offline/PendentesProvider.jsx';
+import { useExecutar } from '../../nucleo/useExecutar.js';
 import Carregando from '../../Carregando.jsx';
 import { consultaVinculosDoSetor, colecaoHistorico, alterarVinculo, criarVinculo, listarMembros } from '../repositorio.js';
 import { quemPodeAlterar, linhasDoHistorico, candidatosParaVincular } from '../vinculos.js';
@@ -20,9 +21,8 @@ export default function GestaoDeVinculos({ setor, titulo = 'Vínculos do setor' 
   const [membros, setMembros] = useState({ permitido: false, membros: [] });
   const [historicoAberto, setHistoricoAberto] = useState(null);
   const [formNovo, setFormNovo] = useState({ pessoaUid: '', papel: 'funcionario', funcoes: ['pragueiro'] });
-  const [ocupado, setOcupado] = useState(false);
   const [ligando, setLigando] = useState(false);
-  const [erro, setErro] = useState(null);
+  const { executar, ocupado, erro, setErro } = useExecutar({ mensagemRecusa: 'O servidor recusou a alteração. Confira se você ainda tem permissão.' });
 
   useEffect(() => {
     setVinculos(null);
@@ -55,18 +55,6 @@ export default function GestaoDeVinculos({ setor, titulo = 'Vínculos do setor' 
       return { ...v, id: `${v.pessoaUid}_${v.setorId}`, nome: nomes[v.pessoaUid], pode: p.pode, podeMudarPapel: p.podeMudarPapel, motivo: p.motivo };
     })
     .sort((a, b) => Number(b.ativo) - Number(a.ativo) || a.nome.localeCompare(b.nome, 'pt-BR'));
-
-  const executar = async (acao) => {
-    setErro(null);
-    setOcupado(true);
-    try {
-      await acao();
-    } catch (e) {
-      setErro(e.code === 'permission-denied' ? 'O servidor recusou a alteração. Confira se você ainda tem permissão.' : e.message);
-    } finally {
-      setOcupado(false);
-    }
-  };
 
   const aoAlterar = (linha, mudancas) => executar(() => alterarVinculo(db, empresaId, { atual: vinculos.find((v) => v.pessoaUid === linha.pessoaUid), mudancas, uid }));
 
