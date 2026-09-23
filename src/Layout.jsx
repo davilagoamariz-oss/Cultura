@@ -3,6 +3,7 @@ import { NOME_APP } from './nucleo/config.js';
 import { useSessao } from './nucleo/Sessao.jsx';
 import { useOnline } from './offline/useOnline.js';
 import { usePendentes, textoPendentes } from './offline/PendentesProvider.jsx';
+import { useFocoNaTrocaDeRota } from './nucleo/useFocoNaTrocaDeRota.js';
 import { useContagemPendencias } from './gestao/telas/contexto.js';
 import { SeloPendencias } from './gestao/telas/apresentacao.jsx';
 
@@ -11,6 +12,7 @@ export default function Layout({ children }) {
   const online = useOnline();
   const pendentes = textoPendentes(usePendentes());
   const { total: pendenciasFitossanidade } = useContagemPendencias();
+  const focoConteudo = useFocoNaTrocaDeRota();
   const legenda = empresaNome ?? (ehPlataforma && !empresaId ? 'Plataforma' : null);
   const classe = ({ isActive }) => `aba${isActive ? ' aba--ativa' : ''}`;
 
@@ -67,7 +69,7 @@ export default function Layout({ children }) {
         )}
       </nav>
 
-      <main className="conteudo">{children}</main>
+      <main className="conteudo" ref={focoConteudo} tabIndex={-1}>{children}</main>
     </div>
   );
 }

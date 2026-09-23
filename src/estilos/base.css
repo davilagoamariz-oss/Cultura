@@ -144,6 +144,10 @@ p {
   padding: 20px max(var(--gutter), env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom))
     max(var(--gutter), env(safe-area-inset-left));
 }
+/* Recebe o foco a cada troca de rota (leitor de tela), fora da ordem normal de Tab: sem contorno. */
+.conteudo:focus {
+  outline: none;
+}
 
 /* ---------- Estado online/offline ---------- */
 
