@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { SessaoProvider, useSessao } from './nucleo/Sessao.jsx';
 import { destinoDaRaiz } from './nucleo/acesso.js';
@@ -8,8 +9,6 @@ import EscolherEmpresa from './EscolherEmpresa.jsx';
 import Carregando from './Carregando.jsx';
 import Inicio from './paginas/Inicio.jsx';
 import Fitossanidade from './modulos/fitossanidade/Fitossanidade.jsx';
-import Frota from './modulos/frota/Frota.jsx';
-import Maquinas from './frota/telas/Maquinas.jsx';
 import Campo from './campo/telas/Campo.jsx';
 import NovaAvaliacao from './campo/telas/NovaAvaliacao.jsx';
 import Avaliacao from './campo/telas/Avaliacao.jsx';
@@ -19,14 +18,20 @@ import Acompanhamento from './gestao/telas/Acompanhamento.jsx';
 import Comparativo from './gestao/telas/Comparativo.jsx';
 import DetalheDaAvaliacao from './gestao/telas/DetalheDaAvaliacao.jsx';
 import VinculosDoSetor from './gestao/telas/VinculosDoSetor.jsx';
-import AdminVinculos from './admin/AdminVinculos.jsx';
-import AdminEstrutura from './admin/AdminEstrutura.jsx';
-import AdminLimites from './admin/AdminLimites.jsx';
-import AdminMembros from './admin/AdminMembros.jsx';
-import AdminMaquinas from './admin/AdminMaquinas.jsx';
 import { PendentesProvider } from './offline/PendentesProvider.jsx';
-import Admin from './admin/Admin.jsx';
-import Plataforma from './plataforma/Plataforma.jsx';
+
+// Frota, Administração e Plataforma são de uso ocasional (nem todo mundo tem vínculo nelas) — quem
+// só avalia plantas no campo, o caso mais comum e muitas vezes com rede ruim, não precisa baixar
+// esse código no primeiro carregamento. Cada import() vira um arquivo à parte, buscado só ao navegar.
+const Frota = lazy(() => import('./modulos/frota/Frota.jsx'));
+const Maquinas = lazy(() => import('./frota/telas/Maquinas.jsx'));
+const Admin = lazy(() => import('./admin/Admin.jsx'));
+const AdminVinculos = lazy(() => import('./admin/AdminVinculos.jsx'));
+const AdminEstrutura = lazy(() => import('./admin/AdminEstrutura.jsx'));
+const AdminLimites = lazy(() => import('./admin/AdminLimites.jsx'));
+const AdminMembros = lazy(() => import('./admin/AdminMembros.jsx'));
+const AdminMaquinas = lazy(() => import('./admin/AdminMaquinas.jsx'));
+const Plataforma = lazy(() => import('./plataforma/Plataforma.jsx'));
 
 /** "/" decide para onde ir depois do login. */
 function Raiz() {
@@ -39,6 +44,7 @@ export default function App() {
     <SessaoProvider>
       <PendentesProvider>
       <BrowserRouter>
+        <Suspense fallback={<Carregando />}>
         <Routes>
           <Route path="/" element={<Raiz />} />
           <Route path="/login" element={<Login />} />
@@ -79,6 +85,7 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
       </BrowserRouter>
       </PendentesProvider>
     </SessaoProvider>
