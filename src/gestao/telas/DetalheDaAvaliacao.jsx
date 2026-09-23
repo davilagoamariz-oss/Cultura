@@ -95,7 +95,7 @@ export default function DetalheDaAvaliacao() {
     setErroAcao(null);
     setExecutando(true);
     try {
-      executarDecisao(db, empresaId, aid, { uid, observacao: execObservacao }).catch((e) => setErroAcao(`O servidor recusou a execução (${e.code ?? 'erro'}).`));
+      executarDecisao(db, empresaId, aid, { uid, observacao: execObservacao, setorId: setor.setorId }).catch((e) => setErroAcao(`O servidor recusou a execução (${e.code ?? 'erro'}).`));
       setConfirmandoExecucao(false);
     } catch (e) {
       setErroAcao(e.message);

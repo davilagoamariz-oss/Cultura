@@ -39,7 +39,8 @@ empresas/{empresaId}                          nome, status, configuracoes
   decisoes/{avaliacaoId}                      avaliacaoId, talhaoId, unidadeId, setorId, tds[], motivos[],
                                               status (aprovada | rejeitada | executada),
                                               decididoPor/Em, executadoPor/Em
-  eventos/{id}                                uid, acao, setorId?, em (trilha de auditoria; só acrescenta)
+  eventos/{id}                                uid, acao, alvo?, setorId?, detalhe?, em (trilha de auditoria;
+                                              só acrescenta; hoje só decisão/execução/vínculo, decisão 020)
 ```
 
 Toda entidade operacional (avaliação, decisão, e as futuras) carrega `unidadeId`, `setorId`,

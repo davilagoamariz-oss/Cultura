@@ -636,6 +636,8 @@ service cloud.firestore {
           && request.resource.data.uid == request.auth.uid
           && request.resource.data.em == request.time
           && textoAte(request.resource.data.acao, 40)
+          && (!('alvo' in request.resource.data) || textoAte(request.resource.data.alvo, 200))
+          && (!('detalhe' in request.resource.data) || textoAte(request.resource.data.detalhe, 500))
           && (!('setorId' in request.resource.data) || idSemSublinhado(request.resource.data.setorId));
         allow read: if ehAdmin(e)
           || (resource.data.setorId is string

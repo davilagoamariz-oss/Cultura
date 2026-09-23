@@ -13,6 +13,12 @@ import { caminhos } from '../nucleo/caminhos.js';
 import { comId } from '../campo/repositorio.js';
 import { montarDecisao, dadosExecucao } from './decisao.js';
 import { montarAlteracao, montarNovoVinculo } from './vinculos.js';
+import { montarEvento } from './eventos.js';
+
+/** Acrescenta o evento de auditoria ao MESMO lote da ação: o evento nunca existe sem ela, nem ela sem o evento. */
+function comEvento(lote, db, empresaId, dados) {
+  lote.set(doc(collection(db, ...caminhos.eventos(empresaId))), { ...montarEvento(dados), em: serverTimestamp() });
+}
 
 // ---------------------------------------------------------------- avaliações do setor
 
@@ -64,12 +70,18 @@ export function ouvirDecisao(db, empresaId, setorId, avaliacaoId, aoMudar, aoFal
 /** O agrônomo decide. O id do documento é o da avaliação (uma decisão por avaliação). */
 export function criarDecisao(db, empresaId, { ficha, avaliacao, uid, status, tds, motivos, observacao }) {
   const dados = montarDecisao({ ficha, avaliacao, uid, status, tds, motivos, observacao, decididoEm: serverTimestamp() });
-  return setDoc(doc(db, ...caminhos.decisao(empresaId, avaliacao.id)), dados);
+  const lote = writeBatch(db);
+  lote.set(doc(db, ...caminhos.decisao(empresaId, avaliacao.id)), dados);
+  comEvento(lote, db, empresaId, { uid, acao: 'decisao_criada', alvo: avaliacao.id, setorId: dados.setorId, detalhe: dados.status });
+  return lote.commit();
 }
 
-/** O gerente marca a decisão aprovada como executada. */
-export function executarDecisao(db, empresaId, avaliacaoId, { uid, observacao }) {
-  return updateDoc(doc(db, ...caminhos.decisao(empresaId, avaliacaoId)), dadosExecucao({ uid, observacao, executadoEm: serverTimestamp() }));
+/** O gerente marca a decisão aprovada como executada. `setorId` é só para o evento de auditoria poder ser lido pelo setor. */
+export function executarDecisao(db, empresaId, avaliacaoId, { uid, observacao, setorId }) {
+  const lote = writeBatch(db);
+  lote.update(doc(db, ...caminhos.decisao(empresaId, avaliacaoId)), dadosExecucao({ uid, observacao, executadoEm: serverTimestamp() }));
+  comEvento(lote, db, empresaId, { uid, acao: 'decisao_executada', alvo: avaliacaoId, setorId });
+  return lote.commit();
 }
 
 // ---------------------------------------------------------------- vínculos
@@ -90,6 +102,7 @@ export async function alterarVinculo(db, empresaId, { atual, mudancas, uid }) {
   const lote = writeBatch(db);
   lote.update(doc(db, ...caminhos.vinculo(empresaId, atual.pessoaUid, atual.setorId)), alt.vinculo);
   lote.set(doc(db, ...caminhos.historicoVinculo(empresaId, atual.pessoaUid, atual.setorId, alt.versao)), alt.historico);
+  comEvento(lote, db, empresaId, { uid, acao: 'vinculo_alterado', alvo: `${atual.pessoaUid}_${atual.setorId}`, setorId: atual.setorId, detalhe: Object.keys(mudancas).join(', ') });
   await lote.commit();
   return alt;
 }
@@ -100,6 +113,7 @@ export async function criarVinculo(db, empresaId, { pessoaUid, setorId, unidadeI
   const lote = writeBatch(db);
   lote.set(doc(db, ...caminhos.vinculo(empresaId, pessoaUid, setorId)), novo.vinculo);
   lote.set(doc(db, ...caminhos.historicoVinculo(empresaId, pessoaUid, setorId, 1)), novo.historico);
+  comEvento(lote, db, empresaId, { uid, acao: 'vinculo_criado', alvo: `${pessoaUid}_${setorId}`, setorId });
   await lote.commit();
   return novo;
 }

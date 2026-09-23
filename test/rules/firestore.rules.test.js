@@ -1049,6 +1049,12 @@ describe('eventos (trilha de auditoria)', () => {
     await assertFails(getDoc(ev('agroA', 'e9')));
     await assertFails(getDoc(ev('gerA1', 'e9')));
   });
+
+  test('alvo e detalhe têm um teto de tamanho, como o resto do cadastro', async () => {
+    await assertSucceeds(setDoc(ev('pragA1', 'e10'), { uid: 'pragA1', acao: 'x', em: serverTimestamp(), alvo: 'a'.repeat(200), detalhe: 'd'.repeat(500) }));
+    await assertFails(setDoc(ev('pragA1', 'e11'), { uid: 'pragA1', acao: 'x', em: serverTimestamp(), alvo: 'a'.repeat(201) }));
+    await assertFails(setDoc(ev('pragA1', 'e12'), { uid: 'pragA1', acao: 'x', em: serverTimestamp(), detalhe: 'd'.repeat(501) }));
+  });
 });
 
 test('coleções que não existem no modelo continuam fechadas', async () => {

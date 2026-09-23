@@ -5,7 +5,7 @@
 // Uso: npm run test:fluxo
 import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator, getDocs, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { getFirestore, connectFirestoreEmulator, getDocs, doc, getDoc, updateDoc, setDoc, collection, query, where } from 'firebase/firestore';
 import { caminhos } from '../src/nucleo/caminhos.js';
 import { carregarFichaDaCultura, consultaTalhoes, iniciarAvaliacao, salvarPlanta, finalizarAvaliacao, carregarParaCalcular, consultaMinhasDaSemana, comId } from '../src/campo/repositorio.js';
 import { agruparPorOrgao, definirGrupo, definirValor } from '../src/campo/ficha-campo.js';
@@ -67,6 +67,9 @@ async function avaliacaoFinalizada({ uid, talhaoId, semana, cenario = {}, adulto
   return id;
 }
 const getDocsUm = (caminho) => getDoc(doc(db, ...caminho));
+// eventos do setor com a ação dada (a trilha de auditoria: decisão, execução, vínculo), mais novos primeiro
+const eventosComAcao = async (setorId, acao) =>
+  (await getDocs(query(collection(db, ...caminhos.eventos(E)), where('setorId', '==', setorId), where('acao', '==', acao)))).docs.map((d) => d.data());
 
 function esperar(condicao, ms = 8000) {
   return new Promise((resolve, reject) => {
@@ -142,8 +145,15 @@ try {
   conferir(true, 'rejeitou o talhão 02 com explicação');
   const decisoes = await decisoesDeAvaliacoes(db, E, S, daSemana.map((a) => a.id));
   conferir(decisoes[aidTripes]?.status === 'aprovada' && decisoes[aidLimpa]?.status === 'rejeitada' && !decisoes[aidRascunho], 'as decisões aparecem por avaliação');
+  const eventosDecisao = await eventosComAcao(S, 'decisao_criada');
+  conferir(eventosDecisao.some((ev) => ev.alvo === aidTripes && ev.uid === uidAgro) && eventosDecisao.some((ev) => ev.alvo === aidLimpa), 'cada decisão deixou um evento de auditoria, com quem decidiu');
+  await sair();
+  await entrar('paulo');
+  conferir(await negado(() => eventosComAcao(S, 'decisao_criada')), 'o pragueiro não lê a trilha de auditoria do setor (só admin, gerente e agrônomo)');
+  await sair();
+  await entrar('agro');
   conferir(await negado(() => criarDecisao(db, E, { ficha: calc.ficha, avaliacao: calc.avaliacao, uid: uidAgro, status: 'rejeitada', tds: ['TD1'], observacao: 'mudei de ideia' })), 'não decide duas vezes a mesma avaliação');
-  conferir(await negado(() => executarDecisao(db, E, aidTripes, { uid: uidAgro })), 'o agrônomo não marca como executada (é do gerente)');
+  conferir(await negado(() => executarDecisao(db, E, aidTripes, { uid: uidAgro, setorId: S })), 'o agrônomo não marca como executada (é do gerente)');
 
   console.log('3b) Selo de pendências: a consulta de finalizadas do setor (para o total na aba)');
   const finalizadasDoSetor = (await getDocs(consultaAvaliacoesFinalizadasDoSetor(db, E, S))).docs.map(comId);
@@ -174,10 +184,11 @@ try {
   const uidGerente = await entrar('gerente');
   const vistas = await decisoesDeAvaliacoes(db, E, S, [aidTripes, aidLimpa]);
   conferir(vistas[aidTripes]?.tds.join() === 'TD3' && vistas[aidTripes].observacao === 'aplicar inseticida amanhã cedo', 'lê a decisão do agrônomo (TD3 e a observação)');
-  conferir(await negado(() => executarDecisao(db, E, aidLimpa, { uid: uidGerente })), 'não executa uma decisão rejeitada');
-  await executarDecisao(db, E, aidTripes, { uid: uidGerente, observacao: 'aplicado às 6h, talhão inteiro' });
+  conferir(await negado(() => executarDecisao(db, E, aidLimpa, { uid: uidGerente, setorId: S })), 'não executa uma decisão rejeitada');
+  await executarDecisao(db, E, aidTripes, { uid: uidGerente, observacao: 'aplicado às 6h, talhão inteiro', setorId: S });
   const exec = (await decisoesDeAvaliacoes(db, E, S, [aidTripes]))[aidTripes];
   conferir(exec.status === 'executada' && exec.executadoPor === uidGerente && exec.observacaoExecucao === 'aplicado às 6h, talhão inteiro', 'marcou como executada, com quem e a observação');
+  conferir((await eventosComAcao(S, 'decisao_executada')).some((ev) => ev.alvo === aidTripes && ev.uid === uidGerente), 'a execução também deixou um evento de auditoria');
   const todasDoSetor = (await getDocs(consultaDecisoesDoSetor(db, E, S))).docs.map((d) => d.data());
   const aids = todasDoSetor.map((d) => d.avaliacaoId);
   // (o script do fluxo de decisão, que roda antes, também deixa uma decisão neste setor: por isso "inclui", não "igual a 2")
@@ -186,7 +197,7 @@ try {
   conferir(escutada?.status === 'executada' && escutada.avaliacaoId === aidTripes, 'a escuta de uma decisão (tela de detalhe) entrega a decisão já executada');
   conferir((await escutarDecisao(S, aidRascunho)) === null, 'e entrega null quando ainda não há decisão (sem erro de permissão)');
   conferir(await negado(() => escutarDecisao('frota-1', aidTripes)), 'escutar com o setor errado é negado');
-  conferir(await negado(() => executarDecisao(db, E, aidTripes, { uid: uidGerente })), 'não executa duas vezes');
+  conferir(await negado(() => executarDecisao(db, E, aidTripes, { uid: uidGerente, setorId: S })), 'não executa duas vezes');
   await sair();
 
   console.log('6) O gerente gerencia os vínculos do setor, com histórico');
@@ -204,6 +215,7 @@ try {
   conferir(depois.ativo === false && depois.versao === 2 && depois.alteradoPor === uidGerente, 'desativou a paula: versão 2, quem alterou registrado');
   let hist = (await getDocs(colecaoHistorico(db, E, uidPaula, S))).docs.map((d) => d.data());
   conferir(hist.length === 2, 'o histórico ganhou o registro da versão 2 no mesmo lote');
+  conferir((await eventosComAcao(S, 'vinculo_alterado')).some((ev) => ev.alvo === `${uidPaula}_${S}` && ev.uid === uidGerente && ev.detalhe === 'ativo'), 'alterar o vínculo também deixou um evento de auditoria');
 
   await sair();
   await entrar('paula');
@@ -243,6 +255,7 @@ try {
   await criarVinculo(db, E, { pessoaUid: semVinculo.uid, setorId: S, unidadeId: U, papel: 'funcionario', funcoes: ['pragueiro'], uid: uidAdmin });
   const novoHist = (await getDocs(colecaoHistorico(db, E, semVinculo.uid, S))).docs.map((d) => d.data());
   conferir(novoHist.length === 1 && novoHist[0].versao === 1, 'ligou "Sem Vínculo" ao setor: vínculo versão 1 e histórico criados juntos');
+  conferir((await eventosComAcao(S, 'vinculo_criado')).some((ev) => ev.alvo === `${semVinculo.uid}_${S}` && ev.uid === uidAdmin), 'ligar alguém ao setor também deixou um evento de auditoria');
   conferir(!candidatosParaVincular(membros, (await getDocs(consultaVinculosDoSetor(db, E, S))).docs.map((d) => d.data())).some((m) => m.uid === semVinculo.uid), 'depois disso ele deixa de ser candidato');
   const nomes = await resolverNomes(db, E, [uidPaulo, uidPaula, uidGerente]);
   conferir(nomes[uidPaula] === 'Paula Pragueira' && nomes[uidGerente] === 'Gil Gerente', 'o admin resolve os nomes das pessoas');
