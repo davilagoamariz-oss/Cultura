@@ -53,7 +53,24 @@ async function iniciar(projeto, cwd) {
     parametros.append('currentDocument.exists', 'true');
     await cliente.patch(`${base}/${caminho}`, campos(novos), { queryParams: parametros });
   };
-  return { email: conta?.user?.email, ler, criar, trocarCampos };
+  /** SOBRESCREVE o documento inteiro (cria se não existir). Só para scripts revisados, nunca por padrão. */
+  const substituir = async (caminho, dados) => {
+    await cliente.patch(`${base}/${caminho}`, campos(dados));
+  };
+  /** Há pelo menos um documento nesta coleção? */
+  const temDocumentos = async (caminhoColecao) => {
+    // A listagem de coleção vazia devolve 500 de vez em quando no Firestore: tenta de novo antes de falhar.
+    for (let tentativa = 1; ; tentativa += 1) {
+      try {
+        const r = await cliente.get(`${base}/${caminhoColecao}`, { queryParams: { pageSize: 1 } });
+        return Array.isArray(r.body.documents) && r.body.documents.length > 0;
+      } catch (e) {
+        if (tentativa >= 5 || (e.status && e.status < 500)) throw e;
+        await new Promise((ok) => setTimeout(ok, 800 * tentativa));
+      }
+    }
+  };
+  return { email: conta?.user?.email, ler, criar, trocarCampos, substituir, temDocumentos };
 }
 
 module.exports = { iniciar };
