@@ -13,6 +13,65 @@ const MENSAGENS = {
   'auth/network-request-failed': 'Sem internet. O primeiro acesso precisa de conexão.',
 };
 
+/** "Esqueci minha senha": ninguém se autocadastra (o usuário nasce no console), então sem isto
+ * esquecer a senha travava a pessoa até o administrador resetar na mão. Não diz se o e-mail existe
+ * (o próprio Firebase já não diz, por segurança): a mensagem de sucesso é sempre a mesma. */
+function RecuperarSenha({ aoVoltar }) {
+  const { recuperarSenha } = useSessao();
+  const [email, setEmail] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const [erro, setErro] = useState('');
+  const [enviado, setEnviado] = useState(false);
+
+  async function enviar(evento) {
+    evento.preventDefault();
+    setErro('');
+    setEnviando(true);
+    try {
+      await recuperarSenha(email);
+      setEnviado(true);
+    } catch (e) {
+      setErro(MENSAGENS[e.code] ?? 'Não foi possível enviar. Tente de novo.');
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  if (enviado) {
+    return (
+      <div className="pilha">
+        <p className="aviso" role="status">
+          Se {email} tiver uma conta, chega um e-mail com o link para trocar a senha.
+        </p>
+        <button type="button" className="botao botao--contorno botao--cheio" onClick={aoVoltar}>
+          Voltar
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={enviar} noValidate>
+      <p className="lead">Digite o e-mail da sua conta para receber um link de troca de senha.</p>
+      <label className="campo">
+        <span>E-mail</span>
+        <input type="email" inputMode="email" autoComplete="username" autoCapitalize="none" value={email} onChange={(e) => setEmail(e.target.value)} required />
+      </label>
+      {erro && (
+        <p className="aviso aviso--erro" role="alert">
+          {erro}
+        </p>
+      )}
+      <button className="botao botao--principal botao--cheio" type="submit" disabled={enviando}>
+        {enviando ? 'Enviando…' : 'Enviar link'}
+      </button>
+      <button type="button" className="botao botao--contorno botao--cheio" onClick={aoVoltar}>
+        Voltar
+      </button>
+    </form>
+  );
+}
+
 export default function Login() {
   const { user, status, entrar } = useSessao();
   const online = useOnline();
@@ -20,6 +79,7 @@ export default function Login() {
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const [recuperando, setRecuperando] = useState(false);
 
   // Já logado: a rota "/" decide para onde ir (área do papel, escolha de empresa ou sem acesso).
   if (user && status !== 'carregando') return <Navigate to="/" replace />;
@@ -55,40 +115,47 @@ export default function Login() {
           </p>
         )}
 
-        <form onSubmit={enviar} noValidate>
-          <label className="campo">
-            <span>E-mail</span>
-            <input
-              type="email"
-              inputMode="email"
-              autoComplete="username"
-              autoCapitalize="none"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </label>
-          <label className="campo">
-            <span>Senha</span>
-            <input
-              type="password"
-              autoComplete="current-password"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              required
-            />
-          </label>
+        {recuperando ? (
+          <RecuperarSenha aoVoltar={() => setRecuperando(false)} />
+        ) : (
+          <form onSubmit={enviar} noValidate>
+            <label className="campo">
+              <span>E-mail</span>
+              <input
+                type="email"
+                inputMode="email"
+                autoComplete="username"
+                autoCapitalize="none"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </label>
+            <label className="campo">
+              <span>Senha</span>
+              <input
+                type="password"
+                autoComplete="current-password"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                required
+              />
+            </label>
 
-          {erro && (
-            <p className="aviso aviso--erro" role="alert">
-              {erro}
-            </p>
-          )}
+            {erro && (
+              <p className="aviso aviso--erro" role="alert">
+                {erro}
+              </p>
+            )}
 
-          <button className="botao botao--principal botao--cheio" type="submit" disabled={enviando || !firebaseConfigurado}>
-            {enviando ? 'Entrando…' : 'Entrar'}
-          </button>
-        </form>
+            <button className="botao botao--principal botao--cheio" type="submit" disabled={enviando || !firebaseConfigurado}>
+              {enviando ? 'Entrando…' : 'Entrar'}
+            </button>
+            <button type="button" className="botao botao--contorno" onClick={() => setRecuperando(true)}>
+              Esqueci minha senha
+            </button>
+          </form>
+        )}
       </div>
     </main>
   );

@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { onSnapshot } from 'firebase/firestore';
 import { auth, db, firebaseConfigurado } from './firebase.js';
 import {
@@ -204,6 +204,9 @@ export function SessaoProvider({ children }) {
       vinculoDoSetor,
       entrar: (email, senha) => signInWithEmailAndPassword(auth, email.trim(), senha),
       sair: () => signOut(auth),
+      // ninguém se autocadastra (usuário nasce no console); sem isto, esquecer a senha travava a
+      // pessoa até o admin resetar na mão.
+      recuperarSenha: (email) => sendPasswordResetEmail(auth, email.trim()),
       escolherEmpresa,
       trocarEmpresa,
       escolherSetor,

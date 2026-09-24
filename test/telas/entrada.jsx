@@ -6,6 +6,7 @@ import { SessaoContext } from '../../src/nucleo/Sessao.jsx';
 import { montarMenu, escolherSetorDoModulo } from '../../src/nucleo/menu.js';
 import Layout from '../../src/Layout.jsx';
 import Inicio from '../../src/paginas/Inicio.jsx';
+import Login from '../../src/Login.jsx';
 import Fitossanidade from '../../src/modulos/fitossanidade/Fitossanidade.jsx';
 import Frota from '../../src/modulos/frota/Frota.jsx';
 import SemAcesso from '../../src/SemAcesso.jsx';
@@ -27,11 +28,11 @@ export function sessaoDeMentira({ vinculos = [], setores = {}, unidades = {}, ad
     estruturaPronta: true, setores, unidades, menu,
     setorDoModulo: (id) => escolherSetorDoModulo(menu.find((e) => e.modulo.id === id), setorSalvo),
     vinculoDoSetor: (sid) => vinculos.find((v) => v.setorId === sid && v.ativo === true) ?? null,
-    entrar: () => {}, sair: () => {}, escolherEmpresa: () => {}, trocarEmpresa: () => {}, escolherSetor: () => {}, limparSetor: () => {},
+    entrar: () => {}, sair: () => {}, recuperarSenha: () => {}, escolherEmpresa: () => {}, trocarEmpresa: () => {}, escolherSetor: () => {}, limparSetor: () => {},
   };
 }
 
-const TELAS = { Layout: () => <Layout><p>conteúdo</p></Layout>, Inicio, Fitossanidade, Frota, SemAcesso, Admin };
+const TELAS = { Layout: () => <Layout><p>conteúdo</p></Layout>, Inicio, Fitossanidade, Frota, SemAcesso, Admin, Login };
 
 export function renderizar(tela, sessao, rota = '/') {
   const Tela = TELAS[tela];

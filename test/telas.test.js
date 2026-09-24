@@ -211,3 +211,21 @@ test('error boundary: getDerivedStateFromError guarda o erro; a tela de recupera
 // navegador: o renderToString do servidor não passa pelos error boundaries, o erro simplesmente
 // estoura para fora do render (mesma limitação já conhecida de containers React nunca terem rodado
 // num navegador de verdade).
+
+// ---------------------------------------------------------------- login
+
+test('login: formulário com e-mail, senha e o link de recuperar senha', () => {
+  const sessaoLogin = { user: null, status: 'esperando', entrar: () => {}, recuperarSenha: () => {} };
+  const h = R.renderizar('Login', sessaoLogin).replaceAll('<!-- -->', '');
+  assert.match(h, /Ronda do Pomar/);
+  assert.match(h, /type="email"/);
+  assert.match(h, /type="password"/);
+  assert.match(h, /Esqueci minha senha/);
+  assert.doesNotMatch(h, /Enviar link/); // ainda não entrou no modo de recuperação
+});
+
+test('login: já autenticado, a rota "/" decide (Navigate), não mostra o formulário', () => {
+  const sessaoLogado = { user: { uid: 'u1' }, status: 'ok', entrar: () => {}, recuperarSenha: () => {} };
+  const h = R.renderizar('Login', sessaoLogado);
+  assert.doesNotMatch(h, /type="password"/);
+});

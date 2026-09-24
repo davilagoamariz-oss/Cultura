@@ -26,3 +26,4 @@ uma nova página que a substitui; não se reescreve a história.
 | 019 | [LGPD: base legal e direito ao esquecimento](019-lgpd-base-legal-e-direito-ao-esquecimento.md) | vigente (anonimização ainda não implementada) |
 | 020 | [Trilha de auditoria (eventos) passa a ser gravada](020-trilha-de-auditoria-eventos.md) | vigente (só decisão/execução/vínculo por ora) |
 | 021 | [Error boundary](021-error-boundary.md) | vigente |
+| 022 | ["Esqueci minha senha"](022-esqueci-minha-senha.md) | vigente |
