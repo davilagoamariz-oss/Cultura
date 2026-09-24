@@ -77,6 +77,7 @@ export default function Login() {
   const online = useOnline();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [recuperando, setRecuperando] = useState(false);
@@ -133,13 +134,23 @@ export default function Login() {
             </label>
             <label className="campo">
               <span>Senha</span>
-              <input
-                type="password"
-                autoComplete="current-password"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                required
-              />
+              <div className="campo-senha">
+                <input
+                  type={mostrarSenha ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="campo-senha__alternar"
+                  onClick={() => setMostrarSenha((v) => !v)}
+                  aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                >
+                  {mostrarSenha ? 'Ocultar' : 'Mostrar'}
+                </button>
+              </div>
             </label>
 
             {erro && (

@@ -220,6 +220,7 @@ test('login: formulário com e-mail, senha e o link de recuperar senha', () => {
   assert.match(h, /Ronda do Pomar/);
   assert.match(h, /type="email"/);
   assert.match(h, /type="password"/);
+  assert.match(h, /aria-label="Mostrar senha"[^>]*>Mostrar</); // olho: começa oculta
   assert.match(h, /Esqueci minha senha/);
   assert.doesNotMatch(h, /Enviar link/); // ainda não entrou no modo de recuperação
 });
