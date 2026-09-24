@@ -11,7 +11,7 @@
     "test": "node --test test/*.test.js",
     "test:rules": "firebase emulators:exec --only firestore,storage --project demo-ronda \"node --test test/rules/*.test.js\"",
     "emuladores": "firebase emulators:start --only auth,firestore --project demo-ronda",
-    "dev:emulador": "vite --mode emulador --port 5174",
+    "dev:emulador": "vite --mode emulador --port 5174 --host",
     "semear": "node scripts/semear-emulador.mjs",
     "verificar:fluxo": "node scripts/verificar-fluxo-emulador.mjs",
     "test:fluxo": "firebase emulators:exec --only auth,firestore --project demo-ronda \"npm run semear && npm run verificar:sessao && npm run verificar:fluxo && npm run verificar:campo && npm run verificar:gestao && npm run verificar:admin && npm run verificar:frota\"",
