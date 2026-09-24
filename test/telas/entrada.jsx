@@ -14,6 +14,7 @@ import { ListaTalhoes, FormNovaAvaliacao, GradePlantas, FormularioPlanta, Resumo
 import { PendentesContext } from '../../src/offline/PendentesProvider.jsx';
 import { ListaAcompanhamento, DetalheAvaliacao, GestaoVinculos, SeloPendencias, Comparativo } from '../../src/gestao/telas/apresentacao.jsx';
 import { Estrutura, Limites, Membros, PublicarFicha, FormTalhao, Maquinas as MaquinasAdmin, FormMaquina, ImportarTalhoes } from '../../src/admin/telas/apresentacao.jsx';
+import ErroBoundary from '../../src/ErroBoundary.jsx';
 import { Maquinas as MaquinasFrota } from '../../src/frota/telas/apresentacao.jsx';
 
 export function sessaoDeMentira({ vinculos = [], setores = {}, unidades = {}, admin = false, plataforma = false, empresas = 1, status = 'ok', setorSalvo = null, nome = 'Fulano' } = {}) {
@@ -101,4 +102,25 @@ export function renderizarFrota(nome, props, rota = '/') {
       <Componente {...props} />
     </MemoryRouter>,
   );
+}
+
+// ---- error boundary (uma tela que quebra de propósito, para testar a recuperação)
+function TelaQueQuebra() {
+  throw new Error('falha de propósito, só para o teste');
+}
+
+export function renderizarErroBoundary(quebra) {
+  return renderToString(
+    <ErroBoundary>{quebra ? <TelaQueQuebra /> : <p>conteúdo normal</p>}</ErroBoundary>,
+  );
+}
+
+/** getDerivedStateFromError é um método estático puro: dá para chamar direto, sem precisar quebrar de verdade. */
+export const estadoDoErroBoundary = (erro) => ErroBoundary.getDerivedStateFromError(erro);
+
+/** A tela de recuperação em si, sem depender do React pegar o erro (só o navegador faz isso de verdade). */
+export function renderizarTelaDeErro() {
+  const instancia = Object.create(ErroBoundary.prototype);
+  instancia.state = { erro: new Error('x') };
+  return renderToString(instancia.render());
 }

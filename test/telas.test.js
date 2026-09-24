@@ -194,3 +194,20 @@ test('administração: os quatro cadastros estão disponíveis e nada é "próxi
   assert.match(h, /Limites de ação/);
   assert.doesNotMatch(h, /Próxima fase/);
 });
+
+// ---------------------------------------------------------------- error boundary
+
+test('error boundary: renderiza normal quando nada quebra', () => {
+  assert.match(R.renderizarErroBoundary(false), /conteúdo normal/);
+});
+test('error boundary: getDerivedStateFromError guarda o erro; a tela de recuperação tem o texto certo', () => {
+  assert.deepEqual(R.estadoDoErroBoundary('x'), { erro: 'x' });
+  const h = R.renderizarTelaDeErro();
+  assert.match(h, /Algo deu errado/);
+  assert.match(h, /já tinha digitado continua salvo/);
+  assert.match(h, /Recarregar/);
+});
+// A recuperação em si (React trocando a tela quando o erro acontece de verdade) só se vê no
+// navegador: o renderToString do servidor não passa pelos error boundaries, o erro simplesmente
+// estoura para fora do render (mesma limitação já conhecida de containers React nunca terem rodado
+// num navegador de verdade).

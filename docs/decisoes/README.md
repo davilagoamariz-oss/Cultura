@@ -25,3 +25,4 @@ uma nova página que a substitui; não se reescreve a história.
 | 018 | [storage.rules corrigida para o desenho multiempresa](018-storage-rules-multiempresa.md) | vigente |
 | 019 | [LGPD: base legal e direito ao esquecimento](019-lgpd-base-legal-e-direito-ao-esquecimento.md) | vigente (anonimização ainda não implementada) |
 | 020 | [Trilha de auditoria (eventos) passa a ser gravada](020-trilha-de-auditoria-eventos.md) | vigente (só decisão/execução/vínculo por ora) |
+| 021 | [Error boundary](021-error-boundary.md) | vigente |
