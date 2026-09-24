@@ -1,5 +1,5 @@
 // Modelo do resumo (prévia do NI e da TD) a partir do resultado do motor. Função pura.
-import { corDoResultado } from '../dominio/motor/cor.js';
+import { corDoResultado, piorCor } from '../dominio/motor/cor.js';
 
 const pct = (v) => (v === null || v === undefined ? '—' : `${(v * 100).toFixed(1).replace('.', ',')}%`);
 export const formatarPercentual = pct;
@@ -77,5 +77,7 @@ export function montarResumo(resultado, ficha) {
     revisar: decisao.revisarManual.map((r) => ({ id: r.id, nome: r.nome, niTexto: pct(r.ni) })),
     motivos: decisao.motivos.map((m) => ({ id: m.id, nome: m.nome, niTexto: pct(m.ni), limiteTexto: `≥ ${pct(m.limite)}`, td: m.td, nivel: m.nivel })),
     secoes,
+    // Pior cor entre todos os itens: resumo visual de uma linha para a lista de acompanhamento.
+    piorCor: piorCor(linhas.map((l) => l.cor.cor)),
   };
 }

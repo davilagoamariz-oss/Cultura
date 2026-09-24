@@ -822,6 +822,13 @@ describe('avaliações (cabeçalho)', () => {
       await assertSucceeds(updateDoc(r, { status: 'finalizada', finalizadaEm: serverTimestamp() }));
     });
 
+    test('resumoCor: só um dos valores conhecidos; opcional; não é a decisão do agrônomo', async () => {
+      const r = ref(como('pragA1'), AV1);
+      await assertFails(updateDoc(r, { status: 'finalizada', finalizadaEm: serverTimestamp(), resumoCor: 'roxo' }));
+      await assertSucceeds(updateDoc(r, { notas: 'sem cor ainda é permitido' })); // campo é opcional
+      await assertSucceeds(updateDoc(r, { status: 'finalizada', finalizadaEm: serverTimestamp(), resumoCor: 'laranja' }));
+    });
+
     test('identidade, setor, talhão, semana, ficha e atributos não mudam', async () => {
       const r = ref(como('pragA1'), AV1);
       await assertFails(updateDoc(r, { talhaoId: 't-a2' }));

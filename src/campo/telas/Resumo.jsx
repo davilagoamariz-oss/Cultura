@@ -52,7 +52,7 @@ export default function Resumo() {
     setFinalizando(true);
     try {
       // não espera o servidor: fica na fila do aparelho, depois das plantas, e sai quando houver rede
-      finalizarAvaliacao(db, empresaId, aid, formulario).catch((e) => setErroFinalizar(`O servidor recusou a finalização (${e.code ?? 'erro'}).`));
+      finalizarAvaliacao(db, empresaId, aid, { ...formulario, resumoCor: modelo.piorCor }).catch((e) => setErroFinalizar(`O servidor recusou a finalização (${e.code ?? 'erro'}).`));
       setConfirmando(false);
     } catch (e) {
       setErroFinalizar(e.message);

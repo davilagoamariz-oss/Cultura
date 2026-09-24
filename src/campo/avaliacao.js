@@ -112,11 +112,16 @@ export function proximaIncompleta(ficha, plantas, n = 0) {
   return null;
 }
 
+// Mesmo enum aceito por firestore.rules (allow update de avaliacoes): 'informativo' fica de fora
+// de propósito (inimigo natural nunca é a pior cor da avaliação, ver piorCor em dominio/motor/cor.js).
+export const CORES_RESUMO = ['verde', 'azul', 'amarelo', 'laranja', 'vermelho', 'revisar', 'indefinido'];
+
 /**
  * Campos que fecham a avaliação. O armadilha é só informativo por enquanto (a regra do bicho-furão
- * ainda não foi confirmada): guarda os adultos contados, sem entrar no cálculo.
+ * ainda não foi confirmada): guarda os adultos contados, sem entrar no cálculo. `resumoCor` é a
+ * prévia (pior cor de severidade) calculada no aparelho, só para o selo da lista de acompanhamento.
  */
-export function dadosParaFinalizar({ notas, outrasPragas, adultosArmadilha, finalizadaEm }) {
+export function dadosParaFinalizar({ notas, outrasPragas, adultosArmadilha, resumoCor, finalizadaEm }) {
   const dados = { status: 'finalizada', finalizadaEm };
   const n = limpar(notas, MAX_NOTAS_AVALIACAO, 'notas');
   const o = limpar(outrasPragas, MAX_NOTAS_AVALIACAO, 'outras pragas');
@@ -126,6 +131,10 @@ export function dadosParaFinalizar({ notas, outrasPragas, adultosArmadilha, fina
     const adultos = Number(adultosArmadilha);
     if (!Number.isInteger(adultos) || adultos < 0 || adultos > 1000) throw new Error('adultos na armadilha: número inteiro de 0 a 1000');
     dados.armadilha = { adultos };
+  }
+  if (resumoCor !== undefined && resumoCor !== null) {
+    if (!CORES_RESUMO.includes(resumoCor)) throw new Error('resumoCor: valor fora do esperado');
+    dados.resumoCor = resumoCor;
   }
   return dados;
 }

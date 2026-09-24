@@ -105,6 +105,9 @@ test('finalizar: só campos permitidos; armadilha é informativa e validada', ()
   for (const ruim of [-1, 1.5, 'muitos', 1001]) assert.throws(() => dadosParaFinalizar({ adultosArmadilha: ruim, finalizadaEm: 'F' }), /armadilha/, String(ruim));
   assert.equal('armadilha' in dadosParaFinalizar({ adultosArmadilha: '', finalizadaEm: 'F' }), false);
   assert.throws(() => dadosParaFinalizar({ notas: 'x'.repeat(2001), finalizadaEm: 'F' }), /notas/);
+  assert.equal(dadosParaFinalizar({ resumoCor: 'laranja', finalizadaEm: 'F' }).resumoCor, 'laranja');
+  assert.equal('resumoCor' in dadosParaFinalizar({ finalizadaEm: 'F' }), false); // opcional
+  assert.throws(() => dadosParaFinalizar({ resumoCor: 'roxo', finalizadaEm: 'F' }), /resumoCor/);
 });
 
 test('aviso de avaliação já existente na semana', () => {
@@ -140,6 +143,7 @@ test('resumo: nível de ação atingido aparece primeiro, com NI, limite e TD', 
   assert.equal(tripes.cor.cor, 'laranja'); // 23,3% / 20% ≈ 1,17x o limite: atingiu, mas não em dobro
   const joaninha = r.secoes.find((s) => s.chave === 'informativo').itens.find((i) => i.id === 'joaninha');
   assert.deepEqual(joaninha.cor, { cor: 'informativo', rotulo: 'Presente' }); // inimigo natural nunca é "ruim"
+  assert.equal(r.piorCor, 'laranja'); // pior entre os itens: laranja vence (a joaninha é só informativa)
   assert.equal(r.revisar[0].id, 'ferrugem_bgude'); // detectada sem limite
   // só a ferrugem (detectada) pede revisão; os outros itens pendentes, sem detecção, ficam à parte
   assert.deepEqual(r.secoes.find((s) => s.chave === 'limite_nao_definido').itens.map((i) => i.id), ['ferrugem_bgude']);
@@ -152,10 +156,12 @@ test('resumo: só REVISAR deixa claro que NÃO é "não pulverizar"', () => {
   assert.match(r.manchete.texto, /NÃO significa "não pulverizar"/);
   assert.deepEqual(r.tds.map((t) => t.codigo), ['REVISAR']);
   assert.equal(r.precisaAplicacao, false);
+  assert.equal(r.piorCor, 'revisar');
 });
 
 test('resumo: nada atingido e nada pendente é TD1; itens sem praga não viram REVISAR', () => {
   const r = resumoDe({});
+  assert.equal(r.piorCor, 'verde');
   assert.equal(r.manchete.tipo, 'nenhuma_acao');
   assert.deepEqual(r.tds, [{ codigo: 'TD1', texto: 'Não pulverizar' }]);
   assert.equal(r.revisar.length, 0);

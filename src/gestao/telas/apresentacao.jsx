@@ -32,6 +32,12 @@ const ROTULO_RESUMO = {
   aguardando_decisao: 'aguardando decisão', aprovada: 'aguardando execução', concluida: 'concluída', em_andamento: 'em andamento',
 };
 
+// Rótulo genérico por cor (a prévia calculada pelo pragueiro ao finalizar), para o selo da lista.
+// Diferente do rótulo por item de BlocoResultado, que é específico da praga.
+const ROTULO_COR_RESUMO = {
+  verde: 'Sem alerta', azul: 'Observar', amarelo: 'Atenção', laranja: 'Nível de ação', vermelho: 'Urgente', revisar: 'Revisar', indefinido: 'Sem prévia',
+};
+
 function ResumoDaSemana({ resumo }) {
   const partes = ['aguardando_decisao', 'aprovada', 'em_andamento', 'concluida'].filter((chave) => resumo[chave] > 0);
   return (
@@ -92,7 +98,10 @@ export function ListaAcompanhamento({ semana, rotuloSemana, semanaAnterior, sema
               <div className="pilha">
                 {doGrupo.map((l) => (
                   <Link key={l.id} to={rotaAcompanhamento(l.id)} className="cartao cartao--linha">
-                    <span className="cartao__titulo">{l.talhaoNome}</span>
+                    <span className="cartao__titulo">
+                      {l.talhaoNome}
+                      {l.resumoCor && <span className={`selo-cor selo-cor--${l.resumoCor}`}>{ROTULO_COR_RESUMO[l.resumoCor]}</span>}
+                    </span>
                     <span className="cartao__texto">
                       {l.pragueiro} · inspeção em {l.dataTexto}
                     </span>

@@ -572,13 +572,17 @@ service cloud.firestore {
           && resource.data.status == 'rascunho'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
                ['faseCultura', 'notas', 'outrasPragas', 'armadilha', 'horaInicio', 'horaFim', 'geo',
-                'status', 'atualizadoEm', 'finalizadaEm'])
+                'status', 'atualizadoEm', 'finalizadaEm', 'resumoCor'])
           && ((request.resource.data.status == 'rascunho' && !('finalizadaEm' in request.resource.data))
               || (request.resource.data.status == 'finalizada' && request.resource.data.finalizadaEm == request.time))
           && (!('faseCultura' in request.resource.data)
               || (request.resource.data.faseCultura is list && request.resource.data.faseCultura.size() <= 20))
           && (!('notas' in request.resource.data) || textoAte(request.resource.data.notas, 2000))
-          && (!('outrasPragas' in request.resource.data) || textoAte(request.resource.data.outrasPragas, 2000));
+          && (!('outrasPragas' in request.resource.data) || textoAte(request.resource.data.outrasPragas, 2000))
+          // Pior cor de severidade da avaliação (prévia calculada no aparelho), só para o selo da
+          // lista de acompanhamento: nunca é a decisão do agrônomo, só um resumo visual.
+          && (!('resumoCor' in request.resource.data)
+              || request.resource.data.resumoCor in ['verde', 'azul', 'amarelo', 'laranja', 'vermelho', 'revisar', 'indefinido']);
 
         allow delete: if false;
 

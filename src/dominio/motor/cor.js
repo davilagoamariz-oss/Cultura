@@ -45,7 +45,11 @@ export function corDoResultado(resultado) {
     return { cor: 'indefinido', rotulo: 'Sem dados' };
   }
   if (resultado.status === 'limite_nao_definido') {
-    return { cor: 'revisar', rotulo: 'Revisar (sem limite definido)' };
+    // Mesma régua do motor (revisarManual): só pede revisão quando a praga foi DETECTADA.
+    // Sem detecção, não há nada para comparar contra um limite que nem existe ainda.
+    return resultado.ni > 0
+      ? { cor: 'revisar', rotulo: 'Revisar (sem limite definido)' }
+      : { cor: 'indefinido', rotulo: 'Sem limite definido (nada detectado)' };
   }
 
   const nivel = nivelMaisRelevante(resultado.niveis);

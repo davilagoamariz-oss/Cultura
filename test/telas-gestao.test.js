@@ -135,6 +135,13 @@ test('lista da semana: avisa o que ainda aguarda envio', () => {
   assert.match(h, /aguardando envio/);
 });
 
+test('lista da semana: selo de cor quando a avaliação tem a prévia calculada', () => {
+  const comCor = tela('ListaAcompanhamento', propsLista({ linhas: [linha({ resumoCor: 'vermelho' })] }));
+  assert.match(comCor, /class="selo-cor selo-cor--vermelho"[^>]*>Urgente/);
+  const semCor = tela('ListaAcompanhamento', propsLista({ linhas: [linha()] })); // avaliação antiga, sem o campo
+  assert.doesNotMatch(semCor, /selo-cor/);
+});
+
 // ---------------------------------------------------------------- detalhe e decisão
 
 function propsDetalhe({ cenario = { tripes: 7 }, avaliacaoStatus = 'finalizada', decisao = null, podeDecidir = false, ehGerente = false, formulario, extra = {} } = {}) {

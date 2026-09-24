@@ -77,6 +77,7 @@ export default function Acompanhamento() {
       status: a.status,
       decisaoStatus: decisoes[a.id]?.status ?? null,
       tds: decisoes[a.id]?.tds ?? [],
+      resumoCor: a.resumoCor ?? null,
       pendente: a.pendente || Boolean(decisoes[a.id]?.pendente),
     }))
     .sort((x, y) => x.talhaoNome.localeCompare(y.talhaoNome, 'pt-BR', { numeric: true }));
