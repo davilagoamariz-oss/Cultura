@@ -137,6 +137,9 @@ test('resumo: nível de ação atingido aparece primeiro, com NI, limite e TD', 
   assert.equal(r.secoes[0].chave, 'acao');
   const tripes = r.secoes[0].itens[0];
   assert.deepEqual([tripes.id, tripes.niTexto, tripes.limiteTexto, tripes.td, tripes.positivas, tripes.avaliadas], ['tripes_flor', '23,3%', '> 20,0%', 'TD3', 7, 30]);
+  assert.equal(tripes.cor.cor, 'laranja'); // 23,3% / 20% ≈ 1,17x o limite: atingiu, mas não em dobro
+  const joaninha = r.secoes.find((s) => s.chave === 'informativo').itens.find((i) => i.id === 'joaninha');
+  assert.deepEqual(joaninha.cor, { cor: 'informativo', rotulo: 'Presente' }); // inimigo natural nunca é "ruim"
   assert.equal(r.revisar[0].id, 'ferrugem_bgude'); // detectada sem limite
   // só a ferrugem (detectada) pede revisão; os outros itens pendentes, sem detecção, ficam à parte
   assert.deepEqual(r.secoes.find((s) => s.chave === 'limite_nao_definido').itens.map((i) => i.id), ['ferrugem_bgude']);

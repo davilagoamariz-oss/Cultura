@@ -457,7 +457,44 @@ a.cartao:active {
   --nivel2-borda: #c2410c;
   --nivel3: #fecaca;
   --nivel3-borda: #991b1b;
+
+  /* Severidade por praga (verde a vermelho + informativo/revisar/indefinido): sempre com o
+     texto do rótulo escrito (ver corDoResultado em dominio/motor/cor.js); a cor só reforça. */
+  --sev-verde: var(--verde-100);
+  --sev-verde-borda: var(--verde-800);
+  --sev-azul: #dbeafe;
+  --sev-azul-borda: #1d4ed8;
+  --sev-amarelo: var(--aviso-fundo);
+  --sev-amarelo-borda: var(--aviso);
+  --sev-laranja: var(--nivel2);
+  --sev-laranja-borda: var(--nivel2-borda);
+  --sev-vermelho: var(--nivel3);
+  --sev-vermelho-borda: var(--nivel3-borda);
+  --sev-informativo: #e0e7ff;
+  --sev-informativo-borda: #3730a3;
+  --sev-revisar: var(--aviso-fundo);
+  --sev-revisar-borda: var(--aviso);
+  --sev-indefinido: #f3f4f6;
+  --sev-indefinido-borda: var(--borda);
 }
+
+.selo-cor {
+  display: inline-block;
+  margin: 0 8px 4px 0;
+  padding: 2px 10px;
+  border: 2px solid;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.selo-cor--verde { background: var(--sev-verde); border-color: var(--sev-verde-borda); color: var(--sev-verde-borda); }
+.selo-cor--azul { background: var(--sev-azul); border-color: var(--sev-azul-borda); color: var(--sev-azul-borda); }
+.selo-cor--amarelo { background: var(--sev-amarelo); border-color: var(--sev-amarelo-borda); color: var(--sev-amarelo-borda); }
+.selo-cor--laranja { background: var(--sev-laranja); border-color: var(--sev-laranja-borda); color: var(--sev-laranja-borda); }
+.selo-cor--vermelho { background: var(--sev-vermelho); border-color: var(--sev-vermelho-borda); color: var(--sev-vermelho-borda); }
+.selo-cor--informativo { background: var(--sev-informativo); border-color: var(--sev-informativo-borda); color: var(--sev-informativo-borda); }
+.selo-cor--revisar { background: var(--sev-revisar); border-color: var(--sev-revisar-borda); color: var(--sev-revisar-borda); }
+.selo-cor--indefinido { background: var(--sev-indefinido); border-color: var(--sev-indefinido-borda); color: var(--texto-suave); }
 
 .faixa {
   margin: 0 0 16px;

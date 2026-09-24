@@ -1,4 +1,5 @@
 // Modelo do resumo (prévia do NI e da TD) a partir do resultado do motor. Função pura.
+import { corDoResultado } from '../dominio/motor/cor.js';
 
 const pct = (v) => (v === null || v === undefined ? '—' : `${(v * 100).toFixed(1).replace('.', ',')}%`);
 export const formatarPercentual = pct;
@@ -36,6 +37,7 @@ function linha(r) {
     td: r.status === 'acao' ? r.td : null,
     limiteTexto: r.status === 'informativo' || r.status === 'nao_aplicavel' ? null : textoDoLimite(principal),
     nivelDisparado: r.nivelDisparado ?? null,
+    cor: corDoResultado(r),
   };
 }
 

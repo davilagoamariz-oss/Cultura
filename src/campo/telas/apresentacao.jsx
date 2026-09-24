@@ -330,6 +330,7 @@ export function BlocoResultado({ modelo }) {
               {s.itens.map((i) => (
                 <tr key={i.id} className={`linha--${i.status}`}>
                   <td>
+                    <span className={`selo-cor selo-cor--${i.cor.cor}`}>{i.cor.rotulo}</span>
                     {i.nome}
                     <span className="linha-item__dica">
                       {i.orgao} · {SELO_STATUS[i.status]}

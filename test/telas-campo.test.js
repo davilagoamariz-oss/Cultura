@@ -263,6 +263,8 @@ test('resumo com nível de ação: TD, NI, limite, aviso de seletivo e o que rev
   assert.match(h, /Atingiram o nível de ação/);
   assert.match(h, /Tripes[\s\S]*?23,0?3?%|23,3%/);
   assert.match(h, /> 20,0%/);
+  assert.match(h, /class="selo-cor selo-cor--laranja"[^>]*>Nível de ação atingido/); // cor de severidade junto do nome
+  assert.match(h, /class="selo-cor selo-cor--informativo"[^>]*>Presente/); // joaninha: informativo, não entra na escala ruim
   assert.match(h, /7\/30/);
   assert.match(h, /Sem limite definido \(revisar\)/);
   assert.match(h, /Ácaro da ferrugem \(bola de gude\)/);
