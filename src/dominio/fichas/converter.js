@@ -215,7 +215,10 @@ export function converterRegrasIniciais(regrasIniciais) {
     origem: regrasIniciais.origem,
     amostragem: {
       tipo: 'plantas_quadrantes',
-      plantas: 30,
+      // Piso do manual (a "amostragem mínima" da unidade de referência de 5 ha, Doc. 183, p.11-12):
+      // só vale quando a avaliação não tem amostragemPlantas própria (calculada por área/espaçamento
+      // do talhão na criação — ver src/campo/amostragem.js e ADR 024). Nunca é o valor normal em uso.
+      plantas: 15,
       lados: ['A', 'B', 'C'], // copa dividida em 3 setores iguais (Manual Embrapa Doc. 183, p.11)
       intensidade: { escala: [0, 1, 2, 3], legenda: { 1: 'até 5 pragas', 2: 'de 6 a 15 pragas', 3: 'mais de 15 pragas' } },
     },

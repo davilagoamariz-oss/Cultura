@@ -47,6 +47,26 @@ export function lerAreaHa(entrada) {
   return n;
 }
 
+/**
+ * Espaçamento em metros (entre plantas x entre linhas), usado para estimar o total de plantas do talhão
+ * e daí o tamanho da amostra (Manual Embrapa Doc. 183, p.11-14; ADR 024). Os dois vazios -> null;
+ * só um preenchido ou valor inválido -> erro.
+ */
+export function lerEspacamento(entrePlantas, entreLinhas) {
+  const ler = (entrada, rotulo) => {
+    const t = String(entrada ?? '').trim().replace(',', '.');
+    if (t === '') return null;
+    const n = Number(t);
+    if (!Number.isFinite(n) || n <= 0 || n > 100) throw new Error(`${rotulo}: informe metros, entre 0 e 100`);
+    return n;
+  };
+  const p = ler(entrePlantas, 'Espaçamento entre plantas');
+  const l = ler(entreLinhas, 'Espaçamento entre linhas');
+  if (p === null && l === null) return null;
+  if (p === null || l === null) throw new Error('Espaçamento: informe entre plantas E entre linhas (ou deixe os dois vazios)');
+  return { entrePlantas: p, entreLinhas: l };
+}
+
 export const ROTULOS_ATRIBUTO = { tipoPomar: 'Tipo de pomar', citrosVizinhos: 'Há outros citros (laranja, lima, tangerina) perto' };
 export const ROTULOS_OPCAO = { adulto: 'Pomar adulto', novo: 'Pomar novo' };
 
@@ -91,11 +111,14 @@ export function validarAtributos(ficha, informados = {}) {
   return saida;
 }
 
-export function montarTalhao({ ficha, unidadeId, nome, culturaId, variedade = '', areaHa = '', atributos = {}, ativo = true }) {
+export function montarTalhao({
+  ficha, unidadeId, nome, culturaId, variedade = '', areaHa = '', espacamentoPlantas = '', espacamentoLinhas = '', atributos = {}, ativo = true,
+}) {
   if (!unidadeId) throw new Error('Escolha a unidade');
   if (!culturaId) throw new Error('Escolha a cultura');
   if (ficha && ficha.culturaId !== culturaId) throw new Error('A ficha não é da cultura escolhida');
   const area = lerAreaHa(areaHa);
+  const espacamento = lerEspacamento(espacamentoPlantas, espacamentoLinhas);
   const v = textoOpcional(variedade, 'Variedade', 80);
   return {
     unidadeId,
@@ -105,6 +128,7 @@ export function montarTalhao({ ficha, unidadeId, nome, culturaId, variedade = ''
     ativo: Boolean(ativo),
     ...(v ? { variedade: v } : {}),
     ...(area !== null ? { areaHa: area } : {}),
+    ...(espacamento !== null ? { espacamento } : {}),
   };
 }
 

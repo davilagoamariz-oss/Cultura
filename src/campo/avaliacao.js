@@ -2,6 +2,7 @@
 // progresso. Funções puras: quem grava (o repositório) só injeta o carimbo de hora do servidor.
 import { idAvaliacao } from '../nucleo/caminhos.js';
 import { obsParaGravar, statusDaPlanta, pendenciasPorGrupo } from './ficha-campo.js';
+import { calcularTamanhoAmostra } from './amostragem.js';
 
 export const MAX_FASES = 20;
 export const MAX_NOTAS_PLANTA = 1000;
@@ -39,6 +40,10 @@ export function montarCabecalho({ ficha, talhaoId, talhao, setorId, unidadeId, u
       fichaId: ficha.fichaId,
       fichaVersao: ficha.versao,
       atributosTalhao: talhao.atributos,
+      // Calculado uma vez, na criação, a partir da área/espaçamento do talhão NESTE momento (Manual
+      // Embrapa Doc. 183, p.11-14) — não recalcula se o talhão for editado depois, mesma lógica de
+      // "atributosTalhao" logo acima: o limite usado no cálculo não pode ser adulterado por trás.
+      amostragemPlantas: calcularTamanhoAmostra(talhao.areaHa, talhao.espacamento),
       responsavelUid: uid,
       data,
       semanaISO: semana,

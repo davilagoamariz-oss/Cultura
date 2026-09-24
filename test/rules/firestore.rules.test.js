@@ -311,6 +311,17 @@ describe('cadastros base (unidades, setores, safras, talhões)', () => {
     await assertFails(setDoc(p(db, 'empresas', A, 'talhoes', 't-14'), novo({ extra: 1 })));
   });
 
+  test('talhão: espaçamento em metros (Embrapa Doc. 183, p.11) — os dois valores, positivos e até 100', async () => {
+    const db = como('admA');
+    const novo = (espacamento) => ({ unidadeId: 'un-a1', nome: 'T', culturaId: 'limao-tahiti', atributos: ATRIBUTOS, ativo: true, areaHa: 5, espacamento });
+    await assertSucceeds(setDoc(p(db, 'empresas', A, 'talhoes', 't-esp1'), novo({ entrePlantas: 4, entreLinhas: 6.5 })));
+    await assertFails(setDoc(p(db, 'empresas', A, 'talhoes', 't-esp2'), novo({ entrePlantas: 4 }))); // falta um
+    await assertFails(setDoc(p(db, 'empresas', A, 'talhoes', 't-esp3'), novo({ entrePlantas: 0, entreLinhas: 6 })));
+    await assertFails(setDoc(p(db, 'empresas', A, 'talhoes', 't-esp4'), novo({ entrePlantas: 4, entreLinhas: 101 })));
+    await assertFails(setDoc(p(db, 'empresas', A, 'talhoes', 't-esp5'), novo({ entrePlantas: 4, entreLinhas: 6, extra: 1 })));
+    await assertFails(setDoc(p(db, 'empresas', A, 'talhoes', 't-esp6'), novo('4x6')));
+  });
+
   test('talhão: a unidade não muda; atributos e nome sim', async () => {
     const db = como('admA');
     await assertFails(updateDoc(p(db, 'empresas', A, 'talhoes', 't-a1'), { unidadeId: 'un-a2' }));
@@ -727,6 +738,29 @@ describe('avaliações (cabeçalho)', () => {
       await assertSucceeds(setDoc(ref(db), nova({ fichaVersao: 2 })));
     });
 
+    test('amostragemPlantas (tamanho da amostra por talhão): piso 10, sem área = 15, área < 5 ha = 10', async () => {
+      const db = como('pragA1');
+      // talhão t-a1 do teste não tem areaHa: só 15 (o piso do manual quando falta o dado)
+      await assertFails(setDoc(ref(db), nova({ amostragemPlantas: 5 })));
+      await assertFails(setDoc(ref(db), nova({ amostragemPlantas: 30 }))); // fixo antigo, sem base no manual
+      await assertFails(setDoc(ref(db), nova({ amostragemPlantas: '15' })));
+      await assertSucceeds(setDoc(ref(db), nova({ amostragemPlantas: 15 })));
+      // talhão com área < 5 ha: 10; a partir de 5 ha: qualquer valor de 10 a 999 (o app faz a conta do 1%)
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await updateDoc(doc(ctx.firestore(), 'empresas', A, 'talhoes', 't-a1'), { areaHa: 3 });
+      });
+      await assertFails(setDoc(ref(db, 't-a1_2026-W41_pragA1'), nova({ semanaISO: '2026-W41', amostragemPlantas: 15 })));
+      await assertSucceeds(setDoc(ref(db, 't-a1_2026-W41_pragA1'), nova({ semanaISO: '2026-W41', amostragemPlantas: 10 })));
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await updateDoc(doc(ctx.firestore(), 'empresas', A, 'talhoes', 't-a1'), { areaHa: 10 });
+      });
+      await assertSucceeds(setDoc(ref(db, 't-a1_2026-W42_pragA1'), nova({ semanaISO: '2026-W42', amostragemPlantas: 42 })));
+    });
+
+    test('amostragemPlantas não muda depois de criada (não está entre os campos editáveis)', async () => {
+      await assertFails(updateDoc(ref(como('pragA1'), AV1), { amostragemPlantas: 10 }));
+    });
+
     test('unidade do cabeçalho tem que ser a do setor', async () => {
       await assertFails(setDoc(ref(como('pragA1')), nova({ unidadeId: 'un-a2' })));
     });
@@ -870,16 +904,18 @@ describe('avaliações (cabeçalho)', () => {
 describe('plantas', () => {
   const planta = (n, uid = 'pragA1', aid = AV1) => p(como(uid), 'empresas', A, 'avaliacoes', aid, 'plantas', String(n));
 
-  test('o pragueiro grava as plantas 1 a 30 da própria avaliação em rascunho', async () => {
+  test('o pragueiro grava as plantas da própria avaliação em rascunho (o número vai até 999: o total exato vem do talhão, no app)', async () => {
     await assertSucceeds(setDoc(planta(2), { n: 2, obs: { tripes_flor: { A: 1, B: null } } }));
     await assertSucceeds(setDoc(planta(30), { n: 30, obs: {} }));
+    await assertSucceeds(setDoc(planta(42), { n: 42, obs: {} })); // talhão grande: amostra > 30 (1% do total)
+    await assertSucceeds(setDoc(planta(999), { n: 999, obs: {} }));
     await assertSucceeds(updateDoc(planta(1), { 'obs.tripes_flor': { A: 3, B: 0 } }));
     await assertSucceeds(setDoc(planta(3), { n: 3, obs: {}, notas: 'foco perto da cerca', fotos: [{ itemId: 'tripes_flor', quadrante: 'A', caminho: 'local:1' }] }));
   });
 
-  test('plantas fora de 1 a 30, campos extras e dados inválidos: negado', async () => {
+  test('plantas fora de 1 a 999, campos extras e dados inválidos: negado', async () => {
     await assertFails(setDoc(planta(0), { n: 0, obs: {} }));
-    await assertFails(setDoc(planta(31), { n: 31, obs: {} }));
+    await assertFails(setDoc(planta(1000), { n: 1000, obs: {} }));
     await assertFails(setDoc(planta('01'), { n: 1, obs: {} }));
     await assertFails(setDoc(planta(3), { n: 3, obs: {}, admin: true }));
     await assertFails(setDoc(planta(3), { n: 3, obs: 'texto' }));

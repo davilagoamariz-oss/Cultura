@@ -9,7 +9,10 @@ import { montarResumo, formatarPercentual, textoDoLimite } from '../src/campo/re
 import { agruparPorOrgao, definirGrupo, definirValor, definirItem, obsParaGravar } from '../src/campo/ficha-campo.js';
 import { avaliar } from '../src/dominio/motor/index.js';
 
-const ficha = JSON.parse(readFileSync(new URL('../catalogo/fichas/limao-tahiti.v1.json', import.meta.url), 'utf8'));
+const fichaBase = JSON.parse(readFileSync(new URL('../catalogo/fichas/limao-tahiti.v1.json', import.meta.url), 'utf8'));
+// O tamanho da amostra real vem do talhão (amostragemPlantas, ADR 024); aqui fixamos 30 só para os
+// testes que verificam o comportamento genérico de "N plantas" (grade, progresso, finalização).
+const ficha = { ...fichaBase, amostragem: { ...fichaBase.amostragem, plantas: 30 } };
 const item = (id) => ficha.itens.find((i) => i.id === id);
 const talhao = { unidadeId: 'un-1', nome: 'T', culturaId: 'limao-tahiti', atributos: { tipoPomar: 'adulto', citrosVizinhos: false }, ativo: true };
 const base = { ficha, talhaoId: 't-01', talhao, setorId: 'fit-1', unidadeId: 'un-1', uid: 'u9', data: '2026-09-22', semana: '2026-W39', criadoEm: 'CARIMBO' };
@@ -23,10 +26,17 @@ test('cabeçalho: id, ficha vigente e atributos do talhão, como as regras exige
   assert.equal(id, 't-01_2026-W39_u9');
   assert.deepEqual(dados, {
     talhaoId: 't-01', unidadeId: 'un-1', setorId: 'fit-1', fichaId: 'limao-tahiti', fichaVersao: 1,
-    atributosTalhao: { tipoPomar: 'adulto', citrosVizinhos: false }, responsavelUid: 'u9', data: '2026-09-22',
+    atributosTalhao: { tipoPomar: 'adulto', citrosVizinhos: false }, amostragemPlantas: 15, responsavelUid: 'u9', data: '2026-09-22',
     semanaISO: '2026-W39', status: 'rascunho', faseCultura: ['chumbinho', 'azeitona'], criadoEm: 'CARIMBO',
   });
   assert.equal('finalizadaEm' in dados, false);
+});
+
+test('cabeçalho: o tamanho da amostra sai da área e do espaçamento do talhão (Embrapa Doc. 183, p.11-14)', () => {
+  const tam = (extra) => montarCabecalho({ ...base, talhao: { ...talhao, ...extra } }).dados.amostragemPlantas;
+  assert.equal(tam({}), 15); // sem área nem espaçamento: piso do manual
+  assert.equal(tam({ areaHa: 3, espacamento: { entrePlantas: 6, entreLinhas: 4 } }), 10); // < 5 ha
+  assert.equal(tam({ areaHa: 10, espacamento: { entrePlantas: 6, entreLinhas: 4 } }), 42); // 1% de ~4167 plantas
 });
 
 test('cabeçalho: recusa talhão inativo, de outra unidade ou de outra cultura, fase e data inválidas', () => {

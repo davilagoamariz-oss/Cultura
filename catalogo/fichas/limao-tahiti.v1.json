@@ -5,7 +5,7 @@
   "origem": "Ficha FFPRO02 v1.0 + Manual Prático Embrapa (Documentos 183)",
   "amostragem": {
     "tipo": "plantas_quadrantes",
-    "plantas": 30,
+    "plantas": 15,
     "lados": [
       "A",
       "B",

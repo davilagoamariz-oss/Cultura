@@ -27,8 +27,18 @@ export function useDadosDaAvaliacao(db, empresaId, aid) {
   }, [db, fichaId, fichaVersao]);
 
   const porN = useMemo(() => Object.fromEntries(Object.entries(plantas?.porN ?? {}).map(([n, p]) => [n, p.obs])), [plantas]);
+
+  // O tamanho da amostra é por talhão (área/espaçamento — ADR 024), calculado uma vez na criação da
+  // avaliação (avaliacao.amostragemPlantas) para não mudar se o talhão for editado depois. Injetar
+  // aqui, num só lugar, faz toda a tela de campo (grade, progresso, planta a planta) já ler o valor
+  // certo sem precisar mudar nada mais — todo o resto só lê ficha.amostragem.plantas.
+  const fichaEfetiva = useMemo(() => {
+    if (!ficha || !avaliacao?.amostragemPlantas) return ficha;
+    return { ...ficha, amostragem: { ...ficha.amostragem, plantas: avaliacao.amostragemPlantas } };
+  }, [ficha, avaliacao]);
+
   return {
-    avaliacao, ficha, plantas, porN, erro,
+    avaliacao, ficha: fichaEfetiva, plantas, porN, erro,
     pendentes: plantas?.pendentes ?? 0,
     pronto: Boolean(avaliacao) && plantas !== null && Boolean(ficha),
   };

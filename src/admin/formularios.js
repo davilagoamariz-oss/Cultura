@@ -19,7 +19,10 @@ export function lerTalhao(fd, fichasPorCultura) {
     const v = fd.get(`atributo:${culturaId}:${a.chave}`);
     atributos[a.chave] = a.tipo === 'booleano' ? v === 'sim' : v === null ? undefined : String(v);
   }
-  return { nome: texto(fd, 'nome'), culturaId, variedade: texto(fd, 'variedade'), areaHa: texto(fd, 'areaHa'), atributos, ativo: fd.get('ativo') === 'sim' };
+  return {
+    nome: texto(fd, 'nome'), culturaId, variedade: texto(fd, 'variedade'), areaHa: texto(fd, 'areaHa'),
+    espacamentoPlantas: texto(fd, 'espacamentoPlantas'), espacamentoLinhas: texto(fd, 'espacamentoLinhas'), atributos, ativo: fd.get('ativo') === 'sim',
+  };
 }
 
 export const lerAjuste = (fd) => ({ entrada: texto(fd, 'entrada'), motivo: texto(fd, 'motivo') });

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { gerarId, idValido } from '../src/admin/slug.js';
-import { montarUnidade, montarSetor, lerAreaHa, atributosDaFicha, validarAtributos, montarTalhao, montarMembro, nomeDaPessoa } from '../src/admin/cadastros.js';
+import { montarUnidade, montarSetor, lerAreaHa, lerEspacamento, atributosDaFicha, validarAtributos, montarTalhao, montarMembro, nomeDaPessoa } from '../src/admin/cadastros.js';
 import { avaliar } from '../src/dominio/motor/index.js';
 
 const ficha = JSON.parse(readFileSync(new URL('../catalogo/fichas/limao-tahiti.v1.json', import.meta.url), 'utf8'));
@@ -119,4 +119,18 @@ test('nome de quem está logado: perfil, depois registro de membro, depois e-mai
   assert.equal(nomeDaPessoa({ nomeDoPerfil: null, nomeDoMembro: 'Ana M', email: 'a@x' }), 'Ana M');
   assert.equal(nomeDaPessoa({ nomeDoPerfil: '', nomeDoMembro: undefined, email: 'a@x' }), 'a@x');
   assert.equal(nomeDaPessoa({}), null);
+});
+
+test('espaçamento: metros entre plantas e entre linhas, juntos ou nenhum (Embrapa Doc. 183, p.11)', () => {
+  assert.deepEqual(lerEspacamento('4', '6,5'), { entrePlantas: 4, entreLinhas: 6.5 });
+  assert.equal(lerEspacamento('', ''), null);
+  assert.equal(lerEspacamento(undefined, undefined), null);
+  assert.throws(() => lerEspacamento('4', ''), /E entre linhas/); // só um dos dois
+  for (const ruim of ['0', '-1', 'abc', '101']) assert.throws(() => lerEspacamento(ruim, '5'), /Espaçamento/, ruim);
+});
+
+test('talhão: o espaçamento entra no cadastro só quando informado', () => {
+  const base = { ficha, unidadeId: 'un-1', nome: 'T', culturaId: 'limao-tahiti', areaHa: '8', atributos: { tipoPomar: 'novo' } };
+  assert.deepEqual(montarTalhao({ ...base, espacamentoPlantas: '4', espacamentoLinhas: '6' }).espacamento, { entrePlantas: 4, entreLinhas: 6 });
+  assert.equal('espacamento' in montarTalhao(base), false);
 });

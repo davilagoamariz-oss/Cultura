@@ -125,7 +125,7 @@ service cloud.firestore {
 
     function talhaoValido() {
       let d = request.resource.data;
-      return d.keys().hasOnly(['unidadeId', 'nome', 'culturaId', 'variedade', 'areaHa', 'atributos',
+      return d.keys().hasOnly(['unidadeId', 'nome', 'culturaId', 'variedade', 'areaHa', 'espacamento', 'atributos',
                                'ativo', 'criadoEm', 'atualizadoEm'])
         && d.keys().hasAll(['unidadeId', 'nome', 'culturaId', 'atributos', 'ativo'])
         && textoAte(d.unidadeId, 128)
@@ -134,7 +134,13 @@ service cloud.firestore {
         && d.atributos is map && d.atributos.keys().size() <= 20
         && d.ativo is bool
         && (!('variedade' in d) || textoAte(d.variedade, 80))
-        && (!('areaHa' in d) || (d.areaHa is number && d.areaHa > 0));
+        && (!('areaHa' in d) || (d.areaHa is number && d.areaHa > 0))
+        // Espaçamento em metros (Manual Embrapa Doc. 183, p.11): base do total de plantas e da amostra.
+        && (!('espacamento' in d)
+            || (d.espacamento is map && d.espacamento.keys().hasOnly(['entrePlantas', 'entreLinhas'])
+                && d.espacamento.keys().hasAll(['entrePlantas', 'entreLinhas'])
+                && d.espacamento.entrePlantas is number && d.espacamento.entrePlantas > 0 && d.espacamento.entrePlantas <= 100
+                && d.espacamento.entreLinhas is number && d.espacamento.entreLinhas > 0 && d.espacamento.entreLinhas <= 100));
     }
 
     // Ajuste de limite: só acrescenta, sempre "a partir de agora" (não dá para voltar no tempo).
@@ -377,7 +383,8 @@ service cloud.firestore {
       let s = get(/databases/$(database)/documents/empresas/$(e)/setores/$(d.setorId)).data;
       return d.keys().hasOnly(['talhaoId', 'unidadeId', 'setorId', 'safraId', 'fichaId', 'fichaVersao', 'atributosTalhao',
                                'responsavelUid', 'data', 'semanaISO', 'faseCultura', 'status', 'finalizadaEm', 'notas',
-                               'outrasPragas', 'armadilha', 'horaInicio', 'horaFim', 'geo', 'criadoEm', 'atualizadoEm'])
+                               'outrasPragas', 'armadilha', 'horaInicio', 'horaFim', 'geo', 'criadoEm', 'atualizadoEm',
+                               'amostragemPlantas'])
         && d.keys().hasAll(['talhaoId', 'unidadeId', 'setorId', 'fichaId', 'fichaVersao', 'atributosTalhao',
                             'responsavelUid', 'data', 'semanaISO', 'status'])
         && idSemSublinhado(d.talhaoId)
@@ -399,6 +406,12 @@ service cloud.firestore {
         && (!('faseCultura' in d) || (d.faseCultura is list && d.faseCultura.size() <= 20))
         && (!('notas' in d) || textoAte(d.notas, 2000))
         && (!('outrasPragas' in d) || textoAte(d.outrasPragas, 2000))
+        // Tamanho da amostra calculado pelo app na criação (área/espaçamento do talhão, Manual Embrapa
+        // Doc. 183, p.11-14). As regras não refazem a conta (arredondamento), mas seguram o piso do
+        // manual (10) e os casos exatos: talhão sem área -> 15; área < 5 ha -> 10.
+        && (!('amostragemPlantas' in d)
+            || (d.amostragemPlantas is int && d.amostragemPlantas >= 10 && d.amostragemPlantas <= 999
+                && (!('areaHa' in t) ? d.amostragemPlantas == 15 : (t.areaHa < 5 ? d.amostragemPlantas == 10 : true))))
         && temFuncao(e, d.setorId, 'pragueiro')
         && moduloAtivo(e, d.setorId, 'fitossanidade');
     }
@@ -602,7 +615,7 @@ service cloud.firestore {
             && moduloAtivo(e, pai().setorId, 'fitossanidade')
             && pai().responsavelUid == request.auth.uid
             && pai().status == 'rascunho'
-            && n.matches('^([1-9]|[12][0-9]|30)$')
+            && n.matches('^[1-9][0-9]{0,2}$')
             && request.resource.data.keys().hasOnly(['n', 'obs', 'fotos', 'notas', 'atualizadoEm'])
             && request.resource.data.keys().hasAll(['n', 'obs'])
             && request.resource.data.n is int

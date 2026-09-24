@@ -103,8 +103,14 @@ export function FormTalhao({ inicial = {}, culturas, fichasPorCultura, aoEnviar,
       <Campo rotulo="Variedade (opcional)">
         <input name="variedade" maxLength={80} defaultValue={inicial.variedade ?? ''} />
       </Campo>
-      <Campo rotulo="Área em hectares (opcional)" dica="Pode usar vírgula: 7,5">
+      <Campo rotulo="Área em hectares (opcional)" dica="Pode usar vírgula: 7,5. A Embrapa define o talhão de amostragem em 5 ha (Doc. 183, p.11): acima disso, considere cadastrar como mais de um talhão, cada um com a sua análise.">
         <input name="areaHa" inputMode="decimal" defaultValue={inicial.areaHa ?? ''} />
+      </Campo>
+      <Campo rotulo="Espaçamento entre plantas, em metros (opcional)" dica="Ex.: 4. Junto com a área, define quantas plantas avaliar (10 se menor que 5 ha; 1% do total a partir de 5 ha). Sem espaçamento, usa o mínimo de 15.">
+        <input name="espacamentoPlantas" inputMode="decimal" defaultValue={inicial.espacamento?.entrePlantas ?? ''} />
+      </Campo>
+      <Campo rotulo="Espaçamento entre linhas, em metros (opcional)" dica="Ex.: 6. Preencha os dois espaçamentos ou nenhum.">
+        <input name="espacamentoLinhas" inputMode="decimal" defaultValue={inicial.espacamento?.entreLinhas ?? ''} />
       </Campo>
       {culturas.map((c) => {
         const atributos = atributosDaFicha(fichasPorCultura[c.id] ?? {});

@@ -21,7 +21,9 @@ before(async () => {
   R = await import(`${pathToFileURL(arquivo).href}?t=${Date.now()}`);
 });
 
-const ficha = JSON.parse(readFileSync(new URL('../catalogo/fichas/limao-tahiti.v1.json', import.meta.url), 'utf8'));
+const fichaBase = JSON.parse(readFileSync(new URL('../catalogo/fichas/limao-tahiti.v1.json', import.meta.url), 'utf8'));
+// Tamanho da amostra real vem do talhão (ADR 024); fixo em 30 aqui para os testes de grade/resumo genéricos.
+const ficha = { ...fichaBase, amostragem: { ...fichaBase.amostragem, plantas: 30 } };
 const item = (id) => ficha.itens.find((i) => i.id === id);
 // tira os comentários do React e volta os caracteres escapados, para comparar o texto que a pessoa lê
 const limpar = (h) => h.replaceAll('<!-- -->', '').replaceAll('&quot;', '"').replaceAll('&gt;', '>').replaceAll('&lt;', '<').replaceAll('&amp;', '&');

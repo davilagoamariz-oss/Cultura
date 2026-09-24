@@ -80,3 +80,24 @@ no cadastro de pessoas/empresas).
 
 `npm test` a cada etapa; `npm run test:rules` para a mudança de `obs`; `npm run test:fluxo` para o
 fluxo ponta a ponta com o novo tamanho de amostra variável.
+
+## Estado da implementação (2026-09-24)
+
+- **B (3 setores)**: pronta, commit `07e178a`. `QUADRANTES` em `src/campo/ficha-campo.js`.
+- **A (amostra por área/espaçamento)**: pronta.
+  - `src/campo/amostragem.js`: `calcularTamanhoAmostra(areaHa, espacamento)` — < 5 ha: 10; >= 5 ha:
+    1% do total (piso 10); sem área/espaçamento: 15 (piso do manual, documentado como padrão).
+  - Talhão ganha `espacamento { entrePlantas, entreLinhas }` (Admin -> Estrutura, opcional, os dois
+    juntos ou nenhum) e o formulário avisa que a Embrapa define o talhão de amostragem em 5 ha.
+  - A avaliação guarda `amostragemPlantas`, calculado UMA vez na criação (como `atributosTalhao`),
+    e `useDadosDaAvaliacao` injeta esse valor em `ficha.amostragem.plantas` num só ponto; o
+    `plantas: 30` fixo da ficha virou 15 (só piso de segurança).
+  - `firestore.rules`: `espacamento` no talhão; `amostragemPlantas` na avaliação (piso 10; sem área =
+    15; área < 5 ha = 10; imutável depois de criada); número da planta 1 a 999.
+- **Convenção "ficha publicada é imutável"**: a v1 foi alterada no lugar (amostragem e `lados`)
+  porque nenhuma avaliação real existe em produção. **Pendente**: o documento
+  `catalogo_fichas/limao-tahiti/versoes/1` já publicado em produção ainda está no formato antigo;
+  precisa ser sobrescrito ao publicar esta versão (decisão do cliente, produção não foi tocada).
+- Não implementado (fora do escopo confirmado): dividir automaticamente um talhão > 5 ha em
+  sub-unidades — o cadastro só orienta a criar mais de um talhão.
+- Verificação: `npm test` 315/315; regras 117/117 (emulador isolado, mesmo conteúdo do arquivo).
