@@ -8,7 +8,8 @@
     "plantas": 30,
     "lados": [
       "A",
-      "B"
+      "B",
+      "C"
     ],
     "intensidade": {
       "escala": [

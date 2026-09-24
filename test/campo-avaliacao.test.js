@@ -51,7 +51,7 @@ test('as fases da ficha viram opções simples', () => {
 test('planta: só grava o respondido; notas e fotos só quando existem', () => {
   const obs = definirItem({}, item('tripes_flor'), 1);
   const d = dadosDaPlanta({ ficha, n: 3, obs, notas: '  foco perto da cerca  ', fotos: [{ itemId: null, quadrante: null, caminho: 'local:abc' }], atualizadoEm: 'T' });
-  assert.deepEqual(d, { n: 3, obs: { tripes_flor: { A: 1, B: 1 } }, notas: 'foco perto da cerca', fotos: [{ itemId: null, quadrante: null, caminho: 'local:abc' }], atualizadoEm: 'T' });
+  assert.deepEqual(d, { n: 3, obs: { tripes_flor: { A: 1, B: 1, C: 1 } }, notas: 'foco perto da cerca', fotos: [{ itemId: null, quadrante: null, caminho: 'local:abc' }], atualizadoEm: 'T' });
   const vazia = dadosDaPlanta({ ficha, n: 1, obs: {}, notas: '   ', atualizadoEm: 'T' });
   assert.deepEqual(vazia, { n: 1, obs: {}, atualizadoEm: 'T' });
 });

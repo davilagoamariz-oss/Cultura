@@ -48,8 +48,8 @@ test('órgão sem item não aparece; ficha de outra cultura gera outra tela', ()
 
 // ---------------------------------------------------------------- quadrantes e valores
 
-test('quadrantes: A e B, exceto o item de lado único (bicho-furão), que usa só o lado da armadilha', () => {
-  assert.deepEqual(quadrantesDoItem(item('tripes_flor')), ['A', 'B']);
+test('quadrantes: A, B e C (copa em 3 setores, Manual Embrapa p.11), exceto o lado único (bicho-furão)', () => {
+  assert.deepEqual(quadrantesDoItem(item('tripes_flor')), ['A', 'B', 'C']);
   assert.deepEqual(quadrantesDoItem(item('bicho_furao')), [LADO_UNICO]);
   assert.equal(LADO_UNICO, 'B');
 });
@@ -67,7 +67,7 @@ test('definirValor não altera o original e recusa quadrante ou valor inválido'
   assert.throws(() => definirValor(obs, item('bicho_furao'), 'A', 1), /não vale/);
   assert.throws(() => definirValor(obs, item('tripes_flor'), 'A', 4), /inválido/);
   assert.throws(() => definirValor(obs, item('tripes_flor'), 'A', '1'), /inválido/);
-  assert.throws(() => definirValor(obs, item('tripes_flor'), 'C', 1));
+  assert.throws(() => definirValor(obs, item('tripes_flor'), 'D', 1));
 });
 
 test('ações em bloco: "tudo ausente" e "sem o órgão" (não avaliável) por grupo', () => {
@@ -75,12 +75,12 @@ test('ações em bloco: "tudo ausente" e "sem o órgão" (não avaliável) por g
   const ausentes = definirGrupo({}, fruto, 0);
   assert.equal(Object.keys(ausentes).length, 11);
   assert.deepEqual(ausentes.tripes_flor, undefined);
-  assert.deepEqual(ausentes.ferrugem_bgude, { A: 0, B: 0 });
+  assert.deepEqual(ausentes.ferrugem_bgude, { A: 0, B: 0, C: 0 });
   assert.deepEqual(ausentes.bicho_furao, { B: 0 }); // lado único: só B
   assert.equal(grupoCompleto(fruto, ausentes), true);
 
   const semFruto = definirGrupo({}, fruto, null);
-  assert.deepEqual(semFruto.ferrugem_bgude, { A: null, B: null });
+  assert.deepEqual(semFruto.ferrugem_bgude, { A: null, B: null, C: null });
   assert.equal(grupoCompleto(fruto, semFruto), true); // "não avaliável" é uma resposta
   assert.equal(definirItem({}, item('tripes_flor'), 1).tripes_flor.B, 1);
 });
@@ -113,12 +113,12 @@ test('pendências por órgão dizem onde falta responder', () => {
 
 // ---------------------------------------------------------------- gravação
 
-test('obsParaGravar: sem undefined, valores conferidos e lado A do lado único fixado em null', () => {
+test('obsParaGravar: sem undefined, valores conferidos e os lados não usados do lado único fixados em null', () => {
   const obs = { tripes_flor: { A: 1, B: undefined }, ferrugem_bgude: { A: null, B: 0 }, bicho_furao: { B: 2 }, joaninha: {} };
   const g = obsParaGravar(ficha, obs);
   assert.deepEqual(g.tripes_flor, { A: 1 });
   assert.deepEqual(g.ferrugem_bgude, { A: null, B: 0 });
-  assert.deepEqual(g.bicho_furao, { A: null, B: 2 });
+  assert.deepEqual(g.bicho_furao, { A: null, B: 2, C: null }); // só B é o lado da armadilha; A e C não se aplicam
   assert.equal('joaninha' in g, false);
   assert.equal(JSON.stringify(g).includes('undefined'), false);
   assert.throws(() => obsParaGravar(ficha, { tripes_flor: { A: 7 } }), /inválido/);

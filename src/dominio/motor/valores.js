@@ -1,6 +1,7 @@
 // Leitura dos valores observados nas plantas. Funções puras.
 //
-// Cada quadrante (A, B) de um item guarda um de:
+// Cada quadrante (A, B, C — a copa dividida em três setores iguais, Manual Embrapa Doc. 183, p.11)
+// de um item guarda um de:
 //   null  não avaliável (o "-" da ficha; fica FORA da conta)
 //   0     ausente
 //   1..3  presente, com a intensidade (1 = até 5 pragas, 2 = de 6 a 15, 3 = mais de 15)
@@ -9,14 +10,14 @@
 /**
  * Valor de uma planta para um item.
  * - { valor: n }  usa n diretamente (contagens, ou a fixture da ficha)
- * - { A, B }      número de quadrantes com presença (0, 1 ou 2)
+ * - { A, B, C }   número de setores com presença (0 a 3)
  * - só um lado preenchido (ex.: bicho-furão) considera apenas esse lado
  * - tudo nulo/ausente -> null (não avaliável)
  */
 export function valorPlanta(obs) {
   if (obs === null || obs === undefined) return null;
   if (obs.valor !== undefined) return obs.valor;
-  const lados = [obs.A, obs.B].filter((v) => v !== null && v !== undefined);
+  const lados = [obs.A, obs.B, obs.C].filter((v) => v !== null && v !== undefined);
   if (lados.length === 0) return null;
   return lados.reduce((soma, v) => soma + (v > 0 ? 1 : 0), 0);
 }
@@ -25,7 +26,7 @@ export function valorPlanta(obs) {
 export function intensidadePlanta(obs) {
   if (obs === null || obs === undefined) return null;
   if (obs.valor !== undefined) return obs.valor;
-  const lados = [obs.A, obs.B].filter((v) => v !== null && v !== undefined);
+  const lados = [obs.A, obs.B, obs.C].filter((v) => v !== null && v !== undefined);
   if (lados.length === 0) return null;
   return Math.max(...lados.map((v) => (v > 0 ? v : 0)));
 }

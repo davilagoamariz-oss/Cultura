@@ -1,16 +1,18 @@
 // Ficha de campo gerada a partir da ficha versionada (catalogo/fichas/...). Funções puras.
 //
-// Cada quadrante (A, B) de cada item guarda:
+// Cada quadrante (A, B, C — a copa dividida em três setores iguais, Manual Embrapa Doc. 183, p.11)
+// de cada item guarda:
 //   undefined  ainda não preenchido        (não é gravado)
 //   null       não avaliável, o "-" da ficha (fica FORA da conta)
 //   0          ausente
 //   1, 2, 3    presente, com a intensidade (até 5 / de 6 a 15 / mais de 15 pragas)
-// O item de "lado único" (bicho-furão, só o lado da armadilha) usa só o quadrante B; o A é sempre null.
+// O item de "lado único" (bicho-furão, só o lado da armadilha) usa só o quadrante B; A e C ficam null.
 
 export const ROTULOS_ORGAO = {
   fruto: 'Fruto', folha: 'Folha', broto: 'Broto', flor: 'Flor', tronco: 'Tronco', planta: 'Planta inteira',
 };
 export const LADO_UNICO = 'B';
+export const QUADRANTES = ['A', 'B', 'C'];
 export const VALORES = [null, 0, 1, 2, 3];
 export const LEGENDA_INTENSIDADE = { 1: 'até 5', 2: '6 a 15', 3: 'mais de 15' };
 
@@ -25,7 +27,7 @@ export function agruparPorOrgao(ficha) {
 
 /** Quadrantes que o pragueiro preenche neste item. */
 export function quadrantesDoItem(item) {
-  return item.tipo === 'lado_unico' ? [LADO_UNICO] : ['A', 'B'];
+  return item.tipo === 'lado_unico' ? [LADO_UNICO] : QUADRANTES;
 }
 
 export function valorValido(v) {
@@ -85,9 +87,11 @@ export function obsParaGravar(ficha, obs) {
     const origem = obs?.[item.id];
     if (!origem) continue;
     const linha = {};
-    for (const q of ['A', 'B']) {
+    for (const q of QUADRANTES) {
       let v = origem[q];
-      if (item.tipo === 'lado_unico' && q === 'A') v = valorDefinido(origem.B) ? null : undefined;
+      // lado único (bicho-furão): só LADO_UNICO é preenchido; os outros dois ficam null quando ele
+      // tem valor (registro explícito de "não se aplica"), em vez de ficarem ausentes.
+      if (item.tipo === 'lado_unico' && q !== LADO_UNICO) v = valorDefinido(origem[LADO_UNICO]) ? null : undefined;
       if (v === undefined) continue;
       if (!valorValido(v)) throw new Error(`valor inválido em ${item.id}.${q}: ${v}`);
       linha[q] = v;

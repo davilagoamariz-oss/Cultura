@@ -1,7 +1,7 @@
 // Componentes de apresentação do módulo de campo: recebem tudo por propriedades (sem Firebase), então
 // podem ser renderizados e testados sozinhos. Os contêineres (Campo, Avaliacao...) os ligam aos dados.
 import { Link } from 'react-router-dom';
-import { agruparPorOrgao, quadrantesDoItem, itemCompleto, grupoCompleto, LEGENDA_INTENSIDADE } from '../ficha-campo.js';
+import { agruparPorOrgao, quadrantesDoItem, itemCompleto, grupoCompleto, LEGENDA_INTENSIDADE, QUADRANTES } from '../ficha-campo.js';
 import { rotaCampo } from './contexto.js';
 
 export function Faixa({ tipo = 'info', children }) {
@@ -215,7 +215,7 @@ export function FormularioPlanta({
                   {item.criterio && <span className="linha-item__dica">{item.criterio.texto}</span>}
                 </div>
                 <div className="celulas">
-                  {['A', 'B'].map((q) => {
+                  {QUADRANTES.map((q) => {
                     const ativa = quadrantes.includes(q);
                     const v = obs?.[item.id]?.[q];
                     return ativa ? (

@@ -216,7 +216,7 @@ export function converterRegrasIniciais(regrasIniciais) {
     amostragem: {
       tipo: 'plantas_quadrantes',
       plantas: 30,
-      lados: ['A', 'B'],
+      lados: ['A', 'B', 'C'], // copa dividida em 3 setores iguais (Manual Embrapa Doc. 183, p.11)
       intensidade: { escala: [0, 1, 2, 3], legenda: { 1: 'até 5 pragas', 2: 'de 6 a 15 pragas', 3: 'mais de 15 pragas' } },
     },
     orgaos: ORGAOS,

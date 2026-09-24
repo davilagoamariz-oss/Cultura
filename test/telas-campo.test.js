@@ -48,14 +48,15 @@ test('a ficha por planta é gerada da ficha: 6 órgãos e os 30 itens', () => {
   assert.match(h, /Sem planta inteira \(–\)/);
 });
 
-test('cada item tem dois quadrantes; o bicho-furão tem só o lado da armadilha', () => {
+test('cada item tem três setores (A/B/C); o bicho-furão tem só o lado da armadilha', () => {
   const h = tela('FormularioPlanta', propsPlanta());
   const botoes = conta(h, 'aria-label="') ;
   assert.ok(botoes > 0);
-  // 29 itens de 2 quadrantes + 1 de lado único (só B): 59 células tocáveis + 1 inativa + 30 botões "–" por item
-  assert.equal(conta(h, 'celula--inativa'), 1);
+  // 29 itens de 3 setores + 1 de lado único (só B): 87 células tocáveis + 2 inativas (A e C do bicho-furão)
+  assert.equal(conta(h, 'celula--inativa'), 2);
   assert.equal(conta(h, 'lado A: '), 29);
   assert.equal(conta(h, 'lado B: '), 30);
+  assert.equal(conta(h, 'lado C: '), 29);
   assert.match(h, /só o lado da armadilha/);
 });
 

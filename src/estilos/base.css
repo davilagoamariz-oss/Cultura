@@ -678,7 +678,7 @@ a.cartao:active {
 .linha-item__nome { display: flex; flex-direction: column; gap: 2px; font-weight: 600; }
 .linha-item__dica { display: block; font-size: 0.8rem; font-weight: 400; color: var(--texto-suave); }
 
-.celulas { display: flex; gap: 8px; }
+.celulas { display: flex; gap: 8px; flex-wrap: wrap; }
 .celula {
   position: relative;
   display: inline-flex;
